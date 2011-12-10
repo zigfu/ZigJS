@@ -1,0 +1,31 @@
+<html>
+<head>
+	<!-- zigjs -->
+	<script type="text/javascript" src="zig.js"></script> 
+	
+	
+	<script type="text/javascript">
+	
+	function ZigPluginLoaded() {
+		Zig.init(document.getElementById("ZigPlugin"));
+		
+		horizFader = new Zig.Fader(Zig.OrientationX);
+		
+		vertFader = new Zig.Fader(Zig.OrientationY);
+		
+		Zig.SingleUser.controls.AddControl(horizFader);
+		Zig.SingleUser.controls.AddControl(vertFader);
+	}
+	
+	</script>
+	
+	
+</head>
+<body>
+<div id="pluginContainer">
+	<object id="ZigPlugin" type="application/x-zig" width="0" height="0">
+		<param name="onload" value="ZigPluginLoaded" />
+	</object>
+</div> 
+</body>
+</html>
