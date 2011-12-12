@@ -581,7 +581,7 @@ function SteadyDetector(maxVariance)
 	
 	this.onDoUpdate = function(trackedUser) {
 		if (this.useJoint && (trackedUser.skeleton[this.joint] !== undefined)) {
-			this.addValue(trackedUser.skeleton[this.joint].position;
+			this.addValue(trackedUser.skeleton[this.joint].position);
 		}
 	}
 }
@@ -960,7 +960,11 @@ var Zig = function() {
 			var currhands = [];
 			for (handid in trackedHands) {
 				if (trackedHands[handid] == userid) {
-					currhands.push(getItemById(hands, handid));
+					var hand = getItemById(hands, handid);
+					if (isRealUser(userid)) { // if hand isn't associated with a user, just pass the raw hand
+						hand.position = rotateHand(hand.position, trackedUsers[userid].centerofmass);
+					}
+					currhands.push(hand);
 				}
 			}
 			trackedUsers[userid].UpdateHands(currhands);
@@ -1052,3 +1056,25 @@ var Zig = function() {
 		verbose :  verbose,
 	}
 } ();
+
+function rotateHand(handPos, comPos)
+{
+	// change the forward vector to be u = (CoM - (0,0,0))
+	// instead of (0,0,1)
+	var cx = comPos[0];
+	var cy = comPos[1];
+	var cz = comPos[2];
+	
+	var len = Math.sqrt(cx*cx + cy*cy + cz*cz);
+	// project the vector to XZ plane, so it's actually (cx,0,cz). let's call it v
+	// so cos(angle) = v . u / (|u|*|v|)
+	var lenProjected = Math.sqrt(cx*cx + cz*cz);
+	var cosXrotation = (cx*cx + cz*cz) / (lenProjected * len); // this can be slightly simplified
+	var xRot = Math.acos(cosXrotation);
+	if (cy < 0) xRot = -xRot; // set the sign which we lose in 
+	// now for the angle between v and the (0,0,1) vector for Y-axis rotation
+	var cosYrotation = cz / lenProjected;
+	var yRot = Math.acos(cosYrotation);
+	if (cx > 0) yRot = -yRot;
+	return (Matrix.RotationX(xRot).x(Matrix.RotationY(yRot))).x($V(handPos)).elements;
+}
