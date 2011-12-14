@@ -386,8 +386,8 @@ function HorizontalSwipeDetector(size)
 	
 	var me = this;
 	this.sd = new SwipeDetector(OrientationX, size);
-	this.sd.onSwipeMax = function() { me.onSwipeLeft(); }
-	this.sd.onSwipeMin = function() { me.onSwipeRight(); }
+	this.sd.onSwipeMin = function() { me.onSwipeLeft(); }
+	this.sd.onSwipeMax = function() { me.onSwipeRight(); }
 	this.sd.onSwipeRelease = function() { me.onSwipeRelease(); }
 	
 	this.onSessionStart = function(focusPoint) { this.sd.onSessionStart(focusPoint); }
@@ -418,7 +418,7 @@ function VerticalSwipeDetector(size)
 	this.onDoUpdate = function(user) { this.sd.onDoUpdate(user); }
 }
 
-function ZigTopDownUsersRadar(parentElement, userClass)
+function TopDownUsersRadar(parentElement, userClass)
 {
 	this.parentElement = parentElement;
 	this.users = [];
@@ -443,13 +443,12 @@ function ZigTopDownUsersRadar(parentElement, userClass)
 		this.users[user.userid].classList.remove('active');
 	}
 	
-	this.onUpdate = function(userTracker) 
+	this.onUpdate = function(trackedUsers) 
 	{
-		for (var userIndex in userTracker.trackedUsers) {
-			var currUser = userTracker.trackedUsers[userIndex];
+		for (var userIndex in trackedUsers) {
+			var currUser = trackedUsers[userIndex];
 			var el = this.users[currUser.userid];
 			var pos = currUser.position;
-			
 			el.style.left = (((pos[0] / 4000) + 0.5) * this.parentElement.offsetWidth - (el.offsetWidth / 2)) + "px";
 			el.style.top = ((pos[2] / 4000.0) * this.parentElement.offsetHeight - (el.offsetHeight / 2)) + "px";
 		}		
@@ -976,7 +975,7 @@ var Zig = function() {
 		UpdateHands(hands);
 		trackedUsers.forEach(function(trackedUser) { trackedUser.NotifyListeners(); });
 		var userTracker = this;
-		listeners.forEach(function(listener) { listener.onUpdate(userTracker); });
+		listeners.forEach(function(listener) { listener.onUpdate(trackedUsers); });
 	}
 	
 	// does this user actually exist in the acquisition layer?
@@ -1036,6 +1035,10 @@ var Zig = function() {
 		init : init,
 		trackedUsers : trackedUsers,
 		listeners : listeners,
+		pause : Pause,
+		resume : Resume,
+		Pause : Pause,
+		Resume : Resume,
 		
 		// user engagement stuff
 		SingleUser : singleUser,
@@ -1046,7 +1049,7 @@ var Zig = function() {
 		SteadyDetector : SteadyDetector,
 		VerticalSwipeDetector : VerticalSwipeDetector,
 		HorizontalSwipeDetector : HorizontalSwipeDetector,
-		TopDownUsersRadar : ZigTopDownUsersRadar,
+		TopDownUsersRadar : TopDownUsersRadar,
 
 		// consts
 		OrientationX : OrientationX,
