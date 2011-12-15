@@ -834,7 +834,7 @@ var Zig = function() {
 	
 	function init(pluginElement) {
 		plugin = pluginElement;
-		ZigAddHandler(pluginElement, "NewFrame", function () { return function() { DoUpdate(pluginElement.users, pluginElement.hands); }}());
+		ZigAddHandler(pluginElement, "NewFrame", function () { return function(data) { var obj = JSON.parse(data); DoUpdate(obj.users, obj.hands); }}());
 		log("Zig: inited");
 	}
 	
