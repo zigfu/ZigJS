@@ -1,0 +1,196 @@
+/*---------------------------------------------------------
+colors
+---------------------------------------------------------*/
+/*---------------------------------------------------------
+sizes
+---------------------------------------------------------*/
+/*---------------------------------------------------------
+fonts
+---------------------------------------------------------*/
+@font-face {
+  font-family: 'Rokkitt';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Rokkitt'), url('http://themes.googleusercontent.com/static/fonts/rokkitt/v4/RcB7dRNAX_8JE8zinU47YALUuEpTyoUstqEm5AMlJo4.woff') format('woff');
+}
+@font-face {
+  font-family: 'Rokkitt';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Rokkitt Bold'), local('Rokkitt-Bold'), url('http://themes.googleusercontent.com/static/fonts/rokkitt/v4/Mef17w3J4CtS0lw4Wa_8r73hpw3pgy2gAi-Ip7WPMi0.woff') format('woff');
+}
+/*---------------------------------------------------------
+utility functions
+---------------------------------------------------------*/
+.cobaltradialgradient {
+  background-color: #161a23;
+  background-image: url(http://zigfu.com/i/bg.png);
+  background-repeat: repeat-x;
+  postion: top;
+  /* Old browsers */
+
+ background-position: center 100px;
+  background: -moz-radial-gradient(center 100px, ellipse cover, #3d5362 25%, #151b23 65%);
+  /* FF3.6+ */
+
+  background: -webkit-gradient(radial, center 100px, 0px, center center, 65%, color-stop(0%, #3d5362), color-stop(65%, #151b23));
+  /* Chrome,Safari4+ */
+
+  background: -webkit-radial-gradient(center 100px, ellipse cover, #3d5362 25%, #151b23 65%);
+  /* Chrome10+,Safari5.1+ */
+
+  background: -o-radial-gradient(center 100px, ellipse cover, #3d5362 25%, #151b23 65%);
+  /* Opera 12+ */
+
+  background: -ms-radial-gradient(center 100px, ellipse cover, #3d5362 25%, #151b23 65%);
+  /* IE10+ */
+
+  background: radial-gradient(center 100px, ellipse cover, #3d5362 25%, #151b23 65%);
+  /* W3C */
+
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr='@cobaltlight', endColorstr='@cobaltdark', GradientType=1);
+  /* IE6-9 fallback on horizontal gradient */
+
+}
+.fillwidth {
+  width: 100%;
+}
+.fillheight {
+  height: 100%;
+}
+.fill {
+  width: 100%;
+  height: 100%;
+}
+.nospacing {
+  margin: 0px 0px;
+  padding: 0px 0px;
+}
+.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+/*---------------------------------------------------------
+styles
+---------------------------------------------------------*/
+html2, body2 {
+  margin: 0px 0px;
+  padding: 0px 0px;
+  background: #3d5362;
+  /* Old browsers */
+
+  background-position: center 100px;
+  background: -moz-radial-gradient(center 100px, ellipse cover, #3d5362 25%, #151b23 65%);
+  /* FF3.6+ */
+
+  background: -webkit-gradient(radial, center 100px, 0px, center center, 65%, color-stop(0%, #3d5362), color-stop(65%, #151b23));
+  /* Chrome,Safari4+ */
+
+  background: -webkit-radial-gradient(center 100px, ellipse cover, #3d5362 25%, #151b23 65%);
+  /* Chrome10+,Safari5.1+ */
+
+  background: -o-radial-gradient(center 100px, ellipse cover, #3d5362 25%, #151b23 65%);
+  /* Opera 12+ */
+
+  background: -ms-radial-gradient(center 100px, ellipse cover, #3d5362 25%, #151b23 65%);
+  /* IE10+ */
+
+  background: radial-gradient(center 100px, ellipse cover, #3d5362 25%, #151b23 65%);
+  /* W3C */
+
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr='@cobaltlight', endColorstr='@cobaltdark', GradientType=1);
+  /* IE6-9 fallback on horizontal gradient */
+
+}
+html, body {
+	margin: 0px 0px;
+	padding: 0px 0px;
+}
+h1, h2, h3, h4, h5, h6, p {
+	margin: 0px 0px;
+	padding: 0px 0px;
+}
+body {
+	background-color: #161a23; /* Old browsers */
+	background-image:url(http://zigfu.com/i/bg.jpg);
+	background-repeat: repeat-x;
+	background-position: top;
+} 
+
+#wrapper {
+  width: 100%;
+  height: 100%;
+}
+.row {
+  width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.left {
+  float: left;
+  width: 460px;
+}
+.right {
+  float: right;
+  width: 460px;
+  padding-top: 35px;
+}
+.right h1 {
+  font-family: 'Rokkitt';
+  font-size: 31pt;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.2);
+  text-shadow: 0px 1px #ffffff;
+}
+#header {
+  width: 100%;
+  height: 100px;
+  font-family: 'Droid Sans';
+  border-width: 0 0 12 0;
+  margin: 0;
+  padding: 0;
+  box-shadow: 0px -5px 5px -2px rgba(255, 255, 255, 0.1) inset;
+  -moz-box-shadow: 0px -5px 5px -2px rgba(255, 255, 255, 0.1) inset;
+  -webkit-box-shadow: 0px -5px 5px -2px rgba(255, 255, 255, 0.1) inset;
+}
+#gallery {
+  width: 100%;
+  background-color: #16181a;
+}
+#gallery .butholder {
+  width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 30px;
+  padding-bottom: 10px;
+}
+#gallery .butholder ul {
+  margin-left: auto;
+  margin-right: auto;
+}
+#gallery .butholder ul li {
+  margin-left: auto;
+  margin-right: auto;
+  display: inline;
+  padding-right: 12px;
+}
+#content {
+  width: 100%;
+  height: 300px;
+  box-shadow: 0px 5px 5px -2px rgba(255, 255, 255, 0.1) inset, 0px -10px 10px -2px rgba(0, 0, 0, 0.2) inset;
+  -moz-box-shadow: 0px 5px 5px -2px rgba(255, 255, 255, 0.1) inset, 0px -10px 10px -2px rgba(0, 0, 0, 0.2) inset;
+  -webkit-box-shadow: 0px 5px 5px -2px rgba(255, 255, 255, 0.1) inset, 0px -10px 10px -2px rgba(0, 0, 0, 0.2) inset;
+}
+#footer {
+  width: 100%;
+  height: 300px;
+  background-color: #0b0b0b;
+}
+#footer p {
+	text-align: center;
+	color: #fff;
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: 12px;
+	font-style: italic;	
+	padding-top: 20px;
+}

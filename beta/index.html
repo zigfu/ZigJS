@@ -1,0 +1,118 @@
+<html>
+<head>
+	<title> ZigFu ZigJS Beta</title>
+
+	<script type="text/javascript" src="zig.js"></script>
+	<script type="text/javascript">
+	
+	function ZigPluginLoaded() {
+		// init zig.js
+		var plugin = document.getElementById("ZigPlugin");
+		Zig.init(plugin);
+	
+		// set the version string
+		document.getElementById("zigjsVersion").innerHTML = plugin.version;
+		
+		// connect the users radar
+		usersRadar = new Zig.TopDownUsersRadar(document.getElementById("userradar"), "user");
+		Zig.listeners.push(usersRadar);
+	}
+	
+	</script>
+	
+	<style>
+
+	#wrapper {
+		width : 960px;
+		margin : 0px auto;
+	}
+	
+	#userradar {
+		width: 	300;
+		height: 300;
+		border:	1px solid black;
+		margin: 50;
+		overflow:hidden;
+		//float: left;
+	}
+	
+	#userradar .user {
+		width:	15;
+		height: 15;
+		border:	3px solid darkblue;
+		background-color: lightblue;
+		position:relative;
+	}
+	
+	#copyright {
+		text-align : center;
+	}
+	
+	</style>
+	
+</head>
+
+<body>
+
+<div id="wrapper">
+
+<h1>ZigFu ZigJS Beta</h1>
+
+ZigJS allows anyone to write gesture driven web pages, as well as full body motion games in html5/unity3d webplayer/flash. <br>
+Please share your experiences with us at <a href="mailto:beta@zigfu.com">beta@zigfu.com</a>
+
+<h2>Install</h2>
+
+<ol>
+	<li>Install latest version of OpenNI: <a href="http://www.motionos.com/ZigFuDevBundle_v1.5.exe">Windows</a> | <a href="http://www.motionos.com/ZigFuOpenNI1.5.pkg">Mac</a></li>
+	<li>Install the browser plugin: <a href="http://www.motionos.com/zigjs/plugin/zigjs_v0.92.msi">Windows</a> | <a href="http://www.motionos.com/zigjs/plugin/zigjs_v0.92.pkg">Mac</a></li>
+	<li><b><em>Important:</em></b> Restart your browser</li>
+</ol>
+
+<h2>Make sure it works</h2>
+
+Once everything is installed and the browser restarted, the plugin version and users radar should work as expected<br>
+
+ZigJS version: <em><span id="zigjsVersion">[Not installed]</span></em>
+<div id="userradar"><p align="center">Users Radar</p></div>
+
+<h2>Samples</h2>
+
+Check out some sample apps we made using ZigJS:
+
+<ul>
+	<li><a href="http://www.motionos.com/punchingbag/">Punching bag</a></li>
+	<li><a href="http://www.motionos.com/demos/">ZigFu samples showcase</a></li>
+</ul>
+
+<h2>Using ZigJS</h2>
+
+<ul>
+	<li>
+		<b>Unity3d Webplayer</b>
+		<p>Use our <a href="http://motionos.com/zigjs/unity3d/ZigUnityBindings_v0.92.unitypackage">unity package</a>, build to WebPlayer. Yes, it's <em>that</em> easy</p>
+	</li>
+	<li>
+		<b>Flash</b>
+		<p><em>[Coming soon]</em></p>
+	</li>
+</ul>
+
+<h2>FAQ</h2>
+<em>[Coming soon]</em>
+<br>
+Please share your experiences with us at <a href="mailto:beta@zigfu.com">beta@zigfu.com</a>
+<hr>
+<p id="copyright">Copyright 2011 &copy; Motion Arcade Inc. <br>
+All rights reserved</p>
+</div>
+
+<!-- ZigJS plugin -->
+<div id="pluginContainer">
+	<object id="ZigPlugin" type="application/x-zig" width="0" height="0">
+		<param name="onload" value="ZigPluginLoaded" />
+	</object>
+</div> 
+
+</body>
+</html>
