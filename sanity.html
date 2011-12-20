@@ -2,26 +2,164 @@
 <head>
 	<!-- zigjs -->
 	<script type="text/javascript" src="zig.js"></script> 
-	
+	<script type="text/javascript" src="sylvester.js"></script> 
 	
 	<script type="text/javascript">
+	
+	function HandVisualizer(parent, color) {
+		this.useHandTracker = true;
+		
+		this.leftHand = document.createElement('div');
+		this.rightHand = document.createElement('div');
+		
+		this.leftHand.classList.add("hand");
+		this.rightHand.classList.add("hand");
+		
+		if (undefined !== color) {
+			this.leftHand.style.background = color;
+			this.rightHand.style.background = color;
+		}
+		
+		parent.appendChild(this.leftHand);
+		parent.appendChild(this.rightHand);
+
+		this.positionInParent = function(element, posX, posY) {
+			element.style.left = (posX * element.parentNode.offsetWidth - (element.offsetWidth / 2)) + "px";
+			element.style.top = (posY * element.parentNode.offsetHeight - (element.offsetHeight / 2)) + "px";
+		}
+
+		this.onDoUpdate = function(trackedUser) {
+			if (trackedUser.tracked) {
+				var pos = trackedUser.position;
+				var leftHand = trackedUser.skeleton[Zig.Joints.LeftHand].position;
+				var rightHand = trackedUser.skeleton[Zig.Joints.RightHand].position;
+				
+				var dLeft = $V(leftHand).subtract($V(pos));
+				var dRight = $V(rightHand).subtract($V(pos));
+				
+				this.positionInParent(this.leftHand, (dLeft.elements[0] / 1000) + 0.5, (dLeft.elements[1] / -700) + 0.5);
+				this.positionInParent(this.rightHand, (dRight.elements[0] / 1000) + 0.5, (dRight.elements[1] / -700) + 0.5);
+			}
+		}
+
+		this.onSessionStart = function(focusPoint) {}
+		this.onSessionUpdate = function(hands) {
+			if (this.useHandTracker) {
+				this.processHands(hands);
+			}
+		}
+		this.onSessionEnd = function() {}
+		
+		this.processHands = function(hands) {
+		
+		}
+		
+		this.remove = function() {
+			this.leftHand.parentNode.removeChild(this.leftHand);
+			this.rightHand.parentNode.removeChild(this.rightHand);
+		}
+	}
+	
+	function VisualizerPerUser(parent)
+	{
+		this.users = [];
+		this.colors = ["blue", "green", "magenta", "indigo", "aqua", "tan", "violet"];
+		this.i = 0;
+		
+		this.onNewUser = function(user) {
+			var viz = new HandVisualizer(parent, this.colors[this.i % this.colors.length]);
+			user.controls.AddControl(viz);
+			this.users[user.userid] = viz;
+			this.i++;
+		}
+		
+		this.onLostUser = function(user) {
+			this.users[user.userid].remove();
+			delete this.users[user];
+		}
+		
+		this.onUpdate = function() {}
+	}
 	
 	function ZigPluginLoaded() {
 		Zig.init(document.getElementById("ZigPlugin"));
 		
 		horizFader = new Zig.Fader(Zig.OrientationX);
-		
 		vertFader = new Zig.Fader(Zig.OrientationY);
 		
-		Zig.SingleUser.controls.AddControl(horizFader);
-		Zig.SingleUser.controls.AddControl(vertFader);
+		//Zig.SingleUser.controls.AddControl(horizFader);
+		//Zig.SingleUser.controls.AddControl(vertFader);
+		userRadar = new Zig.TopDownUsersRadar(document.getElementById("userradar"), "user");
+		//hv = new HandVisualizer(document.getElementById("radar"));
+		//Zig.SingleUser.controls.AddControl(hv);
+		Zig.listeners.push(new VisualizerPerUser(document.getElementById("radar")));
+		Zig.listeners.push(userRadar);
+		
+		Zig.SingleUser.onUserEngaged = function(user) {
+			document.getElementById("radar").classList.add("session");
+		}
+		Zig.SingleUser.onUserDisengaged = function(user) {
+			document.getElementById("radar").classList.remove("session");
+		}
 	}
 	
 	</script>
 	
+	<style>
+	
+	#radar {
+		width: 	500;
+		height: 500;
+		border:	1px solid black;
+		margin: 100 100 auto;
+		overflow:hidden;
+		float: left;
+	}
+	
+	#radar .session {
+		border: 3px solid green;
+	}
+	
+	#radar .hand {
+		width:	20;
+		height: 20;
+		border:	3px solid darkblue;
+		background-color: lightblue;
+		position:relative;
+	}
+
+	#userradar {
+		width: 	300;
+		height: 300;
+		border:	1px solid black;
+		margin: 100 100 auto;
+		overflow:hidden;
+		float: right;
+	}
+	
+	#userradar .user {
+		width:	15;
+		height: 15;
+		border:	3px solid darkblue;
+		background-color: lightblue;
+		position:relative;
+	}
+
+	
+	</style>
 	
 </head>
 <body>
+
+
+<div id="radar">
+
+</div>
+
+<div id="userradar">
+
+</div>
+
 <div id="pluginContainer">
 	<object id="ZigPlugin" type="application/x-zig" width="0" height="0">
 		<param name="onload" value="ZigPluginLoaded" />
