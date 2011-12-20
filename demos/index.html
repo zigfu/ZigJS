@@ -82,10 +82,23 @@ horizontalFader.onItemUnselected = function(itemIndex) {
 };
 horizontalFader.onValueChange = function(value)
 {
-	element = document.getElementById("slider_nub");
-	element.style.left = (value * element.parentNode.offsetWidth - (element.offsetWidth / 2)) + "px";
+	//element = document.getElementById("slider_nub");
+	//element.style.left = (value * element.parentNode.offsetWidth - (element.offsetWidth / 2)) + "px";
+	sliderTarget = value;
 }
 
+isInSession = false;
+function onSessionStart()
+{
+	isInSession = true;
+	$(".showinsession").fadeIn();
+}
+
+function onSessionEnd()
+{
+	isInSession = false;
+	$(".showinsession").fadeOut();
+} 
 
 function ZigPluginLoaded() {
 	Zig.init(document.getElementById("ZigPlugin"));
@@ -93,11 +106,29 @@ function ZigPluginLoaded() {
 	Zig.SingleUser.controls.AddControl(pushDetector);
 
 	var radar = new Zig.TopDownUsersRadar(document.getElementById("usersRadar"), "user");
-	Zig.SingleUser.onUserEngaged = function(user) { radar.DoUserEngaged(user) };
-	Zig.SingleUser.onUserDisengaged = function(user) { radar.DoUserDisengaged(user) };
+	Zig.SingleUser.onUserEngaged = function(user) { onSessionStart(); radar.DoUserEngaged(user) };
+	Zig.SingleUser.onUserDisengaged = function(user) { onSessionEnd(); radar.DoUserDisengaged(user) };
 	Zig.listeners.push(radar);
 
 	document.getElementById('ver').innerHTML = document.getElementById("ZigPlugin").version ;
+	sliderNub = document.getElementById("slider_nub");
+	renderInterval = setInterval(updateSlider, 1/60 * 1000)
+}
+
+sliderTarget = 0.5;
+sliderCurrent = 0.5;
+
+function lerp(from, to, amount) 
+{
+	return from + ((to - from) * amount);
+}
+
+function updateSlider()
+{
+	if (!isInSession) return;
+	
+	sliderCurrent = lerp(sliderCurrent, sliderTarget, 0.5);
+	sliderNub.style.left = (sliderCurrent * sliderNub.parentNode.offsetWidth - (sliderNub.offsetWidth / 2)) + "px";
 }
 
 </script>
@@ -116,7 +147,6 @@ function ZigPluginLoaded() {
 	-moz-box-shadow:inset 0px 1px 5px #000;
 	-webkit-box-shadow:inset 0px 1px 5px #000;
 	-o-box-shadow:inset 0px 1px 5px #000;
-	
 }
 
 .slider_nub {
@@ -133,6 +163,9 @@ function ZigPluginLoaded() {
 	-o-box-shadow: 0px 1px 8px #000;
 }
 
+.showinsession {
+	display: none
+}
 
 #usersRadar	{
 	width: 	300px;
@@ -184,8 +217,10 @@ function ZigPluginLoaded() {
 				<li><a href="unitysamples/index.html"><img name='samp' src='img/samp_but.png' alt=''/></a></li>
 				<li><a href="#"><img name='slid' src='img/slide_but.png' alt='' /></a></li>
 			</ul>
-			<div class="slider" id="slider">
-				<div class="slider_nub" id="slider_nub"></div>
+			<div style="height:15px">
+				<div class="slider showinsession" id="slider">
+					<div class="slider_nub showinsession" id="slider_nub"></div>
+				</div>
 			</div>
 		</div>
 	</div>
