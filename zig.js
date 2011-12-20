@@ -201,6 +201,7 @@ function Fader(orientation, size)
 	// TODO: make real events
 	this.onItemSelected = function(item){};
 	this.onItemUnselected = function(item){};
+	this.onValueChange = function(value) {};
 
 	// hand point control callbacks
 	this.onSessionStart = function(sessionStartPosition) {
@@ -220,6 +221,9 @@ function Fader(orientation, size)
 		var newSelected = this.selectedItem;
 		var minValue = (this.selectedItem * (1 / this.itemsCount)) - this.hysteresis;
 		var maxValue = (this.selectedItem + 1) * (1 / this.itemsCount) + this.hysteresis;
+		
+		this.onValueChange(this.value);
+		
 		if (this.value > maxValue) {
 			newSelected++;
 		}
