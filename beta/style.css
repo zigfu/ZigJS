@@ -37,10 +37,47 @@ h2 {
 	width: 940px;
 	margin: 0px auto;
 	padding: 0px 0px;
-	padding-bottom: 50px;
+	padding-bottom: 40px;
 }
 .header img {
 	float: left;
+}
+.headCont {
+	width: 940px;
+	height: 50px;
+	margin: 0px auto;
+	padding: 0px 0px;
+}
+.headCont img {
+}
+.headCont a {
+	border:0;
+}
+.headCont ul {
+	display: inline;
+	color: #dce8f0;
+	font-family: 'Georgia';
+	font-style: italic;
+	font-size: 24px;
+}
+.headCont li {
+	display:inline;
+	padding-left: 10px;
+}
+.logo {
+	float: left;
+}
+.links {
+	float: right;
+	padding-top: 70px;
+}
+.links a {
+	text-decoration: none;
+	color: #dce8f0;
+}
+.links a:hover {
+	color: #fff;
+	text-shadow: 0px 1px 0px #1d272e;
 }
 #holder p {
 	margin: 10px 0px;
