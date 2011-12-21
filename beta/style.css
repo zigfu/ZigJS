@@ -26,6 +26,7 @@ h1 {
 	font-family: 'Rokkitt';
 	font-size: 42px;
 	color: #ef4036;
+	text-shadow: 1px 1px 1px #e97a74;
 }
 h2 {
 	font-family: Georgia, "Times New Roman", Times, serif;
