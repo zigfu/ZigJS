@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src='http://motionos.com/zigjs/beta/zig.js'></script>
+<script>
+
+var zigActive = false;
+
+function ZigPluginLoaded() {
+
+	// init zig.js
+
+	var plugin = document.getElementById("ZigPlugin");
+
+	Zig.init(plugin);
+
+	zigActive = true;
+
+	// set the version string
+
+	document.getElementById("message").innerHTML = plugin.version;
+
+	mpq.track('PluginLoaded', { "version" : plugin.version } );
+
+	// connect the users radar
+
+	usersRadar = new Zig.TopDownUsersRadar(document.getElementById("userradar"), "user");
+
+	Zig.listeners.push(usersRadar);
+
+}
+
+</script>
+
+<!-- start Mixpanel, apparently best right before the </head> -->
+<script type="text/javascript">
+
+var mpq=[];
+mpq.push(["init","58688baa5864b5219dd56dec4d944a20"]);
+
+(function(){
+       var b,a,e,d,c;
+       b=document.createElement("script");
+       b.type="text/javascript";
+       b.async=true;b.src=(document.location.protocol==="https:"?"https:":"http:")+"//api.mixpanel.com/site_media/js/api/mixpanel.js";
+       a=document.getElementsByTagName("script")[0];
+       a.parentNode.insertBefore(b,a);
+       e=function(f){
+               return function(){
+                       mpq.push([f].concat(Array.prototype.slice.call(arguments,0)))
+               }
+       };
+       d=["init","track","track_links","track_forms","register","register_once","identify","name_tag","set_config"];
+       for(c=0;c<d.length;c++){
+               mpq[d[c]]=e(d[c])
+       }
+})();
+
+</script>
+<!-- end Mixpanel -->
+
+</head>
+<body>
+
+<div id='message'>
+<script type='text/javascript'>
+	document.write('zigActive: '+zigActive);
+</script>
+</div>
+
+<div id="pluginContainer">
+
+	<object id="ZigPlugin" type="application/x-zig" width="0" height="0">
+
+		<param name="onload" value="ZigPluginLoaded" />
+
+	</object>
+
+	</div>
+
+</div> 
+
+
+
+</body>
+</html>
