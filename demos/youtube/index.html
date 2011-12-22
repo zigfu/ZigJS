@@ -232,7 +232,8 @@ function addToAnythingslider(toAdd, hideleft, hideright, caption) {
 
 		swipeDetector = new Zig.HorizontalSwipeDetector();
 		swipeDetector.onSwipeLeft = function() {
-			$(getActiveMenuItems()).parent().removeClass("highlighted");
+			$(".highlighted").removeClass("highlighted");
+			//$(getActiveMenuItems()).parent().removeClass("highlighted");
 			if (isActivePanelHome()) {
 				window.location = "../index.html";
 			} else {
@@ -241,6 +242,8 @@ function addToAnythingslider(toAdd, hideleft, hideright, caption) {
 		};
 		swipeDetector.onSwipeRight = function() {
 			if (!isActivePanelTheMovie()) {
+				//$(getActiveMenuItems()).parent().removeClass("highlighted");
+				$(".highlighted").removeClass("highlighted");
 				$(getActiveMenuItems()).eq(verticalFader.selectedItem).click();
 			}
 		}
