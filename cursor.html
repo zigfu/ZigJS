@@ -1,0 +1,116 @@
+<html>
+<head>
+
+<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js' type='text/javascript'></script>
+
+<!-- ZigJS -->
+<script type="text/javascript" src="zig.js"></script>
+
+<script type='text/javascript'>
+
+
+
+function ZigPluginLoaded()
+{
+	cursorFader = new Zig.Fader2D(300, 250);
+	cursorFader.onValueChange = function(value) {
+		cursorElement.offsetHeight
+		positionInParent(cursorElement, value[0], 1 - value[1]);
+		
+	}
+	
+	pushDetector = new Zig.PushDetector();
+	pushDetector.onPush = function() {
+		$(".pushable").addClass("pushed");
+	}
+	
+	pushDetector.onRelease = function() {
+		$(".pushable").removeClass("pushed");
+	}
+	
+	cursorElement = document.getElementById("cursor");
+
+	Zig.init(document.getElementById("ZigPlugin"));
+	Zig.SingleUser.controls.AddControl(cursorFader);
+	Zig.SingleUser.controls.AddControl(pushDetector);
+
+	Zig.SingleUser.onUserEngaged = function(user) { $(".showinsession").fadeIn(); };
+	Zig.SingleUser.onUserDisengaged = function(user) { $(".showinsession").fadeOut(); };
+
+}
+
+function positionInParent(element, posX, posY) {
+	element.style.left = (posX * element.parentNode.offsetWidth - (element.offsetWidth / 2)) + "px";
+	element.style.top = (posY * element.parentNode.offsetHeight - (element.offsetHeight / 2)) + "px";
+}
+
+</script>
+
+<style>
+#cursorArea {
+	width: 	600;
+	height: 500;
+	margin: auto;
+	border:	3px solid darkblue;
+	overflow:hidden;
+}
+
+#cursorArea.pushed {
+	border:	5px solid red;
+}
+
+#cursor {
+	width : 30;
+	height : 30;
+	border:	3px solid darkblue;
+	background-color: white;
+	opacity: .1;
+	position:relative;
+}
+
+#cursor.pushed {
+	opacity: 1;
+}
+
+#cursorCenter {
+	width:	15;
+	height: 15;
+	border:	3px solid darkblue;
+	background-color: lightblue;
+	position:relative;
+	margin: auto;
+	
+}
+
+#cursorCenter.pushed {
+	border:	3px solid green;
+	background-color: yellow;
+	opacity: .4;
+}
+
+.showinsession {
+	display: none
+}
+
+
+</style>
+
+</head>
+
+<body>
+
+<div id="cursorArea" class="pushable">
+	<div id="cursor" class="showinsession pushable">
+		<div id="cursorCenter" class="showinsession pushable"></div>
+	</div>
+</div>
+
+<!-- ZigJS plugin -->
+<div id="pluginContainer">
+	<object id="ZigPlugin" type="application/x-zig" width="0" height="0">
+		<param name="onload" value="ZigPluginLoaded" />
+	</object>
+</div> 
+
+</body>
+</html>

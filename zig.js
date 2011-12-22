@@ -205,7 +205,7 @@ function Fader(orientation, size)
 
 	// hand point control callbacks
 	this.onSessionStart = function(sessionStartPosition) {
-		this.center = sessionStartPosition;
+		this.center = sessionStartPosition; // TODO: use values from this.initialValue
 		this.value = this.initialValue;
 		this.selectedItem = Math.floor(this.itemsCount * this.value);
 		this.onItemSelected(this.selectedItem);
@@ -245,6 +245,40 @@ function Fader(orientation, size)
 	this.onDoUpdate = function() {};
 	
 	// internal functions
+	
+	this.clamp = function(x, min, max)
+	{
+		if (x < min) return min;
+		if (x > max) return max;
+		return x;
+	}
+}
+
+function Fader2D(width, height)
+{
+	this.width = width;
+	this.height = height;
+	this.topleft = $V([0,0,0]);
+	this.initialValue = [0.5, 0.75];
+	this.value = [0,0];
+
+	// events
+	this.onValueChange = function(value) {}
+	
+	this.onSessionStart = function(focusPoint) {
+		this.topleft = $V(focusPoint).subtract($V([this.initialValue[0] * width, this.initialValue[1] * height, 0]));
+		console.log("Top left is at: " + this.topleft.inspect());
+	}
+	
+	this.onSessionUpdate = function(hands) {
+		var position = hands[0].position;
+		var distanceFromTopleft = $V(position).subtract(this.topleft);
+		this.value = [this.clamp(distanceFromTopleft.elements[0] / width,0,1), this.clamp(distanceFromTopleft.elements[1] / height,0,1)];
+		this.onValueChange(this.value);
+	}
+	
+	this.onSessionEnd = function() {}
+	this.onDoUpdate = function() {}
 	
 	this.clamp = function(x, min, max)
 	{
@@ -1049,6 +1083,7 @@ var Zig = function() {
 		
 		// controls
 		Fader : Fader,
+		Fader2D : Fader2D,
 		PushDetector : PushDetector,
 		SteadyDetector : SteadyDetector,
 		VerticalSwipeDetector : VerticalSwipeDetector,
