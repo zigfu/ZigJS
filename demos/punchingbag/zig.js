@@ -156,7 +156,7 @@ function ZigTrackedUser(userid)
 		// if we aren't in session, but should be
 		if (!this.isInHandpointSession && this.hands.length > 0) {
 			this.isInHandpointSession = true;
-			var focusPoint = this.hands[0].position;
+			var focusPoint = (undefined != this.hands[0].focusposition) ? this.hands[0].focusposition : this.hands[0].position;
 			this.controls.onSessionStart(focusPoint);
 		}
 		
@@ -201,10 +201,11 @@ function Fader(orientation, size)
 	// TODO: make real events
 	this.onItemSelected = function(item){};
 	this.onItemUnselected = function(item){};
+	this.onValueChange = function(value) {};
 
 	// hand point control callbacks
 	this.onSessionStart = function(sessionStartPosition) {
-		this.center = sessionStartPosition;
+		this.moveTo(sessionStartPosition, this.initialValue);
 		this.value = this.initialValue;
 		this.selectedItem = Math.floor(this.itemsCount * this.value);
 		this.onItemSelected(this.selectedItem);
@@ -220,6 +221,9 @@ function Fader(orientation, size)
 		var newSelected = this.selectedItem;
 		var minValue = (this.selectedItem * (1 / this.itemsCount)) - this.hysteresis;
 		var maxValue = (this.selectedItem + 1) * (1 / this.itemsCount) + this.hysteresis;
+		
+		this.onValueChange(this.value);
+		
 		if (this.value > maxValue) {
 			newSelected++;
 		}
@@ -240,7 +244,55 @@ function Fader(orientation, size)
 	
 	this.onDoUpdate = function() {};
 	
+	this.moveTo = function(position, value) {
+		if (this.flip) value = 1 - value;
+		this.center[this.orientation] = position[this.orientation] + ((0.5 - value) * this.size);
+	}
+	
+	this.moveToContain = function(position) {
+		var distanceFromCenter = position[this.orientation] - this.center[this.orientation];
+		if (distanceFromCenter > this.size / 2) {
+			this.center[this.orientation] += distanceFromCenter - (this.size / 2);
+		} else if (distanceFromCenter < this.size / -2) {
+			this.center[this.orientation] += distanceFromCenter + (this.size / 2);
+		}
+	}
+	
 	// internal functions
+	
+	this.clamp = function(x, min, max)
+	{
+		if (x < min) return min;
+		if (x > max) return max;
+		return x;
+	}
+}
+
+function Fader2D(width, height)
+{
+	this.width = width;
+	this.height = height;
+	this.topleft = $V([0,0,0]);
+	this.initialValue = [0.5, 0.75];
+	this.value = [0,0];
+
+	// events
+	this.onValueChange = function(value) {}
+	
+	this.onSessionStart = function(focusPoint) {
+		this.topleft = $V(focusPoint).subtract($V([this.initialValue[0] * width, this.initialValue[1] * height, 0]));
+		console.log("Top left is at: " + this.topleft.inspect());
+	}
+	
+	this.onSessionUpdate = function(hands) {
+		var position = hands[0].position;
+		var distanceFromTopleft = $V(position).subtract(this.topleft);
+		this.value = [this.clamp(distanceFromTopleft.elements[0] / width,0,1), this.clamp(distanceFromTopleft.elements[1] / height,0,1)];
+		this.onValueChange(this.value);
+	}
+	
+	this.onSessionEnd = function() {}
+	this.onDoUpdate = function() {}
 	
 	this.clamp = function(x, min, max)
 	{
@@ -277,7 +329,7 @@ function PushDetector(size)
 	this.onSessionUpdate = function(hands) {
 		var position = hands[0].position;
 		
-		// TODO: Move fader to contain current hand point
+		this.fader.moveToContain(position);
 		this.fader.onSessionUpdate(hands);
 		this.pushProgress = this.fader.value;
 		
@@ -298,7 +350,11 @@ function PushDetector(size)
 			}
 		}
 		
-		// TODO: drift if we aren't pushed
+		// drift if not pushed
+		if (!this.pushed) {
+			var delta = this.fader.initialValue - this.pushProgress;
+			this.fader.moveTo(position, this.pushProgress + delta * 0.05);
+		}
 	}
 	
 	this.onSessionEnd = function() {
@@ -962,6 +1018,8 @@ var Zig = function() {
 					var hand = getItemById(hands, handid);
 					if (isRealUser(userid)) { // if hand isn't associated with a user, just pass the raw hand
 						hand.position = rotateHand(hand.position, trackedUsers[userid].centerofmass);
+						if (undefined !== hand.focusposition)
+							hand.focusposition = rotateHand(hand.focusposition, trackedUsers[userid].centerofmass);
 					}
 					currhands.push(hand);
 				}
@@ -1045,6 +1103,7 @@ var Zig = function() {
 		
 		// controls
 		Fader : Fader,
+		Fader2D : Fader2D,
 		PushDetector : PushDetector,
 		SteadyDetector : SteadyDetector,
 		VerticalSwipeDetector : VerticalSwipeDetector,
