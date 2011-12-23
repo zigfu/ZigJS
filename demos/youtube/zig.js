@@ -351,7 +351,7 @@ function PushDetector(size)
 		}
 		
 		// drift if not pushed
-		if (!this.pushed) {
+		if (!this.isPushed) {
 			var delta = this.fader.initialValue - this.pushProgress;
 			this.fader.moveTo(position, this.pushProgress + delta * 0.05);
 		}
