@@ -15,18 +15,27 @@ var myScroll;
 var cursorFader;
 var pushDetector;
 var cursorElement;
+var cursorElement2;
+
+var baseCursorSize = 15;
+var outerCursorDelta = 25;
 
 function loaded() {
 	myScroll = new iScroll('cursorArea');
 	
 	cursorFader = new Zig.Fader2D(300, 250);
 	cursorFader.onValueChange = function(value) {
-		positionInParent(cursorElement, value[0], 1 - value[1]);
+	
+		cursorElement.style.width = baseCursorSize + ((1 - pushDetector.pushProgress) * outerCursorDelta) + "px";
+		cursorElement.style.height = baseCursorSize + ((1 - pushDetector.pushProgress) * outerCursorDelta) + "px";
+	
+		positionInParent(cursorElement, value[0], 1-value[1]);
+		positionInParent(cursorElement2, value[0], 1-value[1]);
 		if (!pushDetector.isPushed) return;
 		myScroll.handleEvent({
 			type:"mousemove", 
 			pageX : value[0] * cursorElement.parentNode.offsetWidth, 
-			pageY : value[1] * cursorElement.parentNode.offsetHeight,
+			pageY : -value[1] * cursorElement.parentNode.offsetHeight,
 			});
 	}
 	
@@ -35,7 +44,7 @@ function loaded() {
 		myScroll.handleEvent({
 			type:"mousedown", 
 			pageX : cursorFader.value[0] * cursorElement.parentNode.offsetWidth, 
-			pageY : cursorFader.value[1] * cursorElement.parentNode.offsetHeight,
+			pageY : -cursorFader.value[1] * cursorElement.parentNode.offsetHeight,
 			button : 0,
 			preventDefault : function() {} });
 	
@@ -46,21 +55,20 @@ function loaded() {
 		myScroll.handleEvent({
 			type:"mouseup", 
 			pageX : cursorFader.value[0] * cursorElement.parentNode.offsetWidth, 
-			pageY : cursorFader.value[1] * cursorElement.parentNode.offsetHeight,
+			pageY : -cursorFader.value[1] * cursorElement.parentNode.offsetHeight,
 			button : 0});
 
 		$(".pushable").removeClass("pushed");
 	}
 	
 	cursorElement = document.getElementById("cursor");
+	cursorElement2 = document.getElementById("cursorCenter");
 } 
 
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false); 
 
 function ZigPluginLoaded()
 {
-	
-
 	Zig.init(document.getElementById("ZigPlugin"));
 	Zig.SingleUser.controls.AddControl(cursorFader);
 	Zig.SingleUser.controls.AddControl(pushDetector);
@@ -110,14 +118,13 @@ function positionInParent(element, posX, posY) {
 	height: 15;
 	border:	3px solid darkblue;
 	background-color: lightblue;
-	position:relative;
+	position:absolute;
 }
 
 #cursorCenter.pushed {
 	border:	3px solid green;
 	background-color: yellow;
 	opacity: .4;
-	position:relative;
 }
 
 .showinsession {
@@ -193,9 +200,8 @@ function positionInParent(element, posX, posY) {
 			<li>Pretty row 40</li>
 		</ul> 
 	</div>
-	<div id="cursor" class="showinsession pushable">
-		<div id="cursorCenter" class="showinsession pushable"></div>
-	</div>
+	<div id="cursor" class="showinsession pushable"></div>
+	<div id="cursorCenter" class="showinsession pushable"></div>
 </div>
 
 <!-- ZigJS plugin -->
