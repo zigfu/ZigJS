@@ -205,7 +205,7 @@ function Fader(orientation, size)
 
 	// hand point control callbacks
 	this.onSessionStart = function(sessionStartPosition) {
-		this.center = sessionStartPosition; // TODO: use values from this.initialValue
+		this.moveTo(sessionStartPosition, this.initialValue);
 		this.value = this.initialValue;
 		this.selectedItem = Math.floor(this.itemsCount * this.value);
 		this.onItemSelected(this.selectedItem);
@@ -243,6 +243,19 @@ function Fader(orientation, size)
 	}
 	
 	this.onDoUpdate = function() {};
+	
+	this.moveTo = function(position, value) {
+		this.center[this.orientation] = position[this.orientation] + ((value - 0.5) * this.size);
+	}
+	
+	this.moveToContain = function(position) {
+		var distanceFromCenter = position[this.orientation] - this.center[this.orientation];
+		if (distanceFromCenter > this.size / 2) {
+			this.center[this.orientation] += distanceFromCenter - (this.size / 2);
+		} else if (distanceFromCenter < this.size / -2) {
+			this.center[this.orientation] += distanceFromCenter + (this.size / 2);
+		}
+	}
 	
 	// internal functions
 	
@@ -315,7 +328,7 @@ function PushDetector(size)
 	this.onSessionUpdate = function(hands) {
 		var position = hands[0].position;
 		
-		// TODO: Move fader to contain current hand point
+		this.fader.moveToContain(position);
 		this.fader.onSessionUpdate(hands);
 		this.pushProgress = this.fader.value;
 		
@@ -336,7 +349,11 @@ function PushDetector(size)
 			}
 		}
 		
-		// TODO: drift if we aren't pushed
+		// drift if not pushed
+		if (!this.pushed) {
+			var delta = this.fader.initialValue - this.pushProgress;
+			this.fader.moveTo(position, this.pushProgress + delta * 0.02);
+		}
 	}
 	
 	this.onSessionEnd = function() {
