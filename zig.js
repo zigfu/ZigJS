@@ -156,7 +156,7 @@ function ZigTrackedUser(userid)
 		// if we aren't in session, but should be
 		if (!this.isInHandpointSession && this.hands.length > 0) {
 			this.isInHandpointSession = true;
-			var focusPoint = this.hands[0].position;
+			var focusPoint = (undefined != this.hands[0].focusposition) ? this.hands[0].focusposition : this.hands[0].position;
 			this.controls.onSessionStart(focusPoint);
 		}
 		
@@ -353,7 +353,7 @@ function PushDetector(size)
 		// drift if not pushed
 		if (!this.pushed) {
 			var delta = this.fader.initialValue - this.pushProgress;
-			this.fader.moveTo(position, this.pushProgress + delta * 0.02);
+			this.fader.moveTo(position, this.pushProgress + delta * 0.05);
 		}
 	}
 	
@@ -1018,6 +1018,8 @@ var Zig = function() {
 					var hand = getItemById(hands, handid);
 					if (isRealUser(userid)) { // if hand isn't associated with a user, just pass the raw hand
 						hand.position = rotateHand(hand.position, trackedUsers[userid].centerofmass);
+						if (undefined !== hand.focusposition)
+							hand.focusposition = rotateHand(hand.focusposition, trackedUsers[userid].centerofmass);
 					}
 					currhands.push(hand);
 				}
