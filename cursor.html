@@ -63,6 +63,11 @@ function loaded() {
 	
 	cursorElement = document.getElementById("cursor");
 	cursorElement2 = document.getElementById("cursorCenter");
+	
+	  // Setup the dnd listeners.
+	var dropZone = document.getElementById('cursorArea');
+	dropZone.addEventListener('dragover', handleDragOver, false);
+	dropZone.addEventListener('drop', handleFileSelect, false);
 } 
 
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false); 
@@ -83,6 +88,27 @@ function positionInParent(element, posX, posY) {
 	element.style.top = (posY * element.parentNode.offsetHeight - (element.offsetHeight / 2)) + "px";
 }
 
+
+  function handleFileSelect(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+
+    files = evt.dataTransfer.files;
+
+    for (var i = 0, f; f = files[i]; i++) {
+      //output.push('<li><strong>', f.name, '</strong> (', f.type || 'n/a', ') - ',
+       //           f.size, ' bytes, last modified: ',
+        //          f.lastModifiedDate.toLocaleDateString(), '</li>');
+		$("#thelist").append($("<li>").text(f.name));
+    }
+    
+  }
+
+  function handleDragOver(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+  }
 </script>
 
 <style>
@@ -100,7 +126,6 @@ function positionInParent(element, posX, posY) {
 }
 
 #cursor {
-	display:inline;
 	width : 30;
 	height : 30;
 	border:	3px solid darkblue;
@@ -158,7 +183,8 @@ function positionInParent(element, posX, posY) {
 <div id="cursorArea" class="pushable">
 	<div id="scroller">
 		<ul id="thelist">
-			<li>Pretty row 1</li>
+			
+			<!--<li>Pretty row 1</li>
 			<li>Pretty row 2</li>
 			<li>Pretty row 3</li>
 			<li>Pretty row 4</li>
@@ -197,7 +223,7 @@ function positionInParent(element, posX, posY) {
 			<li>Pretty row 37</li>
 			<li>Pretty row 38</li>
 			<li>Pretty row 39</li>
-			<li>Pretty row 40</li>
+			<li>Pretty row 40</li>-->
 		</ul> 
 	</div>
 	<div id="cursor" class="showinsession pushable"></div>
