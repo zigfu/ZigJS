@@ -245,7 +245,8 @@ function Fader(orientation, size)
 	this.onDoUpdate = function() {};
 	
 	this.moveTo = function(position, value) {
-		this.center[this.orientation] = position[this.orientation] + ((value - 0.5) * this.size);
+		if (this.flip) value = 1 - value;
+		this.center[this.orientation] = position[this.orientation] + ((0.5 - value) * this.size);
 	}
 	
 	this.moveToContain = function(position) {
