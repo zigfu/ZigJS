@@ -462,8 +462,6 @@ iScroll.prototype = {
 	
 	_end: function (e) {
 		if (hasTouch && e.touches.length != 0) return;
-		
-		console.log("1");
 
 		var that = this,
 			point = hasTouch ? e.changedTouches[0] : e,
@@ -481,8 +479,6 @@ iScroll.prototype = {
 		that._unbind(MOVE_EV);
 		that._unbind(END_EV);
 		that._unbind(CANCEL_EV);
-
-		console.log("2");
 		
 		if (that.options.onBeforeScrollEnd) that.options.onBeforeScrollEnd.call(that, e);
 
@@ -506,8 +502,6 @@ iScroll.prototype = {
 			return;
 		}
 
-		console.log("3");
-		
 		if (!that.moved) {
 			if (hasTouch) {
 				if (that.doubleTapTimer && that.options.zoom) {
@@ -548,8 +542,6 @@ iScroll.prototype = {
 			return;
 		}
 
-		console.log("4");
-		
 		if (duration < 300 && that.options.momentum) {
 			momentumX = newPosX ? that._momentum(newPosX - that.startX, duration, -that.x, that.scrollerW - that.wrapperW + that.x, that.options.bounce ? that.wrapperW : 0) : momentumX;
 			momentumY = newPosY ? that._momentum(newPosY - that.startY, duration, -that.y, (that.maxScrollY < 0 ? that.scrollerH - that.wrapperH + that.y - that.minScrollY : 0), that.options.bounce ? that.wrapperH : 0) : momentumY;
@@ -561,8 +553,6 @@ iScroll.prototype = {
  			if ((that.y > that.minScrollY && newPosY > that.minScrollY) || (that.y < that.maxScrollY && newPosY < that.maxScrollY)) momentumY = { dist:0, time:0 };
 		}
 
-		console.log("5");
-		
 		if (momentumX.dist || momentumY.dist) {
 			newDuration = m.max(m.max(momentumX.time, momentumY.time), 10);
 
@@ -585,8 +575,6 @@ iScroll.prototype = {
 			return;
 		}
 
-		console.log("6");
-		
 		// Do we need to snap?
 		if (that.options.snap) {
 			distX = newPosX - that.absStartX;
@@ -601,8 +589,6 @@ iScroll.prototype = {
 			return;
 		}
 
-		console.log("7");
-		
 		that._resetPos(200);
 		if (that.options.onTouchEnd) that.options.onTouchEnd.call(that, e);
 	},
