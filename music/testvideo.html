@@ -1,0 +1,55 @@
+<html>
+
+
+<body>
+
+<input type="file" id="files" name="files[]"/>
+
+<video
+  id="movie"
+  controls>
+</video>
+
+<script>
+  function handleFileSelect(evt) {
+    var files = evt.target.files; // FileList object
+
+	var file = files[0]
+	path = file.webkitRelativePath || file.mozFullPath || file.fileName;
+	path2 = geturl(file);
+	console.log(path2);
+	document.getElementById("movie").src = path2;
+	putInLocalStore(path2);
+  }
+  document.getElementById('files').addEventListener('change', handleFileSelect, false);
+  
+  function geturl(f) {
+	var url;
+    if(window.createObjectURL){
+	  url = window.createObjectURL(f)
+	}else if(window.createBlobURL){
+	  url = window.createBlobURL(f)
+	}else if(window.URL && window.URL.createObjectURL){
+	  url = window.URL.createObjectURL(f)
+	}else if(window.webkitURL && window.webkitURL.createObjectURL){
+	  url = window.webkitURL.createObjectURL(f)
+	}
+	return url;
+  }
+  
+  
+function putInLocalStore(url){
+    localStorage.setItem("url", url);
+}
+
+function getFromLocalStore() {
+    var data = localStorage.getItem("url");
+    return data;
+}
+
+document.getElementById("movie").src = getFromLocalStore();
+  
+</script>
+
+</body>
+</html>

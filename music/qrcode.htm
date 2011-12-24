@@ -1,0 +1,83 @@
+
+<!-- saved from url=(0033)http://www.cipherbrain.be/qrcode/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>\</title>
+<style>
+body {
+	background-color: #000000;
+	color: #FFFFFF;
+}
+div#qr_url canvas
+{
+	border-style: solid;
+	border-color: #FFFFFF;
+	border-width: 10px;
+}
+</style>
+<!--[if IE]><script src="excanvas.js"></script><![endif]-->
+<script type="text/javascript" src="./qrcode_files/qrcode.js"></script>
+<script type="text/javascript" src="./qrcode_files/qrcanvas.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+
+  var socket;
+function loaded(){
+	socket = io.connect('http://zig.tv',{port:8081});
+  socket.on('connect', function () {
+   socket.emit('qrcodegen');
+  });
+  socket.on('newjoin', function () {
+	document.getElementById("qr_url").innerHTML = "iPhoneConnected";
+  });
+  socket.on('keydown', function (data) {
+  	document.getElementById("announce").innerHTML = "keydown " + data['key'];
+  });
+  socket.on('keyup', function (data) {
+  	document.getElementById("announce").innerHTML = "keyup " + data['key'];
+
+  	str = document.getElementById("data").innerHTML;
+  	if (data['key'] == "BSP")
+  	{
+  		str = str.substr(0,str.length-1);
+  		document.getElementById("data").innerHTML = str;
+  	}
+  	else
+  	{	
+		document.getElementById("data").innerHTML = str+data['key'];
+  	}
+  });
+
+  
+}
+function genqr()
+{
+	updatecode(document.getElementById("channel"));
+}
+function updatecode(el)
+{
+	document.getElementById("qr_url").innerHTML = "";
+	append_qrcode(4,"qr_url","http://zig.tv:8081/?"+el.value);
+	socket.emit("joinid", {id: el.value});
+	document.getElementById("announce").innerHTML = "<br><h1>scan or load http://zig.tv:8081/?"+el.value + " on phone or <a href=\"JavaScript:newPopup('http://zig.tv:8081/?" + el.value + "');\">open in a popup window</a></h1>";
+	
+}
+ </script>
+<script type="text/javascript">
+// Popup window code
+function newPopup(url) {
+	popupWindow = window.open(
+		url,'popUpWindow','height=960,width=640,left=10,top=10,resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no')
+}
+</script>
+
+</head>
+<body onload="loaded()">
+<center><div id="qr_url">
+</div>
+<h1><div id="data"></div></h1>
+</center><br><br>
+<div id="announce">
+</div>
+Enter Channel ID: <input id="channel" type="text" onchange="updatecode(this);"></input><input type="button" value="GenQR" onclick="genqr();"/>
+</body></html>
