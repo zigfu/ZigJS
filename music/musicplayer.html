@@ -41,7 +41,7 @@ function loaded() {
 	
 	roomurl = 'http://'+document.location.hostname+"/?" + uniqueid;
 	append_qrcode(4,"qrcode",roomurl);
-	document.getElementById("roomURL").innerHTML = '<h1><a href="'+roomurl+'" target="_blank">'+roomurl+'</a></h1>';
+	document.getElementById("roomURL").innerHTML = '<h1><a href=\'JavaScript:newPopup("'+roomurl+'");\'>'+roomurl+'</a></h1>';
 	console.log(roomurl);
 	document.getElementById("qrModalDialog").addEventListener('click',function() {
 		window.location = "#";
@@ -66,7 +66,10 @@ function nameChanged(newName) {
 	socket.emit('setName', { name : currentName });
 }	
 
-
+function newPopup(url) {
+	popupWindow = window.open(
+		url,'popUpWindow','height=960,width=640,left=10,top=10,resizable=no,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no')
+}
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
 
 
@@ -267,9 +270,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 			<INPUT type="text" placeholder="[TV]" spellcheck=off autocomplete=off id="roomNameInput" name="roomNameInput"/>
 		</div>
 		<ul>
-		<li>
-		<div id="textinputhere">TEXTINPUTHERE</div>
-		</li>
+		
 <li>
 	<a href="#qrModalDialog">QR Code</a></li>
 	<li> </li>
@@ -284,7 +285,9 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 	<div id="playlistScroller" class="scrollerContainer">
 		<div class="scroller">
 			<ul id="playlistList">
-				<li>Pretty row 1</li>
+				<li>
+		<div id="textinputhere">Pretty row 1</div>
+		</li>
 				<li>Pretty row 2</li>
 				<li>Pretty row 3</li>
 				<li>Pretty row 4</li>
