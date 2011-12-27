@@ -1,0 +1,285 @@
+<html>
+<head>
+
+<script type="text/javascript" src="iscroll.js"></script>
+
+
+<script type="text/javascript">
+
+var medialibraryScroller;
+var playlistScroller;
+var userlistScroller;
+
+function loaded() {
+	medialibraryScroller = new iScroll('medialibraryScroller');
+	playlistScroller = new iScroll('playlistScroller');
+	userlistScroller = new iScroll('userlistScroller');
+}
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
+ </script>
+
+<style>
+
+.mylist {
+	overflow: hidden;
+	border:	3px solid darkblue;
+	margin : 1%;
+}
+
+.scrollerContainer {
+	width: 100%;
+	height : 100%;
+	margin: auto;
+	overflow:hidden;
+	position:relative;
+}
+
+.scroller ul {
+	list-style:none;
+	padding:0;
+	margin:0;
+	width:100%;
+	text-align:left;
+}
+
+.scroller li {
+	padding:0 10px;
+	height:100px;
+	line-height:100px;
+	border-bottom:1px solid #ccc;
+	border-top:1px solid #fff;
+	background-color:#fafafa;
+	font-size:48px;
+}
+
+.scrollerheader {
+	width:100%;
+	height:45px;
+	line-height:45px;
+	background-color:#d51875;
+	background-image:-webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #fe96c9), color-stop(0.05, #d51875), color-stop(1, #7b0a2e));
+	background-image:-moz-linear-gradient(top, #fe96c9, #d51875 5%, #7b0a2e);
+	background-image:-o-linear-gradient(top, #fe96c9, #d51875 5%, #7b0a2e);
+	padding:0;
+	color:#eee;
+	font-size:20px;
+	text-align:center;
+}
+
+.scrollerheader a {
+	color:#f3f3f3;
+	text-decoration:none;
+	font-weight:bold;
+	text-shadow:0 -1px 0 rgba(0,0,0,0.5);
+}
+
+#playercontrols {
+	width : 65%;
+	height : 15%;
+	float : left;
+}
+
+#medialibrary {
+	width : 65%;
+	height : 75%;
+	float : left;
+}
+
+#playlist {
+	width : 30%;
+	height : 55%; 
+	float : right;
+}
+
+#userlist {
+	width : 30%;
+	height : 35%;
+	float : right;
+}
+
+</style>
+
+</head>
+<body>
+
+<div id="playercontrols" class="mylist">
+	<div class="scrollerheader"><a href="#">Media Library</a></div>
+	<div id="playercontrolsScroller" class="scrollerContainer">
+		<div class="scroller">
+			<ul id="medialibraryList">
+				<li>Pretty row 1</li>
+				<li>Pretty row 2</li>
+				<li>Pretty row 3</li>
+				<li>Pretty row 4</li>
+				<li>Pretty row 5</li>
+				<li>Pretty row 6</li>
+				<li>Pretty row 7</li>
+				<li>Pretty row 8</li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+<div id="playlist" class="mylist">
+	<div class="scrollerheader"><a href="#">Playlist</a></div>
+	<div id="playlistScroller" class="scrollerContainer">
+		<div class="scroller">
+			<ul id="playlistList">
+				<li>Pretty row 1</li>
+				<li>Pretty row 2</li>
+				<li>Pretty row 3</li>
+				<li>Pretty row 4</li>
+				<li>Pretty row 5</li>
+				<li>Pretty row 6</li>
+				<li>Pretty row 7</li>
+				<li>Pretty row 8</li>
+				<li>Pretty row 9</li>
+				<li>Pretty row 10</li>
+				<li>Pretty row 11</li>
+				<li>Pretty row 12</li>
+				<li>Pretty row 13</li>
+				<li>Pretty row 14</li>
+				<li>Pretty row 15</li>
+				<li>Pretty row 16</li>
+				<li>Pretty row 17</li>
+				<li>Pretty row 18</li>
+				<li>Pretty row 19</li>
+				<li>Pretty row 20</li>
+				<li>Pretty row 21</li>
+				<li>Pretty row 22</li>
+				<li>Pretty row 23</li>
+				<li>Pretty row 24</li>
+				<li>Pretty row 25</li>
+				<li>Pretty row 26</li>
+				<li>Pretty row 27</li>
+				<li>Pretty row 28</li>
+				<li>Pretty row 29</li>
+				<li>Pretty row 30</li>
+				<li>Pretty row 31</li>
+				<li>Pretty row 32</li>
+				<li>Pretty row 33</li>
+				<li>Pretty row 34</li>
+				<li>Pretty row 35</li>
+				<li>Pretty row 36</li>
+				<li>Pretty row 37</li>
+				<li>Pretty row 38</li>
+				<li>Pretty row 39</li>
+				<li>Pretty row 40</li>
+			</ul> 
+		</div>
+		<div id="cursor" class="showinsession pushable"></div>
+		<div id="cursorCenter" class="showinsession pushable"></div>
+	</div>
+</div>
+
+<div id="medialibrary" class="mylist">
+	<div class="scrollerheader"><a href="#">Media Library</a></div>
+	<div id="medialibraryScroller" class="scrollerContainer">
+		<div class="scroller">
+			<ul id="medialibraryList">
+				<li>Pretty row 1</li>
+				<li>Pretty row 2</li>
+				<li>Pretty row 3</li>
+				<li>Pretty row 4</li>
+				<li>Pretty row 5</li>
+				<li>Pretty row 6</li>
+				<li>Pretty row 7</li>
+				<li>Pretty row 8</li>
+				<li>Pretty row 9</li>
+				<li>Pretty row 10</li>
+				<li>Pretty row 11</li>
+				<li>Pretty row 12</li>
+				<li>Pretty row 13</li>
+				<li>Pretty row 14</li>
+				<li>Pretty row 15</li>
+				<li>Pretty row 16</li>
+				<li>Pretty row 17</li>
+				<li>Pretty row 18</li>
+				<li>Pretty row 19</li>
+				<li>Pretty row 20</li>
+				<li>Pretty row 21</li>
+				<li>Pretty row 22</li>
+				<li>Pretty row 23</li>
+				<li>Pretty row 24</li>
+				<li>Pretty row 25</li>
+				<li>Pretty row 26</li>
+				<li>Pretty row 27</li>
+				<li>Pretty row 28</li>
+				<li>Pretty row 29</li>
+				<li>Pretty row 30</li>
+				<li>Pretty row 31</li>
+				<li>Pretty row 32</li>
+				<li>Pretty row 33</li>
+				<li>Pretty row 34</li>
+				<li>Pretty row 35</li>
+				<li>Pretty row 36</li>
+				<li>Pretty row 37</li>
+				<li>Pretty row 38</li>
+				<li>Pretty row 39</li>
+				<li>Pretty row 40</li>
+			</ul> 
+		</div>
+		<div id="cursor" class="showinsession pushable"></div>
+		<div id="cursorCenter" class="showinsession pushable"></div>
+	</div>
+</div>
+
+
+
+<div id="userlist" class="mylist">
+	<div class="scrollerheader"><a href="#">User list</a></div>
+	<div id="userlistScroller" class="scrollerContainer">
+		<div class="scroller">
+			<ul id="userlistList">
+				<li>Pretty row 1</li>
+				<li>Pretty row 2</li>
+				<li>Pretty row 3</li>
+				<li>Pretty row 4</li>
+				<li>Pretty row 5</li>
+				<li>Pretty row 6</li>
+				<li>Pretty row 7</li>
+				<li>Pretty row 8</li>
+				<li>Pretty row 9</li>
+				<li>Pretty row 10</li>
+				<li>Pretty row 11</li>
+				<li>Pretty row 12</li>
+				<li>Pretty row 13</li>
+				<li>Pretty row 14</li>
+				<li>Pretty row 15</li>
+				<li>Pretty row 16</li>
+				<li>Pretty row 17</li>
+				<li>Pretty row 18</li>
+				<li>Pretty row 19</li>
+				<li>Pretty row 20</li>
+				<li>Pretty row 21</li>
+				<li>Pretty row 22</li>
+				<li>Pretty row 23</li>
+				<li>Pretty row 24</li>
+				<li>Pretty row 25</li>
+				<li>Pretty row 26</li>
+				<li>Pretty row 27</li>
+				<li>Pretty row 28</li>
+				<li>Pretty row 29</li>
+				<li>Pretty row 30</li>
+				<li>Pretty row 31</li>
+				<li>Pretty row 32</li>
+				<li>Pretty row 33</li>
+				<li>Pretty row 34</li>
+				<li>Pretty row 35</li>
+				<li>Pretty row 36</li>
+				<li>Pretty row 37</li>
+				<li>Pretty row 38</li>
+				<li>Pretty row 39</li>
+				<li>Pretty row 40</li>
+			</ul> 
+		</div>
+		<div id="cursor" class="showinsession pushable"></div>
+		<div id="cursorCenter" class="showinsession pushable"></div>
+	</div>
+</div>
+
+
+</body>
+</html>

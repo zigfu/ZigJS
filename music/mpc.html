@@ -1,0 +1,130 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+
+	<title>Music player controller</title>
+
+	<script type="text/javascript" src="shake.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	
+	<script type="text/javascript">
+	
+	var currentName = localStorage.getItem("currentName");
+	if (null == currentName) currentName = "[Guest]";
+	
+	var currentLocation = [];
+	
+	function loaded(){
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(reportLocation, noLocation);
+		} else {
+			noLocation();
+		}
+
+		//create a new instance of shake.js.
+		var myShakeEvent = new Shake();
+
+		//start listening for shake event. 
+		//you can also use stop() to stop listening.
+		myShakeEvent.start();
+
+		//define a custom method to fire when shake occurs.
+		myShakeEvent.shakeEventDidOccur = function() {
+			//put your own code here etc.
+			navigator.geolocation.getCurrentPosition(shakeLocation, noLocation);
+			addClass(document.getElementById("connectioninfo"),"shook");
+			setTimeout('removeClass(document.getElementById("connectioninfo"),"shook");',500);
+		}
+		
+		nameChanged(currentName);
+		   
+		socket = io.connect('http://zig.tv');
+		socket.on('connect', function () {
+			
+			setStatus("Connected to Zig.TV server");
+		
+			// if we have a room id - use it (from QR code, or manual url)
+			var qs = document.location.search;
+			var roomid = 0;
+			if (qs.length > 0) {
+				var roomid = qs.substr(1,qs.length);
+			}
+			socket.emit('controllerConnected',{id: roomid, name : currentName, location : currentLocation});
+		});
+		
+		// server sends this message when we are successfully controlling a tv
+		socket.on('controlling', function () {
+			setStatus("Controlling TV");
+		});
+	}
+	
+	function reportLocation(position) {
+		var lat = position.coords.latitude;
+		var lon = position.coords.longitude;
+		currentLocation = position;
+		console.log("Location: " + lat + ", " + lon);
+	}
+	function noLocation() {
+		console.log("Location: [Not available]");
+	}
+	
+	function nameentrydone() {
+		var newName = document.getElementById("currentUserNameInput").value;
+		console.log(newName);
+		nameChanged(newName);
+		document.getElementById("currentUserName").style.display = "block";
+		document.getElementById("currentUserNameInput").style.display = "none";
+	}
+	
+	function nameentry() {
+		document.getElementById("currentUserName").style.display = "none";
+		document.getElementById("currentUserNameInput").style.display = "block";
+	}
+	
+	function nameChanged(newName) {
+		currentName = newName;
+		localStorage.setItem("currentName", currentName);
+		document.getElementById("currentUserNameInput").value = currentName;
+		document.getElementById("currentUserName").innerHTML = currentName;
+	}
+	
+	function setStatus(text) {
+		document.getElementById("status").innerHTML = text;
+	}
+	
+	document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+	
+	</script>
+	
+	<style>
+	
+	#currentUserName {
+		width: 100%
+		display : block;
+		border : 1px solid blue;
+	}
+	
+	#currentUserNameInput {
+		width: 100%;
+		display : none;
+	}
+	
+	</style>
+	
+</head>
+<body>
+
+<div id="usernameArea">
+	<div id="currentUserName" onclick="nameentry();">[Guest]</div> <input type="text" id="currentUserNameInput" name="currentUserNameInput" onchange="nameentrydone();">
+</div>
+
+<hr width="50%">
+
+<div id="status">Connecting...</div>
+
+</body>
+</html>
+
+		
+		
