@@ -13,6 +13,9 @@ var userlistScroller;
 
 var socket;
 
+var currentName = localStorage.getItem("roomName");
+if (null == currentName) currentName = "[TV]";	
+
 function loaded() {
 	medialibraryScroller = new iScroll('medialibraryScroller');
 	playlistScroller = new iScroll('playlistScroller');
@@ -21,9 +24,25 @@ function loaded() {
 	var uniqueid = Math.floor(Math.random() * 100000);
 	socket = io.connect('http://zig.tv');
 	socket.on('connect', function () {
-		socket.emit("startRoom", {id: uniqueid, name : "Moshe"});
+		socket.emit("startRoom", {id: uniqueid, name : currentName});
 	});
+	
+	nameChanged(currentName);
 }
+
+function nameentrydone() {
+	var newName = document.getElementById("roomNameInput").value;
+	console.log(newName);
+	nameChanged(newName);
+}
+
+function nameChanged(newName) {
+	currentName = newName;
+	localStorage.setItem("roomName", currentName);
+	document.getElementById("roomNameInput").value = currentName;
+	socket.emit('setName', { name : currentName });
+}	
+
 
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
 
@@ -114,19 +133,15 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 <body>
 
 <div id="playercontrols" class="mylist">
-	<div class="scrollerheader"><a href="#">Media Library</a></div>
+	<div class="scrollerheader"><a href="#">Info</a></div>
 	<div id="playercontrolsScroller" class="scrollerContainer">
 		<div class="scroller">
-			<ul id="medialibraryList">
-				<li>Pretty row 1</li>
-				<li>Pretty row 2</li>
-				<li>Pretty row 3</li>
-				<li>Pretty row 4</li>
-				<li>Pretty row 5</li>
-				<li>Pretty row 6</li>
-				<li>Pretty row 7</li>
-				<li>Pretty row 8</li>
-			</ul>
+
+		<div id="roomnameArea">
+			<input type="text" placeholder="[TV]" spellcheck=off autocomplete=off id="roomNameInput" name="roomNameInput" onchange="nameentrydone();">
+		</div>
+
+
 		</div>
 	</div>
 </div>
