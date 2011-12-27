@@ -45,7 +45,7 @@ function textinput(evt)
 	runSearch(evt.target.value);
 	$('console5').innerHTML = "oninput: " + evt.target.value;
 	console.log(evt);
-	anjou.emit('input',{charCode: evt.target.value});
+	anjou.emit('input',{value: evt.target.value});
 }
 function loaded()
 {
