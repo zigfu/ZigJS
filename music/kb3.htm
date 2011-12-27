@@ -1,0 +1,113 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name = "viewport" content = "width = device-width, initial-scale = 1.0, user-scalable = no"/>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/anjou.js"></script>
+<script>
+var geolocation_support = false;
+function $(id) { return document.getElementById(id); }
+
+if (navigator.geolocation)
+{
+	geolocation_support = true;
+	navigator.geolocation.getCurrentPosition(consoleLocation, noLocation);
+}
+function runSearch(txt)
+{
+document.getElementById("textdisplay").innerHTML = txt;
+}
+function keypress(evt)
+{
+       var charCode = evt.which;
+       var charStr = String.fromCharCode(charCode);
+	   $('console1').innerHTML = "keypress " + charStr + " cc: " + charCode;
+	   anjou.emit('keypress',{charCode: evt.which});
+}
+function keydown(evt)
+{
+       var charCode = evt.which;
+       var charStr = String.fromCharCode(charCode);
+	   $('console2').innerHTML = "keydown " + charStr + " cc: " + charCode;
+	   
+}
+
+function keyup(evt)
+{
+       var charCode = evt.which;
+       var charStr = String.fromCharCode(charCode);
+	   $('console3').innerHTML = "keyup " + charStr + " cc: " + charCode;
+	   anjou.emit('keydown',{charCode: evt.which});
+}
+function textinput(evt)
+{
+	runSearch(evt.target.value);
+	$('console5').innerHTML = "oninput: " + evt.target.value;
+	console.log(evt);
+	anjou.emit('input',{charCode: evt.target.value});
+}
+function loaded()
+{
+	$('search').addEventListener('keypress',keypress);		
+	$('search').addEventListener('keydown',keydown);
+	$('search').addEventListener('keyup',keyup);
+	$('search').addEventListener('input', textinput);
+	if (geolocation_support)
+	{
+		navigator.geolocation.getCurrentPosition(consoleLocation, noLocation);
+	}
+	else
+	{
+		$('console4').innerHTML = "no geolocation support";
+	}
+	anjou.connect('http://zig.tv');
+	
+}
+function consoleLocation(position)
+{  
+	var lat = position.coords.latitude;
+	var long = position.coords.longitude;
+	$('console4').style.backgroundColor="green";
+	$('console4').innerHTML = lat + " " +  long;
+}
+function noLocation()
+{
+  document.getElementById("console4").style.backgroundColor="red";
+  $("console4").innerHTML = "locationFail";
+}
+
+function reportLocation(position)
+{
+  var lat = position.coords.latitude;
+  var long = position.coords.longitude;
+  consoleLocation(position);
+  anjou.emit('loc', {latitude: lat, longitude: long});
+}
+function sendLoc(){
+	if (geolocation_support)
+	{
+		navigator.geolocation.getCurrentPosition(reportLocation, noLocation);
+	}
+}
+
+function stopScrolling( touchEvent ) { touchEvent.preventDefault(); }
+document.addEventListener( 'touchstart' , stopScrolling , false );
+document.addEventListener( 'touchmove' , stopScrolling , false );
+	
+</script>
+</head>
+<body onload="loaded()">
+<input id="search" placeholder="filter library" spellcheck=off autocomplete=off />
+<br>
+<div id="textdisplay"></div>
+<div id="console1"></div>
+<div id="console2"></div>
+<div id="console3"></div>
+
+<div id="console4"></div>
+
+<div id="console5"></div>
+<div id="pushme" ontouchstart="sendLoc()">PUSH</div>
+</body>
+</html>
