@@ -38,7 +38,7 @@ function keyup(evt)
        var charCode = evt.which;
        var charStr = String.fromCharCode(charCode);
 	   $('console3').innerHTML = "keyup " + charStr + " cc: " + charCode;
-	   anjou.emit('keydown',{charCode: evt.which});
+	   anjou.emit('keyup',{charCode: evt.which});
 }
 function textinput(evt)
 {
