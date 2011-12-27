@@ -160,9 +160,22 @@ function onRoomList(data) {
 		if (data.hasOwnProperty(key)) {
 			li = document.createElement('li');
 			li.innerHTML = data[key].name;
-			li.addEventListener("click", function() { socket.emit('joinRoom',{id: key}); });
+			li.addEventListener("click", function(thekey) { return function() { socket.emit('joinRoom',{id: thekey}); }}(key));
 			document.getElementById('roomlistList').appendChild(li);
 		}	
+	}
+}
+
+function onRoomJoined(data)
+{
+	// did it work?
+	var success = data.success;
+	if (success) {
+		// hide room list
+		document.getElementById("roomlist").style.display = "none";
+		document.getElementById("errormsg").innerHTML = "Successfully joined!";
+	} else {
+		document.getElementById("errormsg").innerHTML = data.error;
 	}
 }
 	
@@ -187,7 +200,8 @@ function loaded()
 	}
 	
 	
-	callbacks = { 'roomList' : onRoomList }
+	callbacks = { 'roomList' : onRoomList,
+				  'roomJoined' : onRoomJoined }
 	anjou.connect(document.location.origin, callbacks);
 	
 }
@@ -266,6 +280,11 @@ anjou.processRoom = processRoom;
 	#search {
 		width: 100%;
 	}
+	
+	#errormsg {
+		color : red;
+	}
+	
 	</style>
 	
 
@@ -287,6 +306,9 @@ anjou.processRoom = processRoom;
 		</div>
 	</div>
 </div>
+
+<div id="errormsg"></div>
+
 </div>	
 </body>
 </html>
