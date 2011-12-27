@@ -162,6 +162,13 @@ io.sockets.on('connection', function (socket) {
 		socket.join(socket.roomid);
 		socket.join(socket.roomid + "_server");
 		
+		socket.on('setName', function(data) {
+			console.log("TV name changed: " + data.name);
+			socket.name = data.name;
+			activeRooms[socket.roomid].name = data.name;
+			socket.broadcast.to(socket.roomid).emit('roomList', activeRooms);
+		});
+		
 		socket.on('disconnect', function () {
 			console.log("TV disconnected, removing room details");
 			delete activeRooms[socket.roomid];
