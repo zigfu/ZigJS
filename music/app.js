@@ -27,7 +27,7 @@ function handler (request, response) {
         filePath = './index.html';
     if (request.url[1] == '?')
     {
-    	console.log('saw ?, loading kb.htm');
+    	console.log('saw ?, loading kb3.htm');
     	filePath = './kb3.htm';     
     }    
          
