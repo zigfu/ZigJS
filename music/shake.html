@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="initial-scale=1.0, width=device-width, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>MiniApps - shake.js</title>
+<style type="text/css">
+body {
+	background: #E9E9E9; 
+	color: #333; 
+	font: 1em/1.3em "Helvetica Neue", Helvetica, Arial, Verdana, sans-serif; /* 16px / 21px */
+	text-shadow: rgba(255,255,255,0.8) 0 1px 0;
+	text-align: center;
+}
+</style>
+<script type="text/javascript" src="shake.js"></script>
+
+</head>
+<body>
+
+<h1>Shake to Undo</h1>
+<h2>for your mobile web app</h2><br>
+<div id="connectioninfo">connection</div><br>
+xyz<div id="acceleration">acceleration</div><br>
+arr<div id="arrotation">arrotation</div><br>
+abg<div id="rotation">rotation</div><br>
+com<div id="compass">compass</div><br>
+<p>Shake your iPhone/iPad to see a custom action.</p>
+<p><strong>NOTE:</strong> Requires iOS 4.2.1 and above</p>
+
+<style>
+.shook
+{
+ border-width: 4px;
+ border-style: outset; 
+ border-color: red;
+}
+
+</style>
+<script type="text/javascript">
+function foundLocation(position)
+{
+  var lat = position.coords.latitude;
+  var long = position.coords.longitude;
+  document.getElementById("connectioninfo").style.backgroundColor="green";
+  document.getElementById("connectioninfo").innerHTML = lat + " " +  long;
+}
+
+function noLocation()
+{
+  document.getElementById("connectioninfo").style.backgroundColor="red";
+}
+
+function hasClass(ele,cls) {
+	return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
+}
+function addClass(ele,cls) {
+	if (!this.hasClass(ele,cls)) ele.className += " "+cls;
+}
+function removeClass(ele,cls) {
+	if (hasClass(ele,cls)) {
+		var reg = new RegExp('(\\s|^)'+cls+'(\\s|$)');
+		ele.className=ele.className.replace(reg,' ');
+	}
+}
+window.onload = function() {
+
+
+
+	if (navigator.geolocation)
+	{
+		navigator.geolocation.getCurrentPosition(foundLocation, noLocation);
+	}
+	//create a new instance of shake.js.
+	var myShakeEvent = new Shake();
+
+	//start listening for shake event. 
+	//you can also use stop() to stop listening.
+	myShakeEvent.start();
+
+	//define a custom method to fire when shake occurs.
+	myShakeEvent.shakeEventDidOccur = function() {
+
+		//put your own code here etc.
+		
+		navigator.geolocation.getCurrentPosition(foundLocation, noLocation);
+		addClass(document.getElementById("connectioninfo"),"shook");
+		setTimeout('removeClass(document.getElementById("connectioninfo"),"shook");',500);
+		}
+};
+
+
+
+window.ondevicemotion = function(event) {
+  ax = event.accelerationIncludingGravity.x;
+  ay = event.accelerationIncludingGravity.y;
+  az = event.accelerationIncludingGravity.z;
+  document.getElementById("acceleration").innerHTML = ax + ' ' + ay + ' ' + az;
+  rotation = event.rotationRate;
+  if (rotation != null) {
+    arAlpha = Math.round(rotation.alpha);
+    arBeta = Math.round(rotation.beta);
+    arGamma = Math.round(rotation.gamma);
+     document.getElementById("arrotation").innerHTML = arAlpha + ' ' + arBeta + ' ' + arGamma;
+  }
+
+  window.ondeviceorientation = function(event) {
+  alpha = Math.round(event.alpha);
+  beta = Math.round(event.beta);
+  gamma = Math.round(event.gamma);
+  document.getElementById("rotation").innerHTML = alpha + ' ' + beta + ' '  +gamma;
+}
+
+  
+}
+</script>
+</body>
+</html>

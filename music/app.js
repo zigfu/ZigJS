@@ -1,9 +1,23 @@
 var app = require('http').createServer(handler)
   , io = require('socket.io').listen(app)
   , fs = require('fs')
-  , path = require('path');
-  
+  , path = require('path')
+  , net = require('net');
 app.listen(80);
+
+
+
+function getNetworkIP(addr, callback) {
+  var socket = net.createConnection(80, addr);
+  socket.on('connect', function() {
+    callback(undefined, socket.address().address);
+    socket.end();
+  });
+  socket.on('error', function(e) {
+    callback(e, 'error');
+  });
+}
+
 
 function handler (request, response) {
   console.log('request starting...');
@@ -60,8 +74,29 @@ io.sockets.on('connection', function (socket) {
 		io.sockets.in(data['id']).emit('newjoin');
 	});
 	
+	
+	socket.on('suggest_local', function(data) {
+		console.log('local suggested by tv')
+		socket.get('roomid',function(err, room) {
+          io.sockets.in(room).emit('try_local', data);
+		});
+	});
+	
+	socket.on('localControllerConnected',function (data) {
+		console.log("localControllerConnected");
+		socket.set('roomid', data['id']);
+		socket.join(data['id']);	
+
+		io.sockets.in(data['id']).emit('break_remote');
+	});
+	
 	socket.on("sweet", function(socket) {
 		console.log("SWEET");
+	});
+	
+	socket.on("echo", function (data) {
+		console.log("echo: " + data);
+		socket.emit("echo", data);
 	});
 	
   socket.on('keydown', function (data) {
@@ -69,8 +104,6 @@ io.sockets.on('connection', function (socket) {
     socket.get('roomid',function(err, room) {
           io.sockets.in(room).emit('keydown', data);
     });
-    
-    
   });
    socket.on('keyup', function (data) {
     console.log(data);
@@ -80,6 +113,33 @@ io.sockets.on('connection', function (socket) {
 
   });
   
+  socket.on('shake', function(data){
+      console.log(data);
+    socket.get('roomid',function(err, room) {
+          io.sockets.in(room).emit('shake', data);
+    });
+  });
+  
+ socket.on('notify_remote_of_local', function(data)
+ {
+ console.log('remote connection has local server: ' + data['ipaddr'] + ':' + data['port']);
+ });
+ socket.on('localhost_connection', function(data)
+ {
+	var localaddress = socket.handshake.address;
+	//after a successful connection from localhost we need to report the local ip address back
+	//gets the LAN ip by opening a connection to zig.tv, put some analytics for this
+	getNetworkIP('zig.tv',function(error,ip)
+	{
+		console.log(ip);
+		if (error) {
+			console.log('error:', error);
+		}
+		socket.emit("lan_ip", {ipaddr: ip, port: localaddress.port});
+	});
+	
+ });
+ 
   socket.on('joinid', function(data)
   {
   	console.log("joinid:");

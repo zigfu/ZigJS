@@ -1,6 +1,8 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta name="apple-mobile-web-app-capable" content="yes" />
 <title>\</title>
-
+<script type="text/javascript" src="shake.js"></script>
 </head>
 <style>
 td {
@@ -14,19 +16,67 @@ td {
 }
 
 </style>
+<style>
+.shook
+{
+ border-width: 4px;
+ border-style: outset; 
+ border-color: red;
+}
+
+</style>
 <script src="/socket.io/socket.io.js"></script>
 
 <script>
-
+var socket;
 function loaded(){
-  var socket = io.connect('http://zig.tv');
-  socket.on('connect', function () {
-   var qs = document.location.search;
+
+
+
+	if (navigator.geolocation)
+	{
+		navigator.geolocation.getCurrentPosition(reportLocation, noLocation);
+	}
+	//create a new instance of shake.js.
+	var myShakeEvent = new Shake();
+
+	//start listening for shake event. 
+	//you can also use stop() to stop listening.
+	myShakeEvent.start();
+
+	//define a custom method to fire when shake occurs.
+	myShakeEvent.shakeEventDidOccur = function() {
+
+		//put your own code here etc.
+		
+		navigator.geolocation.getCurrentPosition(shakeLocation, noLocation);
+		addClass(document.getElementById("connectioninfo"),"shook");
+		setTimeout('removeClass(document.getElementById("connectioninfo"),"shook");',500);
+		}
+
+
+  var qs = document.location.search;
    var roomid = qs.substr(1,qs.length);
-	console.log("id " + roomid);
+   
+  socket = io.connect('http://zig.tv');
+  socket.on('connect', function () {
+ 
    socket.emit('controllerConnected',{id: roomid});
    //alert(roomid);
   });
+  
+  socket.on('try_local', function(data)
+  { 
+	local_socket = io.connect('http://'+data['ip']);
+	local_socket.on('connect', function(){
+	
+		local_socket.emit('localControllerConnected',{id: roomid});
+	});
+	local_socket.on('break_remote', function(){
+		socket = local_socket;
+	});
+  });
+	
   
 
 var buttons = document.getElementsByTagName('td');
@@ -40,9 +90,72 @@ for(var i = 0; i < buttons.length; i++){
 }
 }  
     
- </script>
+function shakeLocation(position)
+{
+  var lat = position.coords.latitude;
+  var long = position.coords.longitude;
+  document.getElementById("connectioninfo").style.backgroundColor="green";
+  document.getElementById("connectioninfo").innerHTML = lat + " " +  long;
+  socket.emit('shake', {latitude: lat, longitude: long});
+}
+function reportLocation(position)
+{
+  var lat = position.coords.latitude;
+  var long = position.coords.longitude;
+  document.getElementById("connectioninfo").style.backgroundColor="green";
+  document.getElementById("connectioninfo").innerHTML = lat + " " +  long;
+  socket.emit('loc', {latitude: lat, longitude: long});
+}
+function noLocation()
+{
+  document.getElementById("connectioninfo").style.backgroundColor="red";
+}
 
-<script type="text/javascript">
+function hasClass(ele,cls) {
+	return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
+}
+function addClass(ele,cls) {
+	if (!this.hasClass(ele,cls)) ele.className += " "+cls;
+}
+function removeClass(ele,cls) {
+	if (hasClass(ele,cls)) {
+		var reg = new RegExp('(\\s|^)'+cls+'(\\s|$)');
+		ele.className=ele.className.replace(reg,' ');
+	}
+}
+
+//setInterval(function(){navigator.geolocation.getCurrentPosition(reportLocation,noLocation);}, 500);
+
+window.ondevicemotion = function(event) {
+  ax = event.accelerationIncludingGravity.x;
+  ay = event.accelerationIncludingGravity.y;
+  az = event.accelerationIncludingGravity.z;
+  document.getElementById("acceleration").innerHTML = ax + ' ' + ay + ' ' + az;
+  
+  
+  
+  //socket.emit('ax', {x:ax, y:ay, z:az});
+  
+  rotation = event.rotationRate;
+  if (rotation != null) {
+    arAlpha = Math.round(rotation.alpha);
+    arBeta = Math.round(rotation.beta);
+    arGamma = Math.round(rotation.gamma);
+     document.getElementById("arrotation").innerHTML = arAlpha + ' ' + arBeta + ' ' + arGamma;
+   //  socket.emit('ar', {alpha:rotation.alpha, beta:rotation.beta, gamma:rotation.gamma});
+  }
+
+  window.ondeviceorientation = function(event) {
+  oalpha = Math.round(event.alpha);
+  obeta = Math.round(event.beta);
+  ogamma = Math.round(event.gamma);
+  
+  document.getElementById("rotation").innerHTML = oalpha + ' ' + obeta + ' '  +ogamma;
+ // socket.emit('or', {alpha:event.alpha, beta:event.beta, gamma:event.gamma});
+}
+
+  
+}
 	function stopScrolling( touchEvent ) { touchEvent.preventDefault(); }
 	document.addEventListener( 'touchstart' , stopScrolling , false );
 	document.addEventListener( 'touchmove' , stopScrolling , false );
@@ -50,6 +163,7 @@ for(var i = 0; i < buttons.length; i++){
 <body onload="loaded();">
 
 <table width="100%" height="100%">
+
 <tr height="25%">
 <td width="33%">1</td>
 
@@ -82,6 +196,13 @@ for(var i = 0; i < buttons.length; i++){
 
 
 </table>
+
+<div id="connectioninfo">connection</div><br>
+xyz<div id="acceleration">acceleration</div><br>
+arr<div id="arrotation">arrotation</div><br>
+abg<div id="rotation">rotation</div><br>
+com<div id="compass">compass</div><br>
+
 
 
 </body></html>

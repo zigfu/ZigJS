@@ -22,7 +22,9 @@ var cursorFader;
 var pushDetector;
 var cursorElement;
 var cursorElement2;
-
+var zigtv_connected  = false;
+var local_connected = false;
+var localip;
 var baseCursorSize = 15;
 var outerCursorDelta = 25;
 
@@ -77,23 +79,72 @@ function loaded() {
 	
 	var uniqueid = Math.floor(Math.random() * 100000);
 	
+	
+	
 	socket = io.connect('http://zig.tv');
 	socket.on('connect', function () {
+		zigtv_connected = true;
 		socket.emit("joinid", {id: uniqueid});
 	});
 	
-	socket.on('newjoin', function () {
-		window.location = "#";
-	});
+	
 	
 	
 	append_qrcode(4,"qrcode","http://zig.tv/?" + uniqueid);
+	console.log("http://zig.tv/?" + uniqueid);
 	$("#qrModalDialog").click(function() {
 		window.location = "#";
 	});
 	
+	socket.on("echo", function(data) {
+		var now = new Date().getTime();
+		var delta = now - data.timestamp;
+		document.getElementById("roundtrip").innerHTML = delta + "";
+	});
+	
+	socket.on('shake', function(data)
+	{
+		console.log('shake' + data);
+		alert('shake' + data);
+		console.log('shake long: ' + data['longitude']);
+
+		console.log('shake lat: ' + data['latitude']);
+	});
+	
+	localsocket = io.connect("http://localhost");
+	localsocket.on('connect', function () {
+		console.log('local connected');
+		local_connected = true;
+		localsocket.emit("joinid", {id: uniqueid});
+		localsocket.emit("localhost_connection", {id: uniqueid});
+	});
+	
+	localsocket.on('lan_ip', function(data) {
+		localip = data['ipaddr'];
+		console.log('connected to local: ' + data['ipaddr'] +":"+data['port']);
+		socket.emit('notify_remote_of_local',data);
+	});
+	localsocket.on('shake', function(data)
+	{
+		console.log('local_shake' + data);
+	});
 	//socket.on("play", function(args))
+	
+	socket.on('newjoin', function () {
+		window.location = "#";
+		if (local_connected)
+		{
+			socket.emit('suggest_local', {ip:localip});
+			localsocket.emit('suggested_local', {ip:localip});
+		}
+	});
 } 
+
+function testRoundtrip()
+{
+	console.log("Testing round trip");
+	socket.emit("echo", { timestamp : new Date().getTime() });
+}
 
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false); 
 
@@ -512,8 +563,10 @@ function positionInParent(element, posX, posY) {
         </div>
     </div>
 
-	<a href="#qrModalDialog">test</a>
+	<p><a href="#qrModalDialog">QR Code</a></p>
 
+	<p><input type="button" onclick="testRoundtrip()" value="Test Roundtrip"><div id="roundtrip"></div></p>
+	
 <!-- ZigJS plugin 
 <div id="pluginContainer">
 	<object id="ZigPlugin" type="application/x-zig" width="0" height="0">

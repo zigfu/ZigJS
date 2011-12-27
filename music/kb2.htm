@@ -1,0 +1,354 @@
+
+<html>
+
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+<style>
+body{
+	font-family:arial;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}
+.entry{
+	border:1px solid green;
+	color:darkGreen;
+	margin:25px;
+	font-size:25px;
+	font-family:verdana, arial,"sans serif";
+	padding:10px;
+	width:500px;
+	word-wrap:break-word;
+}
+.wrapper{
+	height:200px;
+	position:relative;
+	margin:35px;
+}
+.keyboard{
+	position:absolute;
+	bottom:0;
+}
+
+.key{
+	border:1px solid darkGray;
+	display:inline-block;
+	text-align:center;
+	cursor:pointer;
+	margin:1px;
+	border-radius: 4px;
+	font-family:arial,"sans serif";
+	width:30px;
+	height:30px;
+	line-height:30px;
+}
+
+#touchkb2 .key{
+	margin:0px;
+}
+
+.spacebar{
+	width:132px;
+}
+.backspace,.shift{
+	width:47px;
+}
+#mousekb .spacebar,
+#mousekb .backspace,
+#mousekb .shift,
+#mousekb .clear{
+	margin:1px -1px;
+}
+#mousekb .shift{
+	margin-left:35px;
+}
+
+#touchkb .shift,
+#touchkb2 .shift{
+	margin-left:32px;
+}
+
+.keypress{
+	border:1px solid blue;
+}
+
+.touchStart{
+	border-color:blue;
+	border-top:0px;
+	border-top-left-radius:0px;
+	border-top-right-radius:0px;
+	-moz-box-shadow: -1px 5px 5px #ccc;
+	-webkit-box-shadow: -1px 5px 5px #ccc;
+	box-shadow: -1px 5px 5px #ccc;
+}
+#floatKey{
+	border-bottom-left-radius:18px;
+	border-bottom-right-radius:18px;
+	border-bottom:0px;
+	border-color:blue;
+	font-weight:bold;
+	font-size:30px;
+	cursor:pointer;
+	width:40px;
+	height:45px;
+	line-height:35px;
+	background-color:white;
+	-moz-box-shadow: 0px -2px 2px #ccc;
+	-webkit-box-shadow: 0px -2px 2px #ccc;
+	box-shadow: 0px -2px 2px #ccc;
+}
+
+#log{
+	height:500px;
+	overflow:auto;
+	border:1px solid gray;
+}
+</style>
+</head>
+
+<body>
+<!--
+<h3>iOS-style keyboard examples</h3>
+<div>These keyboards were developed in response to <a href="http://stackoverflow.com/questions/6045817/ios-android-browser-showing-a-zoomed-preview-of-button-on-touchmove">a fascinating question on SO</a>. 
+<div class="entry">|</div>
+
+<div class="wrapper">
+	<div>With mouse events:</div>
+	<div class="keyboard" id="mousekb">
+		<div class="row">
+			<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span>
+		</div>
+		<div class="row">
+			<span>q</span><span>w</span><span>e</span><span>r</span><span>t</span><span>y</span><span>u</span><span>i</span><span>o</span><span>p</span>
+		</div>
+		<div class="row" style="margin-left:18px">
+			<span>a</span><span>s</span><span>d</span><span>f</span><span>g</span><span>h</span><span>j</span><span>k</span><span>l</span>
+		</div>
+		<div class="row" style="margin-left:35px">
+			<span>z</span><span>x</span><span>c</span><span>v</span><span>b</span><span>n</span><span>m</span><span>,</span><span>.</span>
+		</div>
+		<div class="row">
+			<span class="shift">shift</span>
+			<span class="spacebar">&nbsp;</span>
+			<span class="backspace">&lArr;</span>
+			<span class="clear">&empty;</span>
+		</div>
+	</div>
+</div>
+
+<div class="entry">|</div>
+
+<div class="wrapper">
+	<div>With touch events (zoom in for better view):</div>
+	<div class="keyboard" id="touchkb">
+		<div class="row">
+			<span>1</span>
+			<span>2</span>
+			<span>3</span>
+			<span>4</span>
+			<span>5</span>
+			<span>6</span>
+			<span>7</span>
+			<span>8</span>
+			<span>9</span>
+			<span>0</span>
+		</div>
+		<div class="row">
+			<span>q</span>
+			<span>w</span>
+			<span>e</span>
+			<span>r</span>
+			<span>t</span>
+			<span>y</span>
+			<span>u</span>
+			<span>i</span>
+			<span>o</span>
+			<span>p</span>
+		</div>
+		<div class="row" style="margin-left:18px">
+			<span>a</span>
+			<span>s</span>
+			<span>d</span>
+			<span>f</span>
+			<span>g</span>
+			<span>h</span>
+			<span>j</span>
+			<span>k</span>
+			<span>l</span>
+		</div>
+		<div class="row" style="margin-left:37px">
+			<span>z</span>
+			<span>x</span>
+			<span>c</span>
+			<span>v</span>
+			<span>b</span>
+			<span>n</span>
+			<span>m</span>
+			<span>,</span>
+			<span>.</span>
+		</div>
+		<div class="row">
+			<span class="shift">shift</span>
+			<span class="spacebar">&nbsp;</span>
+			<span class="backspace">&lArr;</span>
+			<span class="clear">&empty;</span>
+		</div>
+	</div>
+</div>
+-->
+<div class="wrapper">
+	<div>Tracking touch events with touchmove:</div>
+	<div class="keyboard" id="touchkb2">
+		<div class="row">
+			<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span>
+		</div>
+		<div class="row">
+			<span>q</span><span>w</span><span>e</span><span>r</span><span>t</span><span>y</span><span>u</span><span>i</span><span>o</span><span>p</span>
+		</div>
+		<div class="row" style="margin-left:18px">
+			<span>a</span><span>s</span><span>d</span><span>f</span><span>g</span><span>h</span><span>j</span><span>k</span><span>l</span>
+		</div>
+		<div class="row" style="margin-left:32px">
+			<span>z</span><span>x</span><span>c</span><span>v</span><span>b</span><span>n</span><span>m</span><span>,</span><span>.</span>
+		</div>
+		<div class="row">
+			<span class="shift">shift</span>
+			<span class="spacebar">&nbsp;</span>
+			<span class="backspace">&lArr;</span>
+			<span class="clear">&empty;</span>
+		</div>
+	</div>
+</div>
+
+<div id="floatKey" class="key" style="display:none"></div>
+
+<script>
+var currentHoverKey;
+SHIFT=false;
+$('.keyboard span').addClass('key');
+
+function updateFloatKey(el){
+	var o=$(el).offset();
+	$(currentHoverKey).removeClass('touchStart');
+	$('#floatKey').html($(el).html())
+		.show()
+		.offset({top:(o.top-$('#floatKey').outerHeight()+8), left:(o.left-5)});
+	$(el).addClass('touchStart');
+}
+
+function touchStart(ev){
+	ev.preventDefault();
+	updateFloatKey(ev.target);
+}
+
+function touchEnd(ev){
+	ev.preventDefault();
+	$('#floatKey').hide();
+	$(ev.target).removeClass('touchStart');
+}
+
+function outlineKey(el){
+	$(el).addClass('keypress');
+	setTimeout(function(){
+		$(el).removeClass('keypress')
+	},500);
+}
+
+function keyrelease(ev){
+	ev.preventDefault();
+	outlineKey(ev.target);
+	$(ev.target).removeClass('keydown');
+	$('#floatKey').removeClass('keydown');
+	var text=$('.entry').eq(0).text();
+	$('.entry').text(text.substr(0,text.length-1)+$(ev.target).text()+'|');
+}
+
+function shiftKey(ev){
+	ev.preventDefault();
+	if(SHIFT){
+		$('.keyboard span').not('.shift').each(function(idx,el){
+			$(el).text($(el).text().toLowerCase());
+		})
+		$(ev.target).removeClass('keypress');
+		SHIFT=false;
+	}else{
+		$('.keyboard span').not('.shift').each(function(idx,el){
+			$(el).text($(el).text().toUpperCase());
+		})
+		$(ev.target).addClass('keypress');
+		SHIFT=true;
+	}
+
+}
+
+function backspace(ev){
+	ev.preventDefault();
+	outlineKey(ev.target);
+	var text=$('.entry').eq(0).text();
+	$('.entry').text(text.substr(0,text.length-2)+'|');
+}
+
+function clear(ev){
+	ev.preventDefault();
+	outlineKey(ev.target);
+	$('.entry').text('|');
+}
+
+
+//functions for touchmove implementation:
+function getElAtTouchPosition(ev){
+	var touch = ev.originalEvent.touches[0] || ev.originalEvent.changedTouches[0] || ev.touches[0];
+	var top = touch.pageY;
+	var left = touch.pageX;
+	var el=document.elementFromPoint(left,top);
+	return el.className=='key' ? el : null;
+}
+
+function move(ev){
+	ev.stopImmediatePropagation();
+	var el=getElAtTouchPosition(ev);
+	if(el && el!=currentHoverKey){
+		updateFloatKey(el);
+		currentHoverKey=el;
+	}
+}
+
+function touchStart2(ev){
+	ev.preventDefault();
+	updateFloatKey(ev.target);
+	currentHoverKey=ev.target;
+}
+
+function touchStop2(ev){
+	$(currentHoverKey).removeClass('touchStart');
+	$('#floatKey').hide();
+}
+
+
+//KEYBOARD BINDINGS
+//mouse keyboard
+/*$('#mousekb span').not('.spacebar,.shift,.backspace,.clear').bind('mouseenter',touchStart);
+$('#mousekb span').not('.spacebar,.shift,.backspace,.clear').bind('mouseout',touchEnd)
+$('#mousekb span').not('.shift,.backspace,.clear').bind('mouseup',keyrelease)
+$('#mousekb .shift').bind('mouseup',shiftKey);
+$('#mousekb .backspace').bind('mouseup',backspace);
+$('#mousekb .clear').bind('mouseup',clear);
+
+//touch keyboard:
+$('#touchkb span').not('.spacebar,.shift,.backspace,.clear').bind('touchstart',touchStart);
+$('#touchkb span').not('.spacebar,.shift,.backspace,.clear').bind('touchend',touchEnd);
+$('#touchkb span').not('.shift,.backspace,.clear').bind('touchend',keyrelease)
+$('#touchkb .shift').bind('touchend',shiftKey);
+$('#touchkb .backspace').bind('touchend',backspace);
+$('#touchkb .clear').bind('touchend',clear);
+*/
+//touch kb with touchmove event:
+$('#touchkb2').bind('touchmove',move);
+$('#touchkb2 span').not('.spacebar,.shift,.backspace,.clear').bind('touchstart',touchStart2);
+$('#touchkb2').bind('touchend',touchStop2);
+</script>
+
+</body>
+

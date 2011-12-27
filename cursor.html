@@ -8,6 +8,173 @@
 
 
 <script type="text/javascript" src="iscroll.js"></script>
+<script src="id3v2.js"></script>
+
+
+
+
+ <script>
+      //beware! this code is pretty hacky and  ugly.
+      /*
+        This doesn't use jQuery or any js libraries, not because they aren't great
+        in retrospect, I really think I should have used jQuery here.
+        
+        But yesterday when I started this, I was really offended by a chrome extension
+        which was literally a one liner content script that had jquery as a dependency.
+        
+        That's just terrible.
+        
+        Anyway, this is more of a proof of concept and in a weird backwards way, I prefer
+        to do my prototypes without jQuery.
+      */
+      function parseFile(file, callback){
+	console.log("start parseFile");
+        if(localStorage[file.fileName]) return callback(JSON.parse(localStorage[file.fileName]));
+	console.log("use id3v2 to parseFile");
+        ID3v2.parseFile(file,function(tags){
+          //to not overflow localstorage
+	  console.log("oncomplete cb");
+          localStorage[file.fileName] = JSON.stringify({
+            Title: tags.Title,
+            Artist: tags.Artist,
+            Album: tags.Album,
+            Genre: tags.Genre
+          });
+	  console.log('invoke cb');
+          callback(tags);
+        })
+      }
+      
+      function runSearch(query){
+        console.log(query);
+        var regex = new RegExp(query.trim().replace(/\s+/g, '.*'), 'ig');
+        for(var i = $('thelist').getElementsByTagName('li'), l = i.length; l--;){
+          if(regex.test(i[l].innerHTML)){
+            i[l].className = 'visible'
+          }else{
+            i[l].className = 'hidden';
+          }
+        }
+      }
+      
+      function canPlay(type){
+        var a = document.createElement('audio');
+        return !!(a.canPlayType && a.canPlayType(type).replace(/no/, ''));
+      }
+         
+      function $E(id){return document.getElementById(id)}
+      function getSongs(files){
+      console.log('getSongs');
+     //   $E("mask").style.display = 'none';
+     //   $E("startup").style.display = 'none';
+        var queue = [];
+        var mp3 = canPlay('audio/mpeg;'), ogg = canPlay('audio/ogg; codecs="vorbis"');
+        for(var i = 0; i < files.length; i++){
+          var file = files[i];
+	  
+	  var path = file.webkitRelativePath || file.mozFullPath || file.fileName;
+          if (path.indexOf('.AppleDouble') != -1) {
+		// Meta-data folder on Apple file systems, skip
+		continue;
+          }         
+	  var size = file.size || file.fileSize || 4096;
+	  if(size < 4095) { 
+		// Most probably not a real MP3
+		console.log(path);
+		continue;
+	  }
+ 
+          if(file.fileName.indexOf('mp3') != -1){ //only does mp3 for now
+            if(mp3){
+              queue.push(file);
+            }
+          }
+          if(file.fileName.indexOf('ogg') != -1  || file.fileName.indexOf('oga') != -1){
+            if(ogg){
+              queue.push(file);
+            }
+          }
+        }
+                                
+        var process = function(){
+		console.log('processingfiles');
+		console.log('queue len: ' + queue.length);
+          if(queue.length){
+            
+            var f = queue.shift();
+            parseFile(f,function(tags){
+	      console.log("parseFile cb");
+              console.log(tags);
+              var li = document.createElement('li');
+              var t2 = guessSong(f.webkitRelativePath || f.mozFullPath || f.fileName); 
+              //it should be innerText/contentText but its annoying.
+              var sp = document.createElement('span');
+              sp.innerHTML = tags.Title || t2.Title;
+              li.appendChild(sp);
+              
+              var sp = document.createElement('span');
+              sp.innerHTML = tags.Artist || t2.Artist;
+              li.appendChild(sp);
+              
+              var sp = document.createElement('span');
+              sp.innerHTML = tags.Album || t2.Album;
+              li.appendChild(sp);
+              
+              var sp = document.createElement('span');
+              sp.innerHTML = tags.Genre || "";
+              li.appendChild(sp);
+              li.onclick = function(){
+                var pl = document.createElement('li');
+                var st = document.createElement('span');
+                st.innerHTML = tags.Title || t2.Title;
+                pl.appendChild(st);
+                $E("playtable").appendChild(pl);
+                pl.file = f;
+                pl.className = 'visible';
+                pl.onclick = function(e){
+                  if(e && e.button == 1){
+                    pl.parentNode.removeChild(pl);
+                  }else{
+                    var url;
+                    if(window.createObjectURL){
+                      url = window.createObjectURL(f)
+                    }else if(window.createBlobURL){
+                      url = window.createBlobURL(f)
+                    }else if(window.URL && window.URL.createObjectURL){
+                      url = window.URL.createObjectURL(f)
+                    }else if(window.webkitURL && window.webkitURL.createObjectURL){
+                      url = window.webkitURL.createObjectURL(f)
+                    }
+                    
+                    $E("player").src = url;
+                    $E("player").play();
+                    for(var i = document.querySelectorAll('.playing'), l = i.length; l--;){
+                      i[l].className = '';
+                    }
+                    pl.className += ' playing';
+                    currentSong = pl;
+                  }
+                }
+                if($E("playtable").childNodes.length == 1) pl.onclick();
+              }
+              $E('thelist').appendChild(li);
+              process();
+            })
+            var lq = queue.length;
+            setTimeout(function(){
+              if(queue.length == lq){
+                process();
+              }
+            },300);
+          }
+        }
+        process();
+        
+        console.log(files);
+      }
+ 
+</script>
+
 
 <script type='text/javascript'>
 
@@ -229,13 +396,18 @@ function positionInParent(element, posX, posY) {
 	<div id="cursor" class="showinsession pushable"></div>
 	<div id="cursorCenter" class="showinsession pushable"></div>
 </div>
-
+<ul id="playtable">
+</ul>
 <!-- ZigJS plugin -->
 <div id="pluginContainer">
 	<object id="ZigPlugin" type="application/x-zig" width="0" height="0">
 		<param name="onload" value="ZigPluginLoaded" />
 	</object>
-</div> 
-
+</div>  
+ <input type="file" webkitdirectory directory multiple mozdirectory onchange="getSongs(this.files)">
+<div id="search">
+      <input type="text" placeholder="filter library" spellcheck=off autocomplete=off oninput="runSearch(this.value)">
+    </div>
+<audio onended="" controls id="player">
 </body>
 </html>
