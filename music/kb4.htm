@@ -1,0 +1,260 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name = "viewport" content = "width = device-width, initial-scale = 1.0, user-scalable = no"/>
+
+
+<style>
+
+.mylist {
+	overflow: hidden;
+	border:	3px solid darkblue;
+	margin : 1%;
+}
+
+.scrollerContainer {
+	width: 100%;
+	height : 100%;
+	margin: auto;
+	overflow:hidden;
+	position:relative;
+}
+
+.scroller ul {
+	list-style:none;
+	padding:0;
+	margin:0;
+	width:100%;
+	text-align:left;
+}
+
+.scroller li {
+	padding:0 10px;
+	height:100px;
+	line-height:100px;
+	border-bottom:1px solid #ccc;
+	border-top:1px solid #fff;
+	background-color:#fafafa;
+	font-size:48px;
+}
+
+.scrollerheader {
+	width:100%;
+	height:45px;
+	line-height:45px;
+	background-color:#d51875;
+	background-image:-webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #fe96c9), color-stop(0.05, #d51875), color-stop(1, #7b0a2e));
+	background-image:-moz-linear-gradient(top, #fe96c9, #d51875 5%, #7b0a2e);
+	background-image:-o-linear-gradient(top, #fe96c9, #d51875 5%, #7b0a2e);
+	padding:0;
+	color:#eee;
+	font-size:20px;
+	text-align:center;
+}
+
+.scrollerheader a {
+	color:#f3f3f3;
+	text-decoration:none;
+	font-weight:bold;
+	text-shadow:0 -1px 0 rgba(0,0,0,0.5);
+}
+
+#playercontrols {
+	width : 65%;
+	height : 15%;
+	float : left;
+}
+
+#medialibrary {
+	width : 65%;
+	height : 75%;
+	float : left;
+}
+
+#playlist {
+	width : 30%;
+	height : 55%; 
+	float : right;
+}
+
+#userlist {
+	width : 30%;
+	height : 35%;
+	float : right;
+}
+#roomlist {
+	width : 100%;
+	height : 35%;
+	float : center;
+}
+
+</style>
+
+
+
+<script type="text/javascript" src="iscroll.js"></script> 
+<script src="/socket.io/socket.io.js"></script>
+<script src="/anjou.js"></script>
+<script>
+var roomlistScroller;
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
+var geolocation_support = false;
+function $(id) { return document.getElementById(id); }
+
+if (navigator.geolocation)
+{
+	geolocation_support = true;
+	navigator.geolocation.getCurrentPosition(consoleLocation, noLocation);
+}
+function runSearch(txt)
+{
+document.getElementById("textdisplay").innerHTML = txt;
+}
+function keypress(evt)
+{
+       var charCode = evt.which;
+       var charStr = String.fromCharCode(charCode);
+	   //$('console1').innerHTML = "keypress " + charStr + " cc: " + charCode;
+	   anjou.emit('keypress',{charCode: evt.which});
+}
+function keydown(evt)
+{
+       var charCode = evt.which;
+       var charStr = String.fromCharCode(charCode);
+	  // $('console2').innerHTML = "keydown " + charStr + " cc: " + charCode;
+	   
+}
+
+function keyup(evt)
+{
+       var charCode = evt.which;
+       var charStr = String.fromCharCode(charCode);
+	   $('console3').innerHTML = "keyup " + charStr + " cc: " + charCode;
+	   anjou.emit('keyup',{charCode: evt.which});
+}
+function textinput(evt)
+{
+	runSearch(evt.target.value);
+	//$('console5').innerHTML = "oninput: " + evt.target.value;
+	//console.log(evt);
+	anjou.emit('input',{value: evt.target.value});
+}
+
+var currentName = localStorage.getItem("currentName");
+if (null == currentName) currentName = "[Guest]";	
+var currentLocation = [];
+	
+function loaded()
+{
+	roomlistScroller = new iScroll('roomlistScroller');
+	nameChanged(currentName);
+	
+	$('search').addEventListener('keypress',keypress);		
+	$('search').addEventListener('keydown',keydown);
+	$('search').addEventListener('keyup',keyup);
+	$('search').addEventListener('input', textinput);
+	
+	
+	if (geolocation_support)
+	{
+		navigator.geolocation.getCurrentPosition(consoleLocation, noLocation);
+	}
+	else
+	{
+	//	$('console4').innerHTML = "no geolocation support";
+	}
+	anjou.connect(document.location.origin);
+	
+}
+function consoleLocation(position)
+{  
+	currentLocation = position;
+	var lat = position.coords.latitude;
+	var long = position.coords.longitude;
+	//$('console4').style.backgroundColor="green";
+	//$('console4').innerHTML = lat + " " +  long;
+}
+
+
+function noLocation()
+{
+  document.getElementById("console4").style.backgroundColor="red";
+  //$("console4").innerHTML = "locationFail";
+}
+	
+function reportLocation(position)
+{
+  var lat = position.coords.latitude;
+  var long = position.coords.longitude;
+  consoleLocation(position);
+  anjou.emit('loc', {latitude: lat, longitude: long});
+}
+function sendLoc(){
+	if (geolocation_support)
+	{
+		navigator.geolocation.getCurrentPosition(reportLocation, noLocation);
+	}
+}
+
+function stopScrolling( touchEvent ) { touchEvent.preventDefault(); }
+document.addEventListener( 'touchstart' , stopScrolling , false );
+document.addEventListener( 'touchmove' , stopScrolling , false );
+	
+
+	function nameentrydone() {
+		var newName = document.getElementById("currentUserNameInput").value;
+		console.log(newName);
+		nameChanged(newName);
+	}
+	
+
+	
+	function nameChanged(newName) {
+		currentName = newName;
+		localStorage.setItem("currentName", currentName);
+		document.getElementById("currentUserNameInput").value = currentName;
+		
+	}	
+	
+	
+	
+</script>
+
+
+
+	<style>
+	
+	
+	#currentUserNameInput {
+		width: 100%;
+	
+	}
+	#search {
+		width: 100%;
+	}
+	</style>
+	
+
+</head>
+<body>
+<div id="usernameArea">
+	<input type="text" placeholder="[Guest]" spellcheck=off autocomplete=off id="currentUserNameInput" name="currentUserNameInput" onchange="nameentrydone();">
+</div>
+
+<input id="search" placeholder="text input" spellcheck=off autocomplete=off />
+<br>
+<div id="roomlist" class="mylist">
+	<div class="scrollerheader"><a href="#">Room List</a></div>
+	<div id="roomlistScroller" class="scrollerContainer">
+		<div class="scroller">
+			<ul id="roomlistList">
+			</ul>
+		</div>
+	</div>
+</div>
+			
+</body>
+</html>

@@ -3,6 +3,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name = "viewport" content = "width = device-width, initial-scale = 1.0, user-scalable = no"/>
+<script type="text/javascript" src="iscroll.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/anjou.js"></script>
 <script>
@@ -61,7 +62,7 @@ function loaded()
 	{
 		$('console4').innerHTML = "no geolocation support";
 	}
-	anjou.connect('http://zig.tv');
+	anjou.connect(document.location.origin);
 	
 }
 function consoleLocation(position)
@@ -98,7 +99,7 @@ document.addEventListener( 'touchmove' , stopScrolling , false );
 </script>
 </head>
 <body onload="loaded()">
-<input id="search" placeholder="filter library" spellcheck=off autocomplete=off />
+<input id="search" placeholder="text input" spellcheck=off autocomplete=off />
 <br>
 <div id="textdisplay"></div>
 <div id="console1"></div>
@@ -108,6 +109,6 @@ document.addEventListener( 'touchmove' , stopScrolling , false );
 <div id="console4"></div>
 
 <div id="console5"></div>
-<div id="pushme" ontouchstart="sendLoc()">PUSH</div>
+<div id="pushme" ontouchstart="this.style.backgroundColor = 'red'; sendLoc();">PUSH</div>
 </body>
 </html>
