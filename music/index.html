@@ -146,6 +146,12 @@ function testRoundtrip()
 	socket.emit("echo", { timestamp : new Date().getTime() });
 }
 
+function testRoundtrip()
+{
+	console.log("Testing round trip");
+	socket.emit("echo", { timestamp : new Date().getTime() });
+}
+
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false); 
 
 function ZigPluginLoaded()
