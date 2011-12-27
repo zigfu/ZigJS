@@ -28,7 +28,7 @@ function handler (request, response) {
     if (request.url[1] == '?')
     {
     	console.log('saw ?, loading kb.htm');
-    	filePath = './kb.htm';     
+    	filePath = './kb3.htm';     
     }    
          
     var extname = path.extname(filePath);
