@@ -1,6 +1,9 @@
 <html>
 <head>
 
+<script type="text/javascript" src="./qrcode_files/qrcode.js"></script>
+<script type="text/javascript" src="./qrcode_files/qrcanvas.js"></script>
+
 <script type="text/javascript" src="iscroll.js"></script>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -10,7 +13,7 @@
 var medialibraryScroller;
 var playlistScroller;
 var userlistScroller;
-
+var playercontrolsScroller;
 var socket;
 
 var currentName = localStorage.getItem("roomName");
@@ -20,14 +23,34 @@ function loaded() {
 	medialibraryScroller = new iScroll('medialibraryScroller');
 	playlistScroller = new iScroll('playlistScroller');
 	userlistScroller = new iScroll('userlistScroller');
+	playercontrolsScroller = new iScroll('playercontrolsScroller');
 	
 	var uniqueid = Math.floor(Math.random() * 100000);
-	socket = io.connect('http://zig.tv');
+	//TODO: we may want this socket to default to zig.tv and not origin for remote connections notifying the tracker
+	socket = io.connect('http://'+document.location.hostname);
 	socket.on('connect', function () {
 		socket.emit("startRoom", {id: uniqueid, name : currentName});
 	});
 	
+	socket.on('userJoined', function (data) {
+		window.location = "#";
+	});
+	socket.on('input', function (data) {
+		document.getElementById('textinputhere').innerHTML = data['value'];
+	});	
+	
+	roomurl = 'http://'+document.location.hostname+"/?" + uniqueid;
+	append_qrcode(4,"qrcode",roomurl);
+	document.getElementById("roomURL").innerHTML = '<h1><a href="'+roomurl+'" target="_blank">'+roomurl+'</a></h1>';
+	console.log(roomurl);
+	document.getElementById("qrModalDialog").addEventListener('click',function() {
+		window.location = "#";
+	});
+
+	
 	nameChanged(currentName);
+	document.getElementById("roomNameInput").addEventListener('change',nameentrydone, false);
+
 }
 
 function nameentrydone() {
@@ -45,6 +68,7 @@ function nameChanged(newName) {
 
 
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
 
  </script>
 
@@ -105,13 +129,13 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 #playercontrols {
 	width : 65%;
-	height : 15%;
+	height : 30%;
 	float : left;
 }
 
 #medialibrary {
 	width : 65%;
-	height : 75%;
+	height : 60%;
 	float : left;
 }
 
@@ -127,21 +151,130 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 	float : right;
 }
 
+
+
+
+
+
+
+/*** pop-up div to cover entire area ***/
+	    .divModalDialog  {
+	        position:fixed;
+		    top:0;
+		    left:0;
+		    width:100%;
+		    height:100%;
+		    /*! important !*/
+		    display:none;
+		    /* last attribute set darkness on scale: 0...1.0 */
+		    background-color:rgba(0,0,0,0.9);
+		    text-align:center;
+		    //z-index:101;
+	    }
+	    
+	    /*** ! target attribute does the job ! ***/
+	    .divModalDialog:target  { display:block; }
+        
+        /*** virtual frame containing controls, image and caption ***/
+	    .divModalDialog div  {
+	       /* either absolute or fixed */
+		    position:absolute;
+		    top:5%;
+		    width:100%;
+		    height:80%;
+            /* rounded corners */
+	        -moz-border-radius: 10px;
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+            //z-index:102;
+	    }
+	    
+        /*** header used as main image caption  ***/
+        .divModalDialog div h1  {
+            width:100%;
+            font-size:2em;
+            color:#dadada;
+            //z-index:103;
+            /* add shadows to text */
+            -moz-text-shadow: 10px 3px 4px 6px rgba(0,0,0,0.9);  
+            -webkit-text-shadow: 3px 4px 6px rgba(0,0,0,0.9);  
+            text-shadow: 10px 4px 6px rgba(0,0,0,0.9); 
+        }	    
+
+        /*** main image style ***/
+        .divModalDialog img {
+            padding:20px;
+            z-index:105;
+            border: solid 1px gray;
+            /* rounded corners */
+        	-moz-border-radius: 10px;
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+            background: -moz-linear-gradient(top, #dadada, 
+                                                    #505050 5%, 
+                                                    #bababa 50%, 
+                                                    #303030 50%, 
+                                                    #101010);
+            background: -webkit-gradient(linear, center top, center bottom, 
+                                                    from(#dadada), 
+                                                    color-stop(0.05, #505050), 
+                                                    color-stop(0.5, #bababa), 
+                                                    color-stop(0.5, #303030), 
+                                                    to(#101010));
+        } 
+
+        /*** navigation controls style: highest z-index ! ***/
+	    .divModalDialog ul a  {
+		    padding:5px;
+		    font-size:3em;
+		    font-weight:bold;
+		    color:Yellow;
+		    text-decoration:none;
+		    border: solid 1px Gray;
+		    /* rounded corners */
+		    -moz-border-radius: 10px;
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+            z-index:500;
+	    }
+		
+		#qrcode {
+			border : solid 10px white;
+			width : auto;
+			height : auto;
+			margin-left : auto;
+			margin-right : auto;
+			position : relative;
+			//display:inline;
+	        //-moz-border-radius: 0px;
+            //-webkit-border-radius: 0px;
+            //border-radius: 0px;
+			}
+
+
+
 </style>
 
 </head>
 <body>
-
+ 
 <div id="playercontrols" class="mylist">
 	<div class="scrollerheader"><a href="#">Info</a></div>
 	<div id="playercontrolsScroller" class="scrollerContainer">
 		<div class="scroller">
 
 		<div id="roomnameArea">
-			<input type="text" placeholder="[TV]" spellcheck=off autocomplete=off id="roomNameInput" name="roomNameInput" onchange="nameentrydone();">
+			<input type="text" placeholder="[TV]" spellcheck=off autocomplete=off id="roomNameInput" name="roomNameInput"/>
 		</div>
-
-
+		<ul>
+		<li>
+		<div id="textinputhere">TEXTINPUTHERE</div>
+		</li>
+<li>
+	<a href="#qrModalDialog">QR Code</a></li>
+	<li> </li>
+	</ul>
+	
 		</div>
 	</div>
 </div>
@@ -304,6 +437,15 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 	</div>
 </div>
 
-
+ <div id="qrModalDialog" class="divModalDialog">
+        <div>
+            <h1>Scan in QR reader</h1>
+			<div id="roomURL"></div>
+			<div style="background-color : white; width: auto; margin : auto">
+				<div id="qrcode"/></div>
+			</div>
+        </div>
+    </div>
+	
 </body>
 </html>

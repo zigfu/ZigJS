@@ -10,6 +10,7 @@ app.listen(80);
 
 // yes, these should be persistent
 var activeRooms = {};
+var roomLocations = {};
 activeRooms["31337"] = { name : "31337 H4xx0r room" };
 
 function handler (request, response) {
@@ -19,10 +20,12 @@ function handler (request, response) {
     
 	// is this a tv? or a controller?
 	var isMobile = /mobile/i.test(request.headers['user-agent']);
-	var forceTv = (request.url == "?tv");
+	
+	var forceTv = (request.url == "tv");
 	var isTv = forceTv || !isMobile;
 	
 	// default page (for tv & controller)
+		
     if (filePath == './') {
 		if (isTv) {
 			console.log("Zig.TV: The TV");
@@ -38,6 +41,12 @@ function handler (request, response) {
 		filePath = filePath.substr( 0, filePath.lastIndexOf('?') );
 	}
 	
+	if (request.url[1] == '?')
+    {
+    	console.log('saw ?, loading kb4.htm');
+    	filePath = './kb4.htm';     
+    }    
+
     var extname = path.extname(filePath);
     var contentType = 'text/html';
     switch (extname) {
@@ -85,10 +94,28 @@ io.sockets.on('connection', function (socket) {
 		// valid room id
 		if (socket.roomid > 0) {
 			// join room
-			console.log("Valid room id, joining");
-			socket.join(socket.roomid);
-			roomLocations[socket.roomid] = data.location;
-		// no valid room id
+			roomToJoin = ""+socket.roomid;
+			if (roomToJoin in activeRooms) {
+				console.log("Valid room id, joining");
+				socket.roomid = roomToJoin;
+				socket.join(socket.roomid);
+				socket.emit("roomJoined", {success : true});
+				roomLocations[socket.roomid] = data.location;
+
+				// notify the "Server"
+				io.sockets.in(socket.roomid + "_server").emit('userJoined', { name : socket.name });
+				
+				// register the disconnect to notify when user leaves
+				socket.on('disconnect', function() {
+					io.sockets.in(socket.roomid + "_server").emit('userLeft', { name : socket.name });
+				});
+			} else {
+				socket.emit("roomJoined", { success : false, error : "Invalid room id" });
+				socket.emit("roomList", activeRooms);
+			}
+			
+			//socket.join(socket.roomid);
+					// no valid room id
 		} else {
 			// TODO: only send rooms within location threshold
 			/*for (var roomid in roomLocations) {
@@ -173,6 +200,13 @@ io.sockets.on('connection', function (socket) {
     console.log(data);
     socket.get('roomid',function(err, room) {
           io.sockets.in(room).emit('keydown', data);
+    });
+  });
+  
+  socket.on('input', function(data){
+	console.log('input: ' + data['value']);
+	socket.get('roomid',function(err, room) {
+		io.sockets.in(room).emit('input', data);
     });
   });
   

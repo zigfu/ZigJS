@@ -117,7 +117,7 @@ if (navigator.geolocation)
 }
 function runSearch(txt)
 {
-document.getElementById("textdisplay").innerHTML = txt;
+console.log(txt);
 }
 function keypress(evt)
 {
@@ -138,7 +138,7 @@ function keyup(evt)
 {
        var charCode = evt.which;
        var charStr = String.fromCharCode(charCode);
-	   $('console3').innerHTML = "keyup " + charStr + " cc: " + charCode;
+	   //$('console3').innerHTML = "keyup " + charStr + " cc: " + charCode;
 	   anjou.emit('keyup',{charCode: evt.which});
 }
 function textinput(evt)
@@ -146,6 +146,7 @@ function textinput(evt)
 	runSearch(evt.target.value);
 	//$('console5').innerHTML = "oninput: " + evt.target.value;
 	//console.log(evt);
+	console.log('input: ' + evt.target.value);
 	anjou.emit('input',{value: evt.target.value});
 }
 
@@ -189,7 +190,12 @@ function loaded()
 	$('search').addEventListener('keyup',keyup);
 	$('search').addEventListener('input', textinput);
 	
-	
+	$('search').addEventListener("DOMNodeInserted", textinput, false);
+$('search').addEventListener("DOMNodeRemoved", textinput, false);
+$('search').addEventListener("DOMCharacterDataModified", textinput, false);
+
+
+
 	if (geolocation_support)
 	{
 		navigator.geolocation.getCurrentPosition(consoleLocation, noLocation);
@@ -202,7 +208,7 @@ function loaded()
 	
 	callbacks = { 'roomList' : onRoomList,
 				  'roomJoined' : onRoomJoined }
-	anjou.connect(document.location.origin, callbacks);
+	anjou.connect('http://'+document.location.hostname, callbacks);
 	
 }
 function consoleLocation(position)
