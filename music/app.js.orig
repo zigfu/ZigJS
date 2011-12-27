@@ -1,43 +1,75 @@
+var roomLocations = [];
+
+/** Converts numeric degrees to radians */
+if (typeof(Number.prototype.toRad) === "undefined") {
+  Number.prototype.toRad = function() {
+    return this * Math.PI / 180;
+  }
+}
+
+// returns km
+function getDistance(lat1,lon1,lat2,lon2) {
+    var R = 6371; // km
+    var dLat = (lat2-lat1).toRad();
+    var dLon = (lon2-lon1).toRad(); 
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1.toRad()) * Math.cos(lat2.toRad()) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2); 
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    return R * c;
+}
+
+// returns m
+function distanceBetween(pos1, pos2) {
+	return getDistance(	pos1.coords.latitude,
+						pos1.coords.longitude,
+						pos2.coords.latitude,
+						pos2.coords.longitude ) * 1000;
+}
+
 var app = require('http').createServer(handler)
   , io = require('socket.io').listen(app)
   , fs = require('fs')
   , path = require('path')
-  , net = require('net')
-  , useragent = require('./useragent')
-  , location = require('./location');
-  
+  , net = require('net');
 app.listen(80);
 
-// yes, these should be persistent
-var activeRooms = {};
-activeRooms["31337"] = { name : "31337 H4xx0r room" };
+function getNetworkIP(addr, callback) {
+  var socket = net.createConnection(80, addr);
+  socket.on('connect', function() {
+    callback(undefined, socket.address().address);
+    socket.end();
+  });
+  socket.on('error', function(e) {
+    callback(e, 'error');
+  });
+}
 
 function handler (request, response) {
-    console.log("Request: " + request.url); 
-	var ua = useragent.parse(request.headers['user-agent']);
+  console.log('request starting...');
+    console.log(request.url); 
     var filePath = '.' + request.url;
+    if (filePath == './')
+        filePath = './index.html';
     
-	// is this a tv? or a controller?
-	var isMobile = /mobile/i.test(request.headers['user-agent']);
-	var forceTv = (request.url == "?tv");
-	var isTv = forceTv || !isMobile;
+	if (request.url[1] == '?')
+    {
+<<<<<<< HEAD
+    	console.log('saw ?, loading kb3.htm');
+    	filePath = './kb3.htm';     
+    }    
+         
+=======
+    	//console.log('saw ?, loading kb.htm');
+    	//filePath = './kb.htm';
+    } 
 	
-	// default page (for tv & controller)
-    if (filePath == './') {
-		if (isTv) {
-			console.log("Zig.TV: The TV");
-			filePath = './musicplayer.html';
-		} else {
-			console.log("Zig.TV: A controller");
-			filePath = './kb4.htm';
-		}
-	}
-	
-	// make sure query strings dont interfere with fetching from fs
 	if (filePath.indexOf('?') > -1) {
 		filePath = filePath.substr( 0, filePath.lastIndexOf('?') );
 	}
+	console.log("Path: " + filePath);
 	
+>>>>>>> location stuff
     var extname = path.extname(filePath);
     var contentType = 'text/html';
     switch (extname) {
@@ -50,6 +82,7 @@ function handler (request, response) {
     }
      
     path.exists(filePath, function(exists) {
+     
         if (exists) {
             fs.readFile(filePath, function(error, content) {
                 if (error) {
@@ -72,8 +105,8 @@ function handler (request, response) {
 io.sockets.on('connection', function (socket) {
 	console.log("connection made");
 	
-	// this is sent by mobile controllers
 	socket.on('controllerConnected', function (data) {
+		console.log("controllerConnected");
 		socket.roomid = data['id'];
 		socket.name = data['name'];
 		
@@ -90,55 +123,26 @@ io.sockets.on('connection', function (socket) {
 			roomLocations[socket.roomid] = data.location;
 		// no valid room id
 		} else {
-			// TODO: only send rooms within location threshold
-			/*for (var roomid in roomLocations) {
+			// check location
+			for (var roomid in roomLocations) {
 				if (roomLocations.hasOwnProperty(roomid)) {
 					var d = distanceBetween(roomLocations[roomid], socket.location);
+					console.log("Distance: " + d);
 				}
-			}*/
-			socket.emit("roomList", activeRooms);
+			}
+			//roomLocations[socket.roomid] = data.location;
 		}
-		
-		socket.on('joinRoom', function (data) {
-			var roomToJoin = data['id'];
-			if ("31337" == roomToJoin) {
-				socket.emit("roomJoined", { success : false, error : "No permission to join" });
-			}
-			else if (roomToJoin in activeRooms) {
-				socket.roomid = roomToJoin;
-				socket.join(socket.roomid);
-				socket.emit("roomJoined", {success : true});
-				
-				// notify the "Server"
-				io.sockets.in(socket.roomid + "_server").emit('userJoined', { name : socket.name });
-				
-				// register the disconnect to notify when user leaves
-				socket.on('disconnect', function() {
-					io.sockets.in(socket.roomid + "_server").emit('userLeft', { name : socket.name });
-				});
-			} else {
-				socket.emit("roomJoined", { success : false, error : "Invalid room id" });
-			}
-		});
+		io.sockets.in(data['id']).emit('newjoin');
 	});
 	
-	// only the tv sends this
-	socket.on('startRoom', function(data) {
-		console.log("Start room request");
+	socket.on('manualConnect', function (data) {
 		socket.roomid = data['id'];
+		if (undefined !== data.location) {
+			socket.location = data.location;
+		}
 		
-		activeRooms[socket.roomid] = { name : data['name'], location : data['location']};
-		
-		// TODO: Send the TV a stored location from prev session
-		// socket.emit("locationSet", {location : roomLocations[socket.roomid]});
-		
+		roomLocations[data['id']] = data.location;
 		socket.join(socket.roomid);
-		socket.join(socket.roomid + "_server");
-		
-		socket.on('disconnect', function () {
-			console.log("TV disconnected, removing room details");
-			delete activeRooms[socket.roomid];
-		});
 	});
 	
 	socket.on('next', function(data) {
@@ -209,17 +213,15 @@ io.sockets.on('connection', function (socket) {
 	});
 	
  });
+ 
+  // only the tv sends this
+  socket.on('joinid', function(data)
+  {
+  	console.log("joinid:");
+  	console.log(data);
+  	socket.set('roomid', data['id']);
+  	socket.join(data['id']);	
+  });
+  
   
 });
-
-
-function getNetworkIP(addr, callback) {
-  var socket = net.createConnection(80, addr);
-  socket.on('connect', function() {
-    callback(undefined, socket.address().address);
-    socket.end();
-  });
-  socket.on('error', function(e) {
-    callback(e, 'error');
-  });
-}

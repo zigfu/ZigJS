@@ -1,0 +1,581 @@
+<html>
+<head>
+
+<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js' type='text/javascript'></script>
+
+<!-- ZigJS -->
+<script type="text/javascript" src="zig.js"></script>
+
+
+<script type="text/javascript" src="iscroll.js"></script>
+<script type="text/javascript" src="id3v2.js"></script>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script type="text/javascript" src="./qrcode_files/qrcode.js"></script>
+<script type="text/javascript" src="./qrcode_files/qrcanvas.js"></script>
+
+<script type='text/javascript'>
+
+var myScroll;
+var cursorFader;
+var pushDetector;
+var cursorElement;
+var cursorElement2;
+var zigtv_connected  = false;
+var local_connected = false;
+var localip;
+var baseCursorSize = 15;
+var outerCursorDelta = 25;
+
+function loaded() {
+	myScroll = new iScroll('cursorArea');
+	
+	cursorFader = new Zig.Fader2D(300, 250);
+	cursorFader.onValueChange = function(value) {
+	
+		cursorElement.style.width = baseCursorSize + ((1 - pushDetector.pushProgress) * outerCursorDelta) + "px";
+		cursorElement.style.height = baseCursorSize + ((1 - pushDetector.pushProgress) * outerCursorDelta) + "px";
+	
+		positionInParent(cursorElement, value[0], 1-value[1]);
+		positionInParent(cursorElement2, value[0], 1-value[1]);
+		if (!pushDetector.isPushed) return;
+		myScroll.handleEvent({
+			type:"mousemove", 
+			pageX : value[0] * cursorElement.parentNode.offsetWidth, 
+			pageY : -value[1] * cursorElement.parentNode.offsetHeight,
+			});
+	}
+	
+	pushDetector = new Zig.PushDetector();
+	pushDetector.onPush = function() {
+		myScroll.handleEvent({
+			type:"mousedown", 
+			pageX : cursorFader.value[0] * cursorElement.parentNode.offsetWidth, 
+			pageY : -cursorFader.value[1] * cursorElement.parentNode.offsetHeight,
+			button : 0,
+			preventDefault : function() {} });
+	
+		$(".pushable").addClass("pushed");
+	}
+	
+	pushDetector.onRelease = function() {
+		myScroll.handleEvent({
+			type:"mouseup", 
+			pageX : cursorFader.value[0] * cursorElement.parentNode.offsetWidth, 
+			pageY : -cursorFader.value[1] * cursorElement.parentNode.offsetHeight,
+			button : 0});
+
+		$(".pushable").removeClass("pushed");
+	}
+	
+	cursorElement = document.getElementById("cursor");
+	cursorElement2 = document.getElementById("cursorCenter");
+	
+	  // Setup the dnd listeners.
+	var dropZone = document.getElementById('cursorArea');
+	dropZone.addEventListener('dragover', handleDragOver, false);
+	dropZone.addEventListener('drop', handleFileSelect, false);
+	
+	var uniqueid = Math.floor(Math.random() * 100000);
+	
+	
+	
+	socket = io.connect('http://zig.tv');
+	socket.on('connect', function () {
+		zigtv_connected = true;
+		socket.emit("joinid", {id: uniqueid});
+	});
+	
+	
+	
+	
+	append_qrcode(4,"qrcode","http://zig.tv/?" + uniqueid);
+	console.log("http://zig.tv/?" + uniqueid);
+	$("#qrModalDialog").click(function() {
+		window.location = "#";
+	});
+	
+	socket.on("echo", function(data) {
+		var now = new Date().getTime();
+		var delta = now - data.timestamp;
+		document.getElementById("roundtrip").innerHTML = delta + "";
+	});
+	
+<<<<<<< HEAD
+	socket.on('shake', function(data)
+	{
+		console.log('shake' + data);
+		alert('shake' + data);
+		console.log('shake long: ' + data['longitude']);
+
+		console.log('shake lat: ' + data['latitude']);
+	});
+	
+	localsocket = io.connect("http://localhost");
+	localsocket.on('connect', function () {
+		console.log('local connected');
+		local_connected = true;
+		localsocket.emit("joinid", {id: uniqueid});
+		localsocket.emit("localhost_connection", {id: uniqueid});
+	});
+	
+	localsocket.on('lan_ip', function(data) {
+		localip = data['ipaddr'];
+		console.log('connected to local: ' + data['ipaddr'] +":"+data['port']);
+		socket.emit('notify_remote_of_local',data);
+	});
+	localsocket.on('shake', function(data)
+	{
+		console.log('local_shake' + data);
+	});
+=======
+>>>>>>> roundtrip stuff
+	//socket.on("play", function(args))
+	
+	socket.on('newjoin', function () {
+		window.location = "#";
+		if (local_connected)
+		{
+			socket.emit('suggest_local', {ip:localip});
+			localsocket.emit('suggested_local', {ip:localip});
+		}
+	});
+} 
+
+function testRoundtrip()
+{
+	console.log("Testing round trip");
+	socket.emit("echo", { timestamp : new Date().getTime() });
+}
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false); 
+
+function ZigPluginLoaded()
+{
+	Zig.init(document.getElementById("ZigPlugin"));
+	Zig.SingleUser.controls.AddControl(cursorFader);
+	Zig.SingleUser.controls.AddControl(pushDetector);
+
+	Zig.SingleUser.onUserEngaged = function(user) { $(".showinsession").fadeIn(); };
+	Zig.SingleUser.onUserDisengaged = function(user) { $(".showinsession").fadeOut(); };
+
+}
+
+function positionInParent(element, posX, posY) {
+	element.style.left = (posX * element.parentNode.offsetWidth - (element.offsetWidth / 2)) + "px";
+	element.style.top = (posY * element.parentNode.offsetHeight - (element.offsetHeight / 2)) + "px";
+}
+
+  function handleFileSelect(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+
+    files = evt.dataTransfer.files;
+
+	getSongs(files);
+	
+    for (var i = 0, f; f = files[i]; i++) {
+      //output.push('<li><strong>', f.name, '</strong> (', f.type || 'n/a', ') - ',
+       //           f.size, ' bytes, last modified: ',
+        //          f.lastModifiedDate.toLocaleDateString(), '</li>');
+		//$("#thelist").append($("<li>").text(f.name));
+    }
+    
+  }
+
+  function handleDragOver(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+  }
+  
+  function canPlay(type){
+        var a = document.createElement('audio');
+        return !!(a.canPlayType && a.canPlayType(type).replace(/no/, ''));
+      }
+  
+  function parseFile(file, callback){
+        if(localStorage[file.fileName]) return callback(JSON.parse(localStorage[file.fileName]));
+		console.log("Parsing " + file.fileName);
+        ID3v2.parseFile(file,function(tags){
+          //to not overflow localstorage
+          localStorage[file.fileName] = JSON.stringify({
+            Title: tags.Title,
+            Artist: tags.Artist,
+            Album: tags.Album,
+            Genre: tags.Genre
+          });
+          callback(tags);
+        })
+      }
+  
+  
+    function geturl(f) {
+	var url;
+    if(window.createObjectURL){
+	  url = window.createObjectURL(f)
+	}else if(window.createBlobURL){
+	  url = window.createBlobURL(f)
+	}else if(window.URL && window.URL.createObjectURL){
+	  url = window.URL.createObjectURL(f)
+	}else if(window.webkitURL && window.webkitURL.createObjectURL){
+	  url = window.webkitURL.createObjectURL(f)
+	}
+	return url;
+  }
+
+  
+	function getSongs(files){
+        var queue = [];
+        var mp3 = canPlay('audio/mpeg;'), ogg = canPlay('audio/ogg; codecs="vorbis"');
+        
+		for(var i = 0; i < files.length; i++) {
+			var file = files[i];
+			var path = file.webkitRelativePath || file.mozFullPath || file.fileName;
+			if (path.indexOf('.AppleDouble') != -1) {
+				// Meta-data folder on Apple file systems, skip
+				continue;
+			}         
+	  
+			var size = file.size || file.fileSize || 4096;
+			if(size < 4095) { 
+				// Most probably not a real MP3
+				continue;
+			}
+ 
+			if(file.fileName.indexOf('mp3') != -1) {
+				if(mp3) {
+					queue.push(file);
+				}
+			}
+          
+			if(file.fileName.indexOf('ogg') != -1  || file.fileName.indexOf('oga') != -1){
+				if(ogg){
+					queue.push(file);
+				}
+			}
+        }
+	
+		var process = function() {
+          if(queue.length){
+            
+            var f = queue.shift();
+			var t2 = guessSong(f.webkitRelativePath || f.mozFullPath || f.fileName);
+			
+			var url = geturl(f);
+			
+            parseFile(url,function(tags){
+              console.log(tags); 
+			  $("#thelist").append($("<li>").text(t2.Title));
+			});
+						
+
+			
+			  /*
+              var tr = document.createElement('tr');
+              var t2 = guessSong(f.webkitRelativePath || f.mozFullPath || f.fileName); 
+              //it should be innerText/contentText but its annoying.
+              var td = document.createElement('td');
+              td.innerHTML = tags.Title || t2.Title;
+              tr.appendChild(td);
+              
+              var td = document.createElement('td');
+              td.innerHTML = tags.Artist || t2.Artist;
+              tr.appendChild(td);
+              
+              var td = document.createElement('td');
+              td.innerHTML = tags.Album || t2.Album;
+              tr.appendChild(td);
+              
+              var td = document.createElement('td');
+              td.innerHTML = tags.Genre || "";
+              tr.appendChild(td);
+              tr.onclick = function(){
+                var pl = document.createElement('tr');
+                var st = document.createElement('td');
+                st.innerHTML = tags.Title || t2.Title;
+                pl.appendChild(st);
+                $("playtable").appendChild(pl);
+                pl.file = f;
+                pl.className = 'visible';
+                pl.onclick = function(e){
+                  if(e && e.button == 1){
+                    pl.parentNode.removeChild(pl);
+                  }else{
+                    var url;
+                    if(window.createObjectURL){
+                      url = window.createObjectURL(f)
+                    }else if(window.createBlobURL){
+                      url = window.createBlobURL(f)
+                    }else if(window.URL && window.URL.createObjectURL){
+                      url = window.URL.createObjectURL(f)
+                    }else if(window.webkitURL && window.webkitURL.createObjectURL){
+                      url = window.webkitURL.createObjectURL(f)
+                    }
+                    
+                    $("player").src = url;
+                    $("player").play();
+                    for(var i = document.querySelectorAll('.playing'), l = i.length; l--;){
+                      i[l].className = '';
+                    }
+                    pl.className += ' playing';
+                    currentSong = pl;
+                  }
+                }
+                if($("playtable").childNodes.length == 1) pl.onclick();
+              }
+              $('songtable').appendChild(tr);
+              process();*/
+            //}) 
+            var lq = queue.length;
+            setTimeout(function(){
+              if(queue.length == lq){
+                process();
+              }
+            },300);
+          }
+        }
+        process();
+	}
+  
+</script>
+
+<style>
+#cursorArea {
+	width: 	600;
+	height: 500;
+	margin: auto;
+	border:	3px solid darkblue;
+	overflow:hidden;
+	position:relative;
+}
+
+#cursorArea.pushed {
+	border:	5px solid red;
+}
+
+#cursor {
+	width : 30;
+	height : 30;
+	border:	3px solid darkblue;
+	background-color: white;
+	opacity: .3;
+	position:absolute;
+}
+
+#cursor.pushed {
+	opacity: 1;
+}
+
+#cursorCenter {
+	width:	15;
+	height: 15;
+	border:	3px solid darkblue;
+	background-color: lightblue;
+	position:absolute;
+}
+
+#cursorCenter.pushed {
+	border:	3px solid green;
+	background-color: yellow;
+	opacity: .4;
+}
+
+.showinsession {
+	display: none
+}
+
+#scroller ul {
+	list-style:none;
+	padding:0;
+	margin:0;
+	width:100%;
+	text-align:left;
+}
+
+#scroller li {
+	padding:0 10px;
+	height:40px;
+	line-height:40px;
+	border-bottom:1px solid #ccc;
+	border-top:1px solid #fff;
+	background-color:#fafafa;
+	font-size:14px;
+}
+
+
+		/*** pop-up div to cover entire area ***/
+	    .divModalDialog  {
+	        position:fixed;
+		    top:0;
+		    left:0;
+		    width:100%;
+		    height:100%;
+		    /*! important !*/
+		    display:none;
+		    /* last attribute set darkness on scale: 0...1.0 */
+		    background-color:rgba(0,0,0,0.9);
+		    text-align:center;
+		    //z-index:101;
+	    }
+	    
+	    /*** ! target attribute does the job ! ***/
+	    .divModalDialog:target  { display:block; }
+        
+        /*** virtual frame containing controls, image and caption ***/
+	    .divModalDialog div  {
+	       /* either absolute or fixed */
+		    position:absolute;
+		    top:5%;
+		    width:100%;
+		    height:80%;
+            /* rounded corners */
+	        -moz-border-radius: 10px;
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+            //z-index:102;
+	    }
+	    
+        /*** header used as main image caption  ***/
+        .divModalDialog div h1  {
+            width:100%;
+            font-size:2em;
+            color:#dadada;
+            //z-index:103;
+            /* add shadows to text */
+            -moz-text-shadow: 10px 3px 4px 6px rgba(0,0,0,0.9);  
+            -webkit-text-shadow: 3px 4px 6px rgba(0,0,0,0.9);  
+            text-shadow: 10px 4px 6px rgba(0,0,0,0.9); 
+        }	    
+
+        /*** main image style ***/
+        .divModalDialog img {
+            padding:20px;
+            z-index:105;
+            border: solid 1px gray;
+            /* rounded corners */
+        	-moz-border-radius: 10px;
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+            background: -moz-linear-gradient(top, #dadada, 
+                                                    #505050 5%, 
+                                                    #bababa 50%, 
+                                                    #303030 50%, 
+                                                    #101010);
+            background: -webkit-gradient(linear, center top, center bottom, 
+                                                    from(#dadada), 
+                                                    color-stop(0.05, #505050), 
+                                                    color-stop(0.5, #bababa), 
+                                                    color-stop(0.5, #303030), 
+                                                    to(#101010));
+        } 
+
+        /*** navigation controls style: highest z-index ! ***/
+	    .divModalDialog ul a  {
+		    padding:5px;
+		    font-size:3em;
+		    font-weight:bold;
+		    color:Yellow;
+		    text-decoration:none;
+		    border: solid 1px Gray;
+		    /* rounded corners */
+		    -moz-border-radius: 10px;
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+            z-index:500;
+	    }
+		
+		#qrcode {
+			border : solid 10px white;
+			width : auto;
+			height : auto;
+			margin-left : auto;
+			margin-right : auto;
+			position : relative;
+			//display:inline;
+	        //-moz-border-radius: 0px;
+            //-webkit-border-radius: 0px;
+            //border-radius: 0px;
+			}
+
+</style>
+</head>
+
+<body>
+
+<div id="cursorArea" class="pushable">
+	<div id="scroller">
+		<ul id="thelist">
+			
+			<!--<li>Pretty row 1</li>
+			<li>Pretty row 2</li>
+			<li>Pretty row 3</li>
+			<li>Pretty row 4</li>
+			<li>Pretty row 5</li>
+			<li>Pretty row 6</li>
+			<li>Pretty row 7</li>
+			<li>Pretty row 8</li>
+			<li>Pretty row 9</li>
+			<li>Pretty row 10</li>
+			<li>Pretty row 11</li>
+			<li>Pretty row 12</li>
+			<li>Pretty row 13</li>
+			<li>Pretty row 14</li>
+			<li>Pretty row 15</li>
+			<li>Pretty row 16</li>
+			<li>Pretty row 17</li>
+			<li>Pretty row 18</li>
+			<li>Pretty row 19</li>
+			<li>Pretty row 20</li>
+			<li>Pretty row 21</li>
+			<li>Pretty row 22</li>
+			<li>Pretty row 23</li>
+			<li>Pretty row 24</li>
+			<li>Pretty row 25</li>
+			<li>Pretty row 26</li>
+			<li>Pretty row 27</li>
+			<li>Pretty row 28</li>
+			<li>Pretty row 29</li>
+			<li>Pretty row 30</li>
+			<li>Pretty row 31</li>
+			<li>Pretty row 32</li>
+			<li>Pretty row 33</li>
+			<li>Pretty row 34</li>
+			<li>Pretty row 35</li>
+			<li>Pretty row 36</li>
+			<li>Pretty row 37</li>
+			<li>Pretty row 38</li>
+			<li>Pretty row 39</li>
+			<li>Pretty row 40</li>-->
+		</ul> 
+	</div>
+	<div id="cursor" class="showinsession pushable"></div>
+	<div id="cursorCenter" class="showinsession pushable"></div>
+</div>
+
+
+<!--1st LINK -->
+
+    <div id="qrModalDialog" class="divModalDialog">
+        <div>
+            <h1>Scan in QR reader</h1>
+			<div style="background-color : white; width: auto; margin : auto">
+				<div id="qrcode"/></div>
+			</div>
+        </div>
+    </div>
+
+	<p><a href="#qrModalDialog">QR Code</a></p>
+
+	<p><input type="button" onclick="testRoundtrip()" value="Test Roundtrip"><div id="roundtrip"></div></p>
+	
+<!-- ZigJS plugin 
+<div id="pluginContainer">
+	<object id="ZigPlugin" type="application/x-zig" width="0" height="0">
+		<param name="onload" value="ZigPluginLoaded" />
+	</object>
+</div> 
+-->
+</body>
+</html>

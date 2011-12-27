@@ -3,6 +3,7 @@
 
 <script type="text/javascript" src="iscroll.js"></script>
 
+<script src="/socket.io/socket.io.js"></script>
 
 <script type="text/javascript">
 
@@ -10,10 +11,18 @@ var medialibraryScroller;
 var playlistScroller;
 var userlistScroller;
 
+var socket;
+
 function loaded() {
 	medialibraryScroller = new iScroll('medialibraryScroller');
 	playlistScroller = new iScroll('playlistScroller');
 	userlistScroller = new iScroll('userlistScroller');
+	
+	var uniqueid = Math.floor(Math.random() * 100000);
+	socket = io.connect('http://zig.tv');
+	socket.on('connect', function () {
+		socket.emit("startRoom", {id: uniqueid, name : "Moshe"});
+	});
 }
 
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);

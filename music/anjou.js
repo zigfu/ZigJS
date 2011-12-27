@@ -4,21 +4,26 @@ var socket;
 	
 anjou = {
 
-	connect: function (url){
+	connect: function (url, callbacks){
 		socket = io.connect(url);	
 
 		socket.on('connect', function (){
 			socket.emit('controllerConnected',{id: roomid, name : currentName, location : currentLocation});
 		});
 
+		for (var cb in callbacks) {
+			if (callbacks.hasOwnProperty(cb)) {
+				socket.on(cb, callbacks[cb]);
+			}
+		}		
 		
-		socket.on('roomList', function(data){
+		/*socket.on('roomList', function(data){
 			for (var key in data) {
 				if (data.hasOwnProperty(key)) {
-					processRoom(key, data[key]);
+					anjou.processRoom(key, data[key]);
 				}	
 			}
-		});
+		});*/
 		
 		socket.on('try_local', function(data){ 
 			local_socket = io.connect('http://'+data['ip']);
@@ -35,13 +40,7 @@ anjou = {
 	
 	emit: function(msg, data){
 		socket.emit(msg,data);
-	}
-}
-  
-function processRoom(key, metadata)
-{
-	li = document.createElement('li');
-	li.innerHTML = "key: " + key + " md.name: " + metadata.name;
-	li.addEventListener("click", function() { socket.emit('joinRoom',{id: key}); });
-	document.getElementById('roomlistList').appendChild(li);
+	},
+	
+	//processRoom : function(key, md) {}
 }
