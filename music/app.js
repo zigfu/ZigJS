@@ -248,6 +248,19 @@ io.sockets.on('connection', function (socket) {
  	io.sockets.in(socket.roomid+'_server').emit('touchend', data);
  });
  
+ 
+  socket.on('ax', function (data) {
+ 	io.sockets.in(socket.roomid+'_server').emit('touchstart', data);
+ });
+ 
+ socket.on('ar', function (data) {
+ 	io.sockets.in(socket.roomid+'_server').emit('touchmove', data);
+ });
+ 
+ socket.on('or', function(data){
+ 	io.sockets.in(socket.roomid+'_server').emit('touchend', data);
+ });
+ 
  socket.on('localhost_connection', function(data) {
 	var localaddress = socket.handshake.address;
 	//after a successful connection from localhost we need to report the local ip address back
