@@ -326,8 +326,9 @@ window.ondevicemotion = function(event) {
    //document.getElementById("arrotation").innerHTML = arAlpha + ' ' + arBeta + ' ' + arGamma;
     socket.emit('ar', {alpha:rotation.alpha, beta:rotation.beta, gamma:rotation.gamma});
   }
+}
 
-  window.ondeviceorientation = function(event) {
+window.ondeviceorientation = function(event) {
   //oalpha = Math.round(event.alpha);
   //obeta = Math.round(event.beta);
   //ogamma = Math.round(event.gamma);
