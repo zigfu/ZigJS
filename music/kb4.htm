@@ -240,8 +240,39 @@ $('search').addEventListener("DOMCharacterDataModified", textinput, false);
 	
 	callbacks = { 'roomList' : onRoomList,
 				  'roomJoined' : onRoomJoined }
-	anjou.connect('http://'+document.location.hostname, callbacks);
+	anjou.connect('http://'+document.location.hostname, callbacks, onconnect);
 	
+	
+}
+
+
+function onconnect()
+{
+	
+window.ondevicemotion = function(event) {
+  ax = event.accelerationIncludingGravity.x;
+  ay = event.accelerationIncludingGravity.y;
+  az = event.accelerationIncludingGravity.z;
+ // document.getElementById("acceleration").innerHTML = ax + ' ' + ay + ' ' + az;
+  
+  socket.emit('ax', {x:ax, y:ay, z:az});
+  
+  rotation = event.rotationRate;
+  if (rotation != null) {
+    //arAlpha = Math.round(rotation.alpha);
+    //arBeta = Math.round(rotation.beta);
+    //arGamma = Math.round(rotation.gamma);
+   //document.getElementById("arrotation").innerHTML = arAlpha + ' ' + arBeta + ' ' + arGamma;
+    socket.emit('ar', {alpha:rotation.alpha, beta:rotation.beta, gamma:rotation.gamma});
+  }
+}
+
+window.ondeviceorientation = function(event) {
+  //oalpha = Math.round(event.alpha);
+  //obeta = Math.round(event.beta);
+  //ogamma = Math.round(event.gamma);
+ socket.emit('or', {alpha:event.alpha, beta:event.beta, gamma:event.gamma});
+}
 }
 function consoleLocation(position)
 {  
@@ -310,30 +341,6 @@ anjou.processRoom = processRoom;
 	
 	
 
-window.ondevicemotion = function(event) {
-  ax = event.accelerationIncludingGravity.x;
-  ay = event.accelerationIncludingGravity.y;
-  az = event.accelerationIncludingGravity.z;
- // document.getElementById("acceleration").innerHTML = ax + ' ' + ay + ' ' + az;
-  
-  socket.emit('ax', {x:ax, y:ay, z:az});
-  
-  rotation = event.rotationRate;
-  if (rotation != null) {
-    //arAlpha = Math.round(rotation.alpha);
-    //arBeta = Math.round(rotation.beta);
-    //arGamma = Math.round(rotation.gamma);
-   //document.getElementById("arrotation").innerHTML = arAlpha + ' ' + arBeta + ' ' + arGamma;
-    socket.emit('ar', {alpha:rotation.alpha, beta:rotation.beta, gamma:rotation.gamma});
-  }
-}
-
-window.ondeviceorientation = function(event) {
-  //oalpha = Math.round(event.alpha);
-  //obeta = Math.round(event.beta);
-  //ogamma = Math.round(event.gamma);
- socket.emit('or', {alpha:event.alpha, beta:event.beta, gamma:event.gamma});
-}
 
 </script>
 

@@ -4,11 +4,12 @@ var socket;
 	
 anjou = {
 
-	connect: function (url, callbacks){
+	connect: function (url, callbacks, onconnectcb){
 		socket = io.connect(url);	
 
 		socket.on('connect', function (){
 			socket.emit('controllerConnected',{id: roomid, name : currentName, location : currentLocation});
+			onconnectcb();
 		});
 
 		for (var cb in callbacks) {
