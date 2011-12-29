@@ -236,6 +236,18 @@ io.sockets.on('connection', function (socket) {
  console.log('remote connection has local server: ' + data['ipaddr'] + ':' + data['port']);
  });
  
+ socket.on('touchstart', function (data) {
+ 	io.sockets.in(socket.roomid+'_server').emit('touchstart', data);
+ });
+ 
+ socket.on('touchmove', function (data) {
+ 	io.sockets.in(socket.roomid+'_server').emit('touchmove', data);
+ });
+ 
+ socket.on('touchend', function(data){
+ 	io.sockets.in(socket.roomid+'_server').emit('touchend', data);
+ });
+ 
  socket.on('localhost_connection', function(data) {
 	var localaddress = socket.handshake.address;
 	//after a successful connection from localhost we need to report the local ip address back

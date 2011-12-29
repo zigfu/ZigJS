@@ -15,11 +15,18 @@ var playlistScroller;
 var userlistScroller;
 var playercontrolsScroller;
 var socket;
-
+var cx = 0; 
+var cy = 0;
+var startx = 0;
+var starty = 0;
+var factor = 2.0;
 var currentName = localStorage.getItem("roomName");
 if (null == currentName) currentName = "[TV]";	
 
 function loaded() {
+	document.getElementById('remotecursor').style.top = cy +'px';
+	document.getElementById('remotecursor').style.left = cx +'px';
+
 	medialibraryScroller = new iScroll('medialibraryScroller');
 	playlistScroller = new iScroll('playlistScroller');
 	userlistScroller = new iScroll('userlistScroller');
@@ -38,6 +45,31 @@ function loaded() {
 	socket.on('input', function (data) {
 		document.getElementById('textinputhere').innerHTML = data['value'];
 	});	
+	
+	socket.on('touchstart', function (data){
+		document.getElementById('remotecursor').style.backgroundColor = "#00FF00";
+		cy = parseInt(document.getElementById('remotecursor').style.top);
+		cx = parseInt(document.getElementById('remotecursor').style.left);
+		starty = parseInt(document.getElementById('remotecursor').style.top);
+		startx = parseInt(document.getElementById('remotecursor').style.left);
+		
+		console.log('touchstart. cx: ' + cx + ' cy: ' + cy);
+		
+	});
+	
+	socket.on('touchmove', function (data){
+	  cx = cx - factor*data['dx'];
+	  cy = cy - factor*data['dy'];
+	  
+	  console.log('touchmove. cx: ' + cx + ' cy: ' + cy);
+	  console.log('touchmove2. cx2: ' + (startx + factor*data['currx']) + ' cy: ' + (starty + factor*data['curry']));
+		document.getElementById('remotecursor').style.top = starty + factor*data['curry'] +'px';
+		document.getElementById('remotecursor').style.left = startx + factor*data['currx'] +'px';
+	});
+	socket.on('touchend', function (){
+	console.log('touchend');
+		document.getElementById('remotecursor').style.backgroundColor = "#BBFFBB";
+	});
 	
 	roomurl = 'http://'+document.location.hostname+"/?" + uniqueid;
 	append_qrcode(4,"qrcode",roomurl);
@@ -154,6 +186,15 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 }
 
 
+#remotecursor{
+	display: block;
+	background-color: #BBFFBB;
+	width: 10px;
+	height: 10px;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
 
 
 
@@ -449,5 +490,6 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
         </div>
     </div>
 	
+	<div id="remotecursor" class="remotecursor"></div>
 </body>
 </html>

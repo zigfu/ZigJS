@@ -166,7 +166,33 @@ function onRoomList(data) {
 		}	
 	}
 }
+var startx, starty;
+var curx, cury;
+var prevx, prevy;
+function ontouchstart(event)
+{
+	touch = event.touches[0];
+	startx = touch.pageX;
+	starty = touch.pageY;
+	prevx = 0;
+	prevy = 0;
+	socket.emit('touchstart', {x: startx, y: starty});
+}
+function ontouchmove(event)
+{
+	
+	touch = event.touches[0];
+	curx = touch.pageX - startx;
+	cury = touch.pageY - starty;
+	socket.emit('touchmove', {dx:prevx - curx,dy:prevy - cury, currx: curx, curry: cury});
+	prevx = curx;
+	prevy = cury;
+}
 
+function ontouchend(event)
+{
+	socket.emit('touchend');
+}
 function onRoomJoined(data)
 {
 	// did it work?
@@ -174,7 +200,12 @@ function onRoomJoined(data)
 	if (success) {
 		// hide room list
 		document.getElementById("roomlist").style.display = "none";
-		document.getElementById("touchsurface").style.display = "inline";
+		document.getElementById("touchsurface").style.display = "block";
+		surface = document.getElementById("touchsurface");
+		surface.addEventListener("touchstart", ontouchstart,false);
+		surface.addEventListener("touchmove", ontouchmove,false);
+		surface.addEventListener("touchend", ontouchend,false);
+		
 		document.getElementById("errormsg").innerHTML = "Successfully joined!";
 	} else {
 		document.getElementById("errormsg").innerHTML = data.error;
@@ -242,7 +273,8 @@ function sendLoc(){
 	}
 }
 
-function stopScrolling( touchEvent ) { touchEvent.preventDefault(); }
+function stopScrolling( touchEvent ) { 
+touchEvent.preventDefault(); }
 document.addEventListener( 'touchstart' , stopScrolling , false );
 document.addEventListener( 'touchmove' , stopScrolling , false );
 	
