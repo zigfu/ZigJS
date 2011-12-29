@@ -20,8 +20,38 @@ var cy = 0;
 var startx = 0;
 var starty = 0;
 var factor = 2.0;
+var mfactor = 10.0;
 var currentName = localStorage.getItem("roomName");
 if (null == currentName) currentName = "[TV]";	
+var controltoggle = 'Motion';
+
+var alpha, beta, gamma;
+var dalpha, dbeta, dgamma;
+var ax, ay, az;
+var starta, startb, startg;
+
+function recalibrate()
+{
+	starta = alpha;
+	startb = beta;
+	startg = gamma;
+	starty = parseInt(document.height/2);
+	startx = parseInt(document.width/2);
+	document.getElementById('remotecursor').style.top = starty +'px';
+	document.getElementById('remotecursor').style.left = startx +'px';
+}
+function move()
+{
+if (controltoggle=='Motion')
+{
+cura = alpha-starta;
+curb = beta -startb;
+curg = gamma-startg;
+
+document.getElementById('remotecursor').style.top = starty - mfactor*curb +'px';
+document.getElementById('remotecursor').style.left = startx - mfactor*cura +'px';
+}
+}
 
 function loaded() {
 	document.getElementById('remotecursor').style.top = cy +'px';
@@ -46,7 +76,49 @@ function loaded() {
 		document.getElementById('textinputhere').innerHTML = data['value'];
 	});	
 	
+	
+	socket.on('or', function (data) {
+		alpha = data['alpha'];
+		beta = data['beta'];
+		gamma = data['gamma'];
+		document.getElementById('alpha').innerHTML = alpha;
+		document.getElementById('beta').innerHTML = beta;
+		document.getElementById('gamma').innerHTML = gamma;
+		move();
+	});	
+	socket.on('ar', function (data) {
+		dalpha = data['alpha'];
+		dbeta = data['beta'];
+		dgamma = data['gamma'];
+		document.getElementById('dalpha').innerHTML = dalpha;
+		document.getElementById('dbeta').innerHTML = dbeta;
+		document.getElementById('dgamma').innerHTML = dgamma;
+		
+	});		
+	socket.on('ax', function (data) {
+		ax = data['x'];
+		ay = data['y'];
+		az = data['z'];
+		document.getElementById('ax').innerHTML = ax;
+		document.getElementById('ay').innerHTML = ay;
+		document.getElementById('az').innerHTML = az;
+	});		
+	
+	socket.on('controltoggle', function(data) {
+		controltoggle = data['value'];
+		if (controltoggle == 'Touch')
+		{
+		document.getElementById('remotecursor').style.backgroundColor = "#BBFFBB";
+		}
+		else
+		{
+		document.getElementById('remotecursor').style.backgroundColor = "#FFBBBB";
+		}
+	});
+	
 	socket.on('touchstart', function (data){
+		if (controltoggle == 'Touch')
+		{
 		document.getElementById('remotecursor').style.backgroundColor = "#00FF00";
 		cy = parseInt(document.getElementById('remotecursor').style.top);
 		cx = parseInt(document.getElementById('remotecursor').style.left);
@@ -54,10 +126,17 @@ function loaded() {
 		startx = parseInt(document.getElementById('remotecursor').style.left);
 		
 		console.log('touchstart. cx: ' + cx + ' cy: ' + cy);
-		
+		}
+		else if  (controltoggle == 'Motion')
+		{
+			
+			document.getElementById('remotecursor').style.backgroundColor = "#FF0000";
+		}
 	});
 	
 	socket.on('touchmove', function (data){
+	if (controltoggle == 'Touch')
+		{
 	  cx = cx - factor*data['dx'];
 	  cy = cy - factor*data['dy'];
 	  
@@ -65,10 +144,20 @@ function loaded() {
 	  console.log('touchmove2. cx2: ' + (startx + factor*data['currx']) + ' cy: ' + (starty + factor*data['curry']));
 		document.getElementById('remotecursor').style.top = starty + factor*data['curry'] +'px';
 		document.getElementById('remotecursor').style.left = startx + factor*data['currx'] +'px';
+		}
 	});
 	socket.on('touchend', function (){
 	console.log('touchend');
+		if (controltoggle == 'Touch')
+		{
 		document.getElementById('remotecursor').style.backgroundColor = "#BBFFBB";
+		}
+		else if  (controltoggle == 'Motion')
+		{
+			recalibrate();
+			document.getElementById('remotecursor').style.backgroundColor = "#FFBBBB";
+		}
+		
 	});
 	
 	roomurl = 'http://'+document.location.hostname+"/?" + uniqueid;
@@ -188,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 #remotecursor{
 	display: block;
-	background-color: #BBFFBB;
+	background-color: #FFBBBB;
 	width: 10px;
 	height: 10px;
 	position: absolute;
@@ -380,7 +469,11 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 	<div id="medialibraryScroller" class="scrollerContainer">
 		<div class="scroller">
 			<ul id="medialibraryList">
-				<li>Pretty row 1</li>
+				<li><table width="100%">
+					<tr width = "100%"><td>ax,ay,az:</td><td id='ax'></td><td id='ay'></td><td id='az'></td></tr>
+					<tr width = "100%"><td>da,db,dg:</td><td id='dalpha'></td><td id='dbeta'></td><td id='dgamma'></td></tr>
+					<tr width = "100%"><td>ra,rb,rg:<td id='alpha'></td><td id='beta'></td><td id='gamma'></td></tr>
+				</table></li>
 				<li>Pretty row 2</li>
 				<li>Pretty row 3</li>
 				<li>Pretty row 4</li>

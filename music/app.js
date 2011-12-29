@@ -250,15 +250,18 @@ io.sockets.on('connection', function (socket) {
  
  
   socket.on('ax', function (data) {
- 	io.sockets.in(socket.roomid+'_server').emit('touchstart', data);
+ 	io.sockets.in(socket.roomid+'_server').emit('ax', data);
  });
  
  socket.on('ar', function (data) {
- 	io.sockets.in(socket.roomid+'_server').emit('touchmove', data);
+ 	io.sockets.in(socket.roomid+'_server').emit('ar', data);
  });
  
  socket.on('or', function(data){
- 	io.sockets.in(socket.roomid+'_server').emit('touchend', data);
+ 	io.sockets.in(socket.roomid+'_server').emit('or', data);
+ });
+ socket.on('controltoggle', function(data){
+ 	io.sockets.in(socket.roomid+'_server').emit('controltoggle', data);
  });
  
  socket.on('localhost_connection', function(data) {
