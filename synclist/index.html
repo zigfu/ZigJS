@@ -1,0 +1,89 @@
+<html>
+<head>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script src="synclist-client.js"></script>
+
+<script type="text/javascript">
+
+var mylist;
+
+function addRow(id, data) {
+	var table = document.getElementById('thelist');
+ 
+	var rowCount = table.rows.length;
+	var row = table.insertRow(rowCount);
+
+	var cell1 = row.insertCell(0);
+	cell1.innerHTML = "<div>" + id + "</div>";
+
+	var cell2 = row.insertCell(1);
+	cell2.innerHTML = "<div>" + data + "</div>";
+
+	var cell3 = row.insertCell(2);
+	var deleteMe = document.createElement('a');
+	deleteMe.innerHTML = "X";
+	deleteMe.addEventListener("click", function(theid) { return function() { mylist.remove(theid); }}(id));
+	cell3.appendChild(deleteMe);
+}
+
+function removeRow(id) {
+
+}
+
+function clearTable() {
+
+}
+
+function loaded() {
+	socket = io.connect('http://'+document.location.hostname);
+
+	socket.on('connect', function () {
+		console.log("Connected to node.js server");
+		
+		mylist = synclist.subscribe(socket, "mytest", {
+			add : function(id, data) {
+				console.log("List: Item added (" + id + ", " + data + ")");
+				addRow(id, data);
+			},
+			remove : function(id) {
+				console.log("List: Item removed (" + id + ")");
+				removeRow(id);
+			},
+			clear : function() {
+				console.log("List: Cleared");
+				clearTable();
+			}
+		});
+	});
+	
+	socket.on("test", function(data) {
+		console.log("Received test from " + data.from);
+	});
+}
+
+function doadd() {
+	mylist.add(document.getElementById("toadd").value);
+}
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
+</script>
+
+</head>
+
+<body>
+
+<table id="thelist">
+<tr>
+	<th>ID</th>
+	<th>Data</th>
+	<th>X</th>
+</tr>
+</table>
+
+<input type='text' id='toadd'> <input type='button' value='Add' onclick='doadd()'>
+
+</body>
+</html>

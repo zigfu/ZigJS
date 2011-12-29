@@ -1,0 +1,3 @@
+- add existing id: either fail it, or replace it
+- smarter way to choose id automatically (best is if server does it)
+- easy way to do permissions (permissions = create/destroy/add/remove/clear)
