@@ -5,7 +5,8 @@ var app = require('http').createServer(handler)
   , net = require('net')
   , useragent = require('./useragent')
   , location = require('./location')
-  , synclist = require('synclist').listen(io);
+  , synclist = require('synclist').listen(io)
+  , zmote = require('zmote').listen(io);
   
 app.listen(80);
 
@@ -26,7 +27,13 @@ function doJoin(socket, roomid) {
 		socket.join(socket.roomid);
 
 		var joining = roomslist.get(roomid);
-		socket.emit("roomJoined", {success : true, userlist : joining.userlist, playlist : joining.playlist, medialist : joining.medialist});
+		socket.emit("roomJoined", {
+			success : true, 
+			userlist : joining.userlist, 
+			playlist : joining.playlist, 
+			medialist : joining.medialist,
+			zmoteid : joining.zmoteid,
+		});
 		
 		var userlist = synclist.open(joining.userlist);
 		var id = userlist.add({ name : socket.name });
@@ -104,11 +111,6 @@ function handler (request, response) {
 }
 
 io.sockets.on('connection', function (socket) {
-	console.log("connection made sdjfuhsdkjfh");
-});
-
-
-io.sockets.on('connection', function (socket) {
 	console.log("connection made");
 	
 	// this is sent by mobile controllers
@@ -152,6 +154,8 @@ io.sockets.on('connection', function (socket) {
 		medialist.add("Song 2");
 		medialist.add("Song 3");
 
+		var zmoteOmercy = zmote.register(socket.roomid + ":zmote", socket);
+
 		var newRoom = {
 			roomid : socket.roomid,
 			name : data['name'], 
@@ -159,7 +163,8 @@ io.sockets.on('connection', function (socket) {
 			playlist : playlist.id,
 			userlist : userlist.id,
 			medialist : medialist.id,
-			};
+			zmoteid : socket.roomid + ":zmote",
+		};
 
 		roomslist.add(newRoom, socket.roomid);
 		

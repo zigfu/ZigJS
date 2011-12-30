@@ -11,6 +11,7 @@
 
 
 <script src="/synclist-client.js"></script>
+<script src="/zmote-client.js"></script>
 
 <script type="text/javascript">
 
@@ -21,6 +22,7 @@ var playercontrolsScroller;
 var socket;
 
 var userlist;
+var zmoteReceiver;
 
 var currentName = localStorage.getItem("roomName");
 if (null == currentName) currentName = "[TV]";	
@@ -38,6 +40,13 @@ function gotLocation(position) {
 function noLocation() {
 	// bummer
 }
+
+
+function positionInParent(element, posX, posY) {
+	element.style.left = (posX * element.parentNode.offsetWidth - (element.offsetWidth / 2)) + "px";
+	element.style.top = (posY * element.parentNode.offsetHeight - (element.offsetHeight / 2)) + "px";
+}
+
 function loaded() {
 	medialibraryScroller = new iScroll('medialibraryScroller');
 	playlistScroller = new iScroll('playlistScroller');
@@ -63,6 +72,13 @@ function loaded() {
 		userlist.onadd = function() { userlistScroller.refresh(); }
 		userlist.onremove = function() { userlistScroller.refresh(); }
 		userlist.onclear = function() { userlistScroller.refresh(); }
+
+		zmoteReceiver = zmote.receiver(socket);
+		zmoteReceiver.onconnect = function(clientid) { console.log("Zmote connected: " + clientid); };
+		zmoteReceiver.ondisconnect = function() { console.log("Zmote disconnected"); };
+		//zmoteReceiver.onorientation = function(a,b,g) { console.log("Orientation:" + a); };
+		var thecursor = document.getElementById("realcursor")
+		zmoteReceiver.oncursor = function(cursor) { return function(x,y) { positionInParent(cursor, x, y); }} (thecursor) ;
 	});
 	
 	socket.on('userJoined', function (data) {
@@ -107,6 +123,17 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 
  </script>
+
+<style>
+
+#realcursor {
+	width : 28;
+	height : 35;
+	position:absolute;
+	background-image : url("i/hand-pointer.png");
+}
+
+</style>
 
 </head>
 <body>
@@ -184,7 +211,11 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 				<div id="qrcode"/></div>
 			</div>
         </div>
-    </div>
+</div>
+
+<div id="realcursor" class="showinsession">
+
+</div>
 	
 </body>
 </html>

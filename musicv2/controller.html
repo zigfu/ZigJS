@@ -102,6 +102,7 @@
 <script type="text/javascript" src="iscroll.js"></script> 
 <script src="/socket.io/socket.io.js"></script>
 <script src="/synclist-client.js"></script>
+<script src="/zmote-client.js"></script>
 <script>
 
 var roomlistScroller;
@@ -111,6 +112,8 @@ var roomslist;
 var playlist;
 var userlist;
 var medialist;
+
+var zmoteController;
 
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
 
@@ -161,38 +164,17 @@ function textinput(evt)
 	anjou.emit('input',{value: evt.target.value});
 }
 
+function positionInParent(element, posX, posY) {
+	element.style.left = (posX * element.parentNode.offsetWidth - (element.offsetWidth / 2)) + "px";
+	element.style.top = (posY * element.parentNode.offsetHeight - (element.offsetHeight / 2)) + "px";
+}
+
+
 var currentName = localStorage.getItem("currentName");
 if (null == currentName) currentName = "[Guest]";	
 var currentLocation = [];
 	
 	
-function onRoomList(data) {
-	document.getElementById('roomlistList').innerHTML = "";
-	for (var key in data) {
-		if (data.hasOwnProperty(key)) {
-			li = document.createElement('li');
-			li.innerHTML = data[key].name;
-			li.addEventListener("click", function(thekey) { return function() { socket.emit('joinRoom',{id: thekey}); }}(key));
-			document.getElementById('roomlistList').appendChild(li);
-		}	
-	}
-}
-
-function onRoomJoined(data)
-{
-	// did it work?
-	var success = data.success;
-	if (success) {
-		// hide room list
-		document.getElementById("roomlist").style.display = "none";
-		document.getElementById("touchsurface").style.display = "inline";
-		document.getElementById("errormsg").innerHTML = "Successfully joined!";
-	} else {
-		document.getElementById("errormsg").innerHTML = data.error;
-	}
-}
-	
-
 function makegenericprinter(label) {
 	function genericprinter(id, data) {
 		if (undefined !== data) {
@@ -248,7 +230,7 @@ $('search').addEventListener("DOMCharacterDataModified", textinput, false);
 			if (success) {
 				// hide room list
 				document.getElementById("roomlist").style.display = "none";
-				document.getElementById("touchsurface").style.display = "inline";
+				document.getElementById("touchsurface").style.display = "block";
 				document.getElementById("errormsg").innerHTML = "Successfully joined!";
 
 				// register to the room specific lists
@@ -268,6 +250,12 @@ $('search').addEventListener("DOMCharacterDataModified", textinput, false);
 				medialist.onremove = makegenericprinter("Remove");
 				medialist.onclear = makegenericprinter("Clear");
 
+				// start the zmote
+				zmoteController = zmote.controller(socket);
+				//zmoteController.cursormode = zmote.cursorModes.motion;
+				zmoteController.cursormode = zmote.cursorModes.motion;
+				zmoteController.bindtouchpad("touchsurface");
+				zmoteController.start(data.zmoteid);
 
 			} else {
 				document.getElementById("errormsg").innerHTML = data.error;
