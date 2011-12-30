@@ -4,12 +4,10 @@ var app = require('http').createServer(handler)
   , path = require('path')
   , net = require('net')
   , useragent = require('./useragent')
-  , location = require('./location');
-  //, synclist = require('synclist').listen(io);
+  , location = require('./location')
+  , synclist = require('synclist').listen(io);
   
 app.listen(80);
-
-var synclist = require('synclist').listen(io);
 
 var roomslist = synclist.create("roomslist");
 roomslist.add({ name : "1337 H4xx0r room", location : "testing" }, 31337);
