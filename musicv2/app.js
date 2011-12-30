@@ -53,7 +53,7 @@ function handler (request, response) {
 	// is this a tv? or a controller?
 	var isMobile = /mobile/i.test(request.headers['user-agent']);
 	
-	var forceTv = (request.url == "?tv");
+	var forceTv = (request.url == "/?tv");
 	var forceController = (request.url[1] == '?' && !forceTv);
 	var isTv = !forceController && (forceTv || !isMobile);
 	
@@ -74,6 +74,11 @@ function handler (request, response) {
 		filePath = './controller.html';
 	}
 	
+	if (forceTv) {
+		console.log("Zig.TV: forced TV");
+		filePath = "./musicplayer.html";
+	}
+
 	// make sure query strings dont interfere with fetching from fs
 	if (filePath.indexOf('?') > -1) {
 		filePath = filePath.substr( 0, filePath.lastIndexOf('?') );
