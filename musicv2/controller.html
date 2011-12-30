@@ -126,6 +126,12 @@ if (navigator.geolocation)
 	navigator.geolocation.getCurrentPosition(consoleLocation, noLocation);
 }
 
+function testRoundtrip()
+{
+	console.log("Testing round trip");
+	socket.emit("echo", { timestamp : new Date().getTime() });
+}
+
 function runSearch(txt)
 {
 	console.log(txt);
@@ -186,6 +192,8 @@ function makegenericprinter(label) {
 	return genericprinter;
 }
 
+var max_zigtv = 0;
+var max_tv = 0;
 function loaded()
 {
 	roomlistScroller = new iScroll('roomlistScroller');
@@ -261,6 +269,29 @@ $('search').addEventListener("DOMCharacterDataModified", textinput, false);
 				document.getElementById("errormsg").innerHTML = data.error;
 			}
 		});
+		
+		socket.on('echofromzigtv', function(data){
+				var now = new Date().getTime();
+				var delta = now - data.timestamp;
+				document.getElementById("touchsurface_ztv").innerHTML = delta + "";
+				if (delta > max_zigtv)
+				{
+					max_zigtv = delta;
+					document.getElementById("touchsurface_ztv_max").innerHTML = delta + "";
+				}
+			});
+		socket.on('echofromtv', function(data){
+				var now = new Date().getTime();
+				var delta = now - data.timestamp;
+				document.getElementById("touchsurface_tv").innerHTML = delta + "";
+				if (delta > max_tv)
+				{
+					max_tv = delta;
+					document.getElementById("touchsurface_tv_max").innerHTML = delta + "";
+				}
+			});
+			setInterval("testRoundtrip()",500);
+			
 	});
 }
 
@@ -369,7 +400,10 @@ function processRoom(key, metadata)
 		</div>
 	</div>
 </div>
-<div id="touchsurface">touchsurface</div>
+<div id="touchsurface">touchsurface<br>
+<span id="touchsurface_ztv"></span> max: <span id="touchsurface_ztv_max"></span><br>
+<span id="touchsurface_tv"></span> max: <span id="touchsurface_tv_max"></span>
+</div>
 <div id="errormsg"></div>
 
 </div>	

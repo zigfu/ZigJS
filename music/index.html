@@ -140,11 +140,6 @@ function loaded() {
 	});
 } 
 
-function testRoundtrip()
-{
-	console.log("Testing round trip");
-	socket.emit("echo", { timestamp : new Date().getTime() });
-}
 
 function testRoundtrip()
 {

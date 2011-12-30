@@ -197,6 +197,8 @@ io.sockets.on('connection', function (socket) {
 		socket.broadcast.to(socket.roomid).emit('next', {name : socket.name});
 	});
 	
+	
+	
 	socket.on('suggest_local', function(data) {
 		console.log('local suggested by tv')
 		socket.get('roomid',function(err, room) {
@@ -218,7 +220,12 @@ io.sockets.on('connection', function (socket) {
 	
 	socket.on("echo", function (data) {
 		console.log("echo: " + data);
-		socket.emit("echo", data);
+		socket.emit("echofromzigtv", data);
+		socket.broadcast.to(socket.roomid).emit("pingTV",data);
+	});
+	socket.on("pongTV", function(data)
+	{
+		socket.broadcast.to(socket.roomid).emit("echofromtv",data);
 	});
 	
   socket.on('keydown', function (data) {

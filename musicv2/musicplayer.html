@@ -62,6 +62,10 @@ function loaded() {
 		socket.emit("startRoom", {id: uniqueid, name : currentName, location : currentLocation});
 	});
 		
+	socket.on('pingTV',function(data){
+		socket.emit('pongTV',data);
+	});
+		
 	socket.on('roomStarted', function(data) {
 		userlist = synclist.subscribe(socket, data.userlist);
 		userlist.bind(document.getElementById('userlistList'), function(userid, userdata) {
