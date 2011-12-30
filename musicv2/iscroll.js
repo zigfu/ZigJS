@@ -96,17 +96,7 @@ var m = Math,
 
 			// Events
 			onRefresh: null,
-			onBeforeScrollStart: function (e) { 
-			
-			 var target = e.target;
-			while (target.nodeType != 1) target = target.parentNode;
-
-			if (target.tagName != 'SELECT' && target.tagName != 'INPUT' && target.tagName != 'TEXTAREA')
-			{
-				e.preventDefault(); 
-			}
-			}
-			,
+			onBeforeScrollStart: function (e) { e.preventDefault(); },
 			onScrollStart: null,
 			onBeforeScrollMove: null,
 			onScrollMove: null,
@@ -183,12 +173,13 @@ iScroll.prototype = {
 		var that = this;
 		switch(e.type) {
 			case START_EV:
+				console.log("iScroll Start " + e.pageX + " "  + e.pageY);
 				if (!hasTouch && e.button !== 0) return;
 				that._start(e);
 				break;
 			case MOVE_EV: that._move(e); break;
 			case END_EV:
-			case CANCEL_EV: that._end(e); break;
+			case CANCEL_EV: that._end(e); console.log("iScroll End"); break;
 			case RESIZE_EV: that._resize(); break;
 			case WHEEL_EV: that._wheel(e); break;
 			case 'mouseout': that._mouseout(e); break;
