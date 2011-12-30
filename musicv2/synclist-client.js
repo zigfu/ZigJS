@@ -126,10 +126,23 @@ var synclist = (function() {
 		socket.emit("list-subscribe", { listid : id });
 		return ret;
 	}
+
+	function removeFromDom(parent, listid) {
+		var toremove = [];
+		for (var i = 0; i < parent.children.length; i++) {
+ 		   if (parent.children[i].getAttribute("data-synclistid") == listid) {
+ 		   		toremove.push(parent.children[i]);
+    		}
+		}
+
+		for (var child in toremove) {
+			parent.removeChild(child);
+		}
+	}
 	
 	function getElementByItemid(parent, itemid) {
 		for (var i = 0; i < parent.children.length; i++) {
- 		   if (parent.children[i].getAttribute("data-synclistid") == itemid) {
+ 		   if (parent.children[i].getAttribute("data-syncitemid") == itemid) {
         		return parent.children[i];
     		}
 		}
@@ -141,7 +154,8 @@ var synclist = (function() {
 		lists[listid].obj.onadd(itemid, itemdata);
 		if (lists[listid].bound) {
 			var newElement = lists[listid].makeelement(itemid, itemdata);
-			newElement.setAttribute("data-synclistid", itemid);
+			newElement.setAttribute("data-synclistid", listid);
+			newElement.setAttribute("data-syncitemid", itemid);
 			lists[listid].boundelement.appendChild(newElement)
 		}
 	}
@@ -159,7 +173,7 @@ var synclist = (function() {
 		lists[listid].items.clear();
 		lists[listid].obj.onclear();
 		if (lists[listid].bound) {
-			lists[listid].boundelement.innerHTML = "";
+			removeFromDom(lists[listid].boundelement, listid);
 		}
 	}
 
