@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name = "viewport" content = "width = device-width, initial-scale = 1.0, user-scalable = no"/>
+
+<title>Zigtv // Mobile Device</title>
+
+<link rel="stylesheet" type="text/css" href="controllerstyle.css" />
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/synclist-client.js"></script>
+<script src="/zmote-client.js"></script>
+
+<script>
+    
+var roomslist;
+
+// name stuff
+var currentName = localStorage.getItem("currentName");
+if (null == currentName) currentName = "[Guest]";   
+
+// location stuff
+var currentLocation = {};
+if (navigator.geolocation)
+{
+    navigator.geolocation.getCurrentPosition(gotLocation, noLocation);
+}
+
+function gotLocation(position) {
+    currentLocation = position;
+}
+
+function noLocation() {
+    // bummer
+}
+
+
+
+function loaded() {
+    window.location = "#inputRooms";
+
+    socket = io.connect('http://'+document.location.hostname);
+
+    socket.on('connect', function () {
+        var qs = document.location.search;
+        var roomid = qs.substr(1,qs.length);
+
+        socket.emit('controllerConnected',{ id : roomid, name : currentName, location : currentLocation});
+
+        roomslist = synclist.subscribe(socket, "roomslist");
+        roomslist.bind(document.getElementById("roomsList"), function(id, data) {
+            var li = document.createElement('li');
+            li.innerHTML = data.name;
+            li.addEventListener("click", function() { socket.emit('joinRoom',{id: id}); });
+            return li;
+        });
+    });
+
+    socket.on('roomJoined', function(data) {
+        // did it work?
+        var success = data.success;
+        if (success) {
+            // start the zmote
+            zmoteController = zmote.controller(socket, data.zmoteid);
+            zmoteController.ondisconnected = function() {
+                window.location = "#welcomeSplash";
+            }
+
+            // show the splash
+            window.location = "#welcomeSplash";
+        }
+    });
+
+    socket.on('tvDied', function(data) {
+        window.location = "#inputRooms";
+    });
+
+    preventScrolling("touchpad");
+        
+}
+
+function dotouchpad() {
+    zmoteController.cursormode = zmote.cursorModes.touchpadabs;
+    zmoteController.bindtouchpad("touchpad");
+    zmoteController.onconnected = function() {
+        window.location = "#touchpad";
+    }
+    zmoteController.start();
+}
+
+function domotion() {
+    zmoteController.cursormode = zmote.cursorModes.motion;
+    zmoteController.onconnected = function() {
+        window.location = "#motion";
+    }
+    zmoteController.start();
+}
+
+
+function preventScrolling(id) {
+    var elem = document.getElementById(id);
+    function stopScrolling( touchEvent ) { touchEvent.preventDefault(); }
+    elem.addEventListener( 'touchstart' , stopScrolling , false );
+    elem.addEventListener( 'touchmove' , stopScrolling , false );
+}
+
+function recalibrate() {
+    zmoteController.recalibrate();    
+}
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
+</script>
+
+</head>
+
+<body>
+
+<div id="mobileWrapper">
+
+	<div class="header">
+    
+		<img src="mi/logo.png" />    
+    
+    </div>
+    
+        	<div class="name">
+        
+        <img src="mi/name.png" />
+        
+        	<div class="nameField">
+            
+            <input style="width: 320px; height: 30px; font-size: 20px;" type="text" placeholder="[Enter Name]" spellcheck="off" autocomplete="off" id="roomNameInput" name="roomNameInput"/>
+            
+        	</div>
+            
+    	</div>
+    
+    
+    
+    <div id="inputRooms" class="targetable">
+    
+
+        
+        <div class="rooms">
+        	
+            <div class="roomsHeader">
+            
+        		    <h1>TV's near you</h1>
+                    
+                    <div class="roomsul">
+                    
+                    	<ul id="roomsList">
+                        </ul>
+                    
+                    </div>
+                    
+            </div>
+        
+
+            
+        </div>
+    	
+        <div class="buttons">
+        	
+            <center>
+        	
+            <input class="join" type="button" value="Join Room" style="height:100px; width: 200px; font-size: 30px;"/>
+        	
+            </center>
+            
+        </div>
+    
+    </div>
+    		<div id="welcomeSplash" class="targetable">
+            
+            <h2>How would you like to interact?</h2>
+            
+            <div class="wtouch"><a href="javascript:dotouchpad()"><img src="mi/touchwphone.png" /></a><br />with Touch</div>
+            
+            <div class="wphone"><a href="javascript:domotion()"><img src="mi/motionwphone.png" /></a><br />with Motion</div>
+            
+            
+            </div>
+
+        	<div id="touchpad" class="targetable">
+            	    
+            </div>
+            
+            <div id="motion" class="targetable">
+            
+                <div class="recal"><a href="javascript:recalibrate()"><img src="mi/recalibrate.png" /></a></div>
+                
+                <div class="rightbut"><a href="#"><img src="mi/right-click.png" /></a></div>
+                
+                <div class="leftbut"><a href="#"><img src="mi/left-click.png" /></a></div>
+                        
+            </div>
+
+</div>
+
+</body>
+</html>

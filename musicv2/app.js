@@ -65,13 +65,13 @@ function handler (request, response) {
 			filePath = './musicplayer.html';
 		} else {
 			console.log("Zig.TV: A controller");
-			filePath = './controller.html';
+			filePath = './newcontroller.html';
 		}
 	}
 
 	if (forceController) {
 		console.log("Zig.TV: forced controller");
-		filePath = './controller.html';
+		filePath = './newcontroller.html';
 	}
 	
 	if (forceTv) {
@@ -193,6 +193,8 @@ io.sockets.on('connection', function (socket) {
 			console.log("TV disconnected, removing room details");
 			roomslist.remove(socket.roomid);
 			//delete activeRooms[socket.roomid];
+			// notify everyone in the room this happened ?
+			socket.broadcast.to(socket.roomid).emit('tvDied');
 		});
 
 		socket.emit('roomStarted', newRoom );
