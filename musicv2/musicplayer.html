@@ -48,10 +48,13 @@ function positionInParent(element, posX, posY) {
 }
 
 function loaded() {
+	document.documentElement.style.overflow = 'hidden';	 // firefox, chrome
+	document.body.scroll = "no";	// ie only
+
 	medialibraryScroller = new iScroll('medialibraryScroller');
 	playlistScroller = new iScroll('playlistScroller');
 	userlistScroller = new iScroll('userlistScroller');
-	playercontrolsScroller = new iScroll('playercontrolsScroller');
+	//playercontrolsScroller = new iScroll('playercontrolsScroller');
 	
 	var uniqueid = Math.floor(Math.random() * 100000);
 	

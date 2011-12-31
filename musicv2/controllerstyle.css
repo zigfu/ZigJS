@@ -170,3 +170,7 @@ body {
 .targetable:target {
 	display: block;
 }
+#calibrateButton {
+	margin : 0px;
+	padding : 0px;
+}

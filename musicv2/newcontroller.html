@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name = "viewport" content = "width = device-width, initial-scale = 1.0, user-scalable = no"/>
+<meta name="viewport" content="width=device-width, user-scalable=no"/>
 
 <title>Zigtv // Mobile Device</title>
 
@@ -78,6 +78,7 @@ function loaded() {
     });
 
     preventScrolling("touchpad");
+    preventScrolling("calibrateButton");
         
 }
 
@@ -139,11 +140,9 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
     	</div>
     
     
-    
+    <!-- room / TV selection -->
     <div id="inputRooms" class="targetable">
     
-
-        
         <div class="rooms">
         	
             <div class="roomsHeader">
@@ -158,8 +157,6 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
                     </div>
                     
             </div>
-        
-
             
         </div>
     	
@@ -174,30 +171,33 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
         </div>
     
     </div>
-    		<div id="welcomeSplash" class="targetable">
-            
-            <h2>How would you like to interact?</h2>
-            
-            <div class="wtouch"><a href="javascript:dotouchpad()"><img src="mi/touchwphone.png" /></a><br />with Touch</div>
-            
-            <div class="wphone"><a href="javascript:domotion()"><img src="mi/motionwphone.png" /></a><br />with Motion</div>
-            
-            
-            </div>
 
+    <!-- default screen, when connected to TV -->    		
+    <div id="welcomeSplash" class="targetable">
+            
+        <h2>How would you like to interact?</h2>
+        
+        <div class="wtouch"><a href="javascript:dotouchpad()"><img src="mi/touchwphone.png" /></a><br />with Touch</div>
+        
+        <div class="wphone"><a href="javascript:domotion()"><img src="mi/motionwphone.png" /></a><br />with Motion</div>
+            
+    </div>
+
+    <div>
         	<div id="touchpad" class="targetable">
             	    
             </div>
             
             <div id="motion" class="targetable">
             
-                <div class="recal"><a href="javascript:recalibrate()"><img src="mi/recalibrate.png" /></a></div>
+                <div class="recal"><div id="calibrateButton" ontouchend="recalibrate()"><img src="mi/recalibrate.png" /></div>
                 
                 <div class="rightbut"><a href="#"><img src="mi/right-click.png" /></a></div>
                 
                 <div class="leftbut"><a href="#"><img src="mi/left-click.png" /></a></div>
                         
             </div>
+    </div>
 
 </div>
 
