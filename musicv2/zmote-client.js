@@ -7,7 +7,8 @@ var zmote = (function() {
 		touchpadrel : "touchpadrel",
 	};
 
-	var lastOrientation;
+	var lastRawOrientation = { alpha : 0, beta : 0, gamma : 0};
+	var lastOrientation = { alpha : 0, beta : 0, gamma : 0};
 	var calibrationOrientation = { alpha : 0, beta : 0, gamma : 0};
 	var lastTouch = { x : 0, y : 0 };
 	var lastCursor = { x : 0, y : 0 };
@@ -34,7 +35,7 @@ var zmote = (function() {
 		lastCursor.y = (touch.pageY - touch.target.offsetTop) / touch.target.offsetHeight;
 	}
 
-	function controller(socket) {
+	function controller(socket, zmoteid) {
 
 		function ontouchstart(event) {
 			ontouchmove(event);
@@ -55,7 +56,7 @@ var zmote = (function() {
 
 		// return API
 		var ret = {
-			start : function(zmoteid) {
+			start : function() {
 				socket.emit('zmote-connect', { zmoteid : zmoteid })
 			},
 
@@ -68,7 +69,11 @@ var zmote = (function() {
 			},
 
 			recalibrate : function() {
-				calibrationOrientation = { alpha : lastOrientation.alpha, beta : lastOrientation.beta, gamme : lastOrientation.gamma};
+				calibrationOrientation = { 
+					alpha : lastRawOrientation.alpha, 
+					beta : lastRawOrientation.beta, 
+					gamma : lastRawOrientation.gamma
+				};
 			},
 
 			bindtouchpad : function(elementId) {
@@ -98,11 +103,13 @@ var zmote = (function() {
 		});
 
 		window.ondeviceorientation = function(event) {
-			lastOrientation = { 
-				alpha : event.alpha - calibrationOrientation.alpha, 
-				beta : event.beta - calibrationOrientation.beta, 
-				gamma : event.gamma - calibrationOrientation.gamma, 
-			};
+			lastRawOrientation.alpha = event.alpha;
+			lastRawOrientation.beta = event.beta;
+			lastRawOrientation.gamma = event.gamma;
+
+			lastOrientation.alpha = event.alpha - calibrationOrientation.alpha;
+			lastOrientation.beta = event.beta - calibrationOrientation.beta;
+			lastOrientation.gamma = event.gamma - calibrationOrientation.gamma;
 
 			if (controllerConnected && ret.updateorientation) {			
 				socket.emit('zmote-orientation', lastOrientation );
@@ -118,7 +125,7 @@ var zmote = (function() {
 
 	var isSomeoneConnected = false;
 
-	function receiver(socket) {
+	function receiver(socket, id) {
 
 		// API for return object
 		var ret = {
@@ -159,6 +166,10 @@ var zmote = (function() {
 		socket.on('zmote-cursor', function(data) {
 			ret.oncursor(data.x, data.y);
 		});
+
+		if (undefined !== id) {
+			socket.emit('zmote-register', { zmoteid : id })
+		}
 
 		return ret;
 	}
