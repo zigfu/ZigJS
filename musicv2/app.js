@@ -131,7 +131,7 @@ io.sockets.on('connection', function (socket) {
 		// valid room id
 		if (socket.roomid > 0) {
 			// join room
-			roomToJoin = ""+socket.roomid;
+			var roomToJoin = ""+socket.roomid;
 			doJoin(socket, roomToJoin);
 		}
 		
