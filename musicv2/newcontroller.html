@@ -214,6 +214,10 @@ function recalibrate() {
     zmoteController.recalibrate();    
 }
 
+function sendToTV(command, data) {
+    socket.emit('sendToTV', { command : command, data : data });
+}
+
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
 
 
@@ -262,7 +266,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
         </div>
 
         <div class="qrcode">
-            <div onclick="javascript:socket.emit('toggleQR');"><img src="mi/qrcode.png"></div>
+            <div onclick="javascript:sendToTV('toggleQR');"><img src="mi/qrcode.png"></div>
             <p>QR Code</p>
         </div>
 

@@ -24,6 +24,11 @@ var socket;
 var userlist;
 var zmoteReceiver;
 
+var tvCommands = {};
+tvCommands.on = function(command, callback) {
+	this[command] = callback;
+}
+
 var currentName = localStorage.getItem("roomName");
 if (null == currentName) currentName = "[TV]";	
 
@@ -126,12 +131,17 @@ function loaded() {
 		document.getElementById('textinputhere').innerHTML = data['value'];
 	});	
 
-	socket.on('toggleQR', function() {
+	tvCommands.on('toggleQR', function(data) {
 		if (window.location.hash != "#qrModalDialog") {
 			window.location = "#qrModalDialog";
 		} else {
 			window.location = "#";
 		}
+	});
+
+	socket.on('sendToTV', function(data) {
+		// TODO: make sure command exists
+		tvCommands[data.command](data.data);
 	});
 	
 	roomurl = 'http://'+document.location.hostname+"/?" + uniqueid;

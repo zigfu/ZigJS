@@ -151,10 +151,10 @@ io.sockets.on('connection', function (socket) {
 			doJoin(socket, roomToJoin);
 		});
 
-		// forward these to the TV
-		socket.on('toggleQR', function(data) {
-			io.sockets.in(socket.roomid + "_server").emit('toggleQR');
-		});
+		// forward commands to the TV
+		socket.on('sendToTV', function(data) {
+			io.sockets.in(socket.roomid + "_server").emit('sendToTV', data);
+		})
 	});
 	
 	// only the tv sends this
