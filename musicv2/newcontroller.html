@@ -131,7 +131,9 @@ function loaded() {
 
     preventScrolling("touchpad");
     //preventScrolling("sensitivitySlider");
-    window.scrollTo(0,1);
+
+    //hides address bar
+    setTimeout("window.scrollTo(0, 1)", 1000); 
 }
 
 function hasClass(ele,cls) {
