@@ -1,11 +1,9 @@
-<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Mobile Controller</title>
+
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="viewport" content="width=device-width, user-scalable=no"/>
-
-<title>Zigtv // Mobile Device</title>
 
 <link rel="stylesheet" type="text/css" href="controllerstyle.css" />
 
@@ -13,13 +11,55 @@
 <script src="/synclist-client.js"></script>
 <script src="/zmote-client.js"></script>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script src="js/jquery.ui.touch-punch.js"></script>
+<link type="text/css" href="css/custom-theme/jquery-ui-1.8.16.custom.css" rel="Stylesheet" />
+
 <script>
-    
+
+var screenTypes = {
+    chooseScreen : "roomslist",
+    homeScreen : "homescreen",
+    pointerScreen : "pointerscreen",
+}
+
+function gotoScreen(screenType) {
+    for (var screen in screenTypes) {
+        document.getElementById(screenTypes[screen]).style.display = (screenTypes[screen] == screenType) ? "block" : "none";
+    }
+}
+
+var pointerTypes = {
+    motion : "motion",
+    touch : "touchpad",
+}
+
+var zmoteController;
+var currentPointerMode;
+
+function setPointer(pointerType) {
+    for (var pt in pointerTypes) {
+        document.getElementById(pointerTypes[pt]).style.display = (pointerTypes[pt] == pointerType) ? "block" : "none";
+    }
+
+    if (pointerType == pointerTypes.motion) {
+        currentPointerMode = zmote.cursorModes.motion;
+    }
+    if (pointerType == pointerTypes.touch) {
+        currentPointerMode = zmote.cursorModes.touchpadrel;
+    }
+    if (undefined !== zmoteController) {
+        zmoteController.cursormode = currentPointerMode;
+    }
+}
+
 var roomslist;
 
 // name stuff
 var currentName = localStorage.getItem("currentName");
-if (null == currentName) currentName = "[Guest]";   
+if (null == currentName) currentName = "[Guest]";
+
 
 // location stuff
 var currentLocation = {};
@@ -36,10 +76,11 @@ function noLocation() {
     // bummer
 }
 
-
-
 function loaded() {
-    window.location = "#inputRooms";
+    nameChanged(currentName);
+
+    gotoScreen(screenTypes.chooseScreen);
+    setPointer(pointerTypes.touch);
 
     socket = io.connect('http://'+document.location.hostname);
 
@@ -50,7 +91,7 @@ function loaded() {
         socket.emit('controllerConnected',{ id : roomid, name : currentName, location : currentLocation});
 
         roomslist = synclist.subscribe(socket, "roomslist");
-        roomslist.bind(document.getElementById("roomsList"), function(id, data) {
+        roomslist.bind(document.getElementById("roomslistList"), function(id, data) {
             var li = document.createElement('li');
             li.innerHTML = data.name;
             li.addEventListener("click", function() { socket.emit('joinRoom',{id: id}); });
@@ -64,12 +105,14 @@ function loaded() {
         if (success) {
             // start the zmote
             zmoteController = zmote.controller(socket, data.zmoteid);
+            zmoteController.bindtouchpad("touchpad");
+            zmoteController.cursormode = currentPointerMode;
             zmoteController.ondisconnected = function() {
-                window.location = "#welcomeSplash";
+                gotoScreen(screenTypes.chooseScreen);
             }
 
-            // show the splash
-            window.location = "#welcomeSplash";
+            // show the welcome screen
+            gotoScreen(screenTypes.homeScreen);
         }
     });
 
@@ -77,28 +120,24 @@ function loaded() {
         window.location = "#inputRooms";
     });
 
+    $("#sensitivitySlider").slider({
+            orientation: "vertical",
+            range: "min",
+            min: 0,
+            max: 100,
+            value: 60
+        });
+
     preventScrolling("touchpad");
-    preventScrolling("calibrateButton");
-        
+    preventScrolling("sensitivitySlider");
 }
 
-function dotouchpad() {
-    zmoteController.cursormode = zmote.cursorModes.touchpadabs;
-    zmoteController.bindtouchpad("touchpad");
+function doPointer() {
     zmoteController.onconnected = function() {
-        window.location = "#touchpad";
+        gotoScreen(screenTypes.pointerScreen);
     }
-    zmoteController.start();
+    zmoteController.start();   
 }
-
-function domotion() {
-    zmoteController.cursormode = zmote.cursorModes.motion;
-    zmoteController.onconnected = function() {
-        window.location = "#motion";
-    }
-    zmoteController.start();
-}
-
 
 function preventScrolling(id) {
     var elem = document.getElementById(id);
@@ -111,95 +150,110 @@ function recalibrate() {
     zmoteController.recalibrate();    
 }
 
+function nameentry() {
+    document.getElementById("currentUserName").style.display = "none";
+    document.getElementById("currentUserNameInput").style.display = "block";
+    document.getElementById("currentUserNameInput").focus();
+}
+
+function nameentrydone() {
+    var newName = document.getElementById("currentUserNameInput").value;
+    console.log("Name changed: " + newName);
+    nameChanged(newName);
+}
+
+function nameChanged(newName) {
+    currentName = newName;
+    localStorage.setItem("currentName", currentName);
+    document.getElementById("currentUserNameInput").value = currentName;
+    document.getElementById("currentUserName").innerHTML = currentName;
+    document.getElementById("currentUserName").style.display = "block";
+    document.getElementById("currentUserNameInput").style.display = "none";
+}
+
+function recalibrate() {
+    zmoteController.recalibrate();    
+}
+
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
 
-</script>
 
+</script>
 </head>
 
 <body>
-
-<div id="mobileWrapper">
+<div id="wrapper">
 
 	<div class="header">
-    
-		<img src="mi/logo.png" />    
-    
-    </div>
-    
-        	<div class="name">
-        
-        <img src="mi/name.png" />
-        
-        	<div class="nameField">
+	</div>
+	<div class="name">
+        <div id="currentUserName" onclick="nameentry();"></div>
+		<input style="display:none; width: 320px; height: 30px; font-size: 20px;" type="text" placeholder="[Enter Name]" spellcheck="off" autocomplete="off" id="currentUserNameInput" name="currentUserNameInput" onchange="nameentrydone()"/>
+
+	</div>
+
+	<div id="roomslist" class="invisible">
+		<ul id="roomslistList">
+		</ul>
+	</div>
+
+	<div id="homescreen" class="invisible">
+    <!--
+		<div class="nowplaying">
+			TODO: Now playing
+		</div>
+		<div class="playlist">
+		<h1>playlist</h1>
+		<ul>
+			<li>LIST ITEM</li>
+			<li>LIST ITEM</li>
+
+		</ul>
+
+
+		</div><-->
+		<div class="cursor"><a href="javascript:doPointer()">Cursor</a></div>
+
+
+	</div>
+
+	<div id="pointerscreen" class="invisible">
+        	<div id="touchpad" class="invisible">
             
-            <input style="width: 320px; height: 30px; font-size: 20px;" type="text" placeholder="[Enter Name]" spellcheck="off" autocomplete="off" id="roomNameInput" name="roomNameInput"/>
-            
-        	</div>
-            
-    	</div>
-    
-    
-    <!-- room / TV selection -->
-    <div id="inputRooms" class="targetable">
-    
-        <div class="rooms">
-        	
-            <div class="roomsHeader">
-            
-        		    <h1>TV's near you</h1>
-                    
-                    <div class="roomsul">
-                    
-                    	<ul id="roomsList">
-                        </ul>
-                    
-                    </div>
-                    
             </div>
             
-        </div>
-    	
-        <div class="buttons">
-        	
-            <center>
-        	
-            <input class="join" type="button" value="Join Room" style="height:100px; width: 200px; font-size: 30px;"/>
-        	
-            </center>
+            <div id="motion" class="invisible">
             
-        </div>
-    
-    </div>
+            	<div class="motionContainer">
+            
+                <div class="recal"><div id="calibrateButton" ontouchend="recalibrate()"><img src="mi/recalibrate.png" /></div></div>
 
-    <!-- default screen, when connected to TV -->    		
-    <div id="welcomeSplash" class="targetable">
-            
-        <h2>How would you like to interact?</h2>
-        
-        <div class="wtouch"><a href="javascript:dotouchpad()"><img src="mi/touchwphone.png" /></a><br />with Touch</div>
-        
-        <div class="wphone"><a href="javascript:domotion()"><img src="mi/motionwphone.png" /></a><br />with Motion</div>
-            
-    </div>
-
-    <div>
-        	<div id="touchpad" class="targetable">
-            	    
-            </div>
-            
-            <div id="motion" class="targetable">
-            
-                <div class="recal"><div id="calibrateButton" ontouchend="recalibrate()"><img src="mi/recalibrate.png" /></div>
-                
-                <div class="rightbut"><a href="#"><img src="mi/right-click.png" /></a></div>
-                
-                <div class="leftbut"><a href="#"><img src="mi/left-click.png" /></a></div>
+				</div>
                         
             </div>
-    </div>
+			
+            <div class="controllerOptions">
+            
+            	<a href="javascript:setPointer(pointerTypes.motion)"><div class="pointer"><h2>Motion</h2></div></a>
+                
+                <a href="javascript:setPointer(pointerTypes.touch)"><div class="touchpad"><h2>Touchpad</h2></div></a>
+            
+            
+            </div>
+            
+            <div id="sensitivitySlider"></div>
+
+			<div class="closebutton">
+
+                <a href="javascript:gotoScreen(screenTypes.homeScreen);">Close</a>
+
+			</div>
+
+
+
+	</div>
 
 </div>
-
 </body>
+
 </html>

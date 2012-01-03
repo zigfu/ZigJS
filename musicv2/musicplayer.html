@@ -41,10 +41,30 @@ function noLocation() {
 	// bummer
 }
 
+var lastCursor = {x : 0, y : 0};
 
-function positionInParent(element, posX, posY) {
-	element.style.left = (posX * element.parentNode.offsetWidth - (element.offsetWidth / 2)) + "px";
-	element.style.top = (posY * element.parentNode.offsetHeight - (element.offsetHeight / 2)) + "px";
+function setCursor(element, xpx, ypx) {
+	element.style.left = lastCursor.x + "px";
+	element.style.top = lastCursor.y + "px";
+}
+
+function positionCursor(element, posX, posY) {
+	lastCursor.x = (posX * element.parentNode.offsetWidth - (element.offsetWidth / 2));
+	lastCursor.y = (posY * element.parentNode.offsetHeight - (element.offsetHeight / 2));
+	setCursor(element, lastCursor.x, lastCursor.y);
+}
+
+function clamp(val, min, max) {
+	if (val < min) return min;
+	if (val > max) return max;
+	return val;
+}
+
+function moveCursorBy(element, deltaX, deltaY) {
+	lastCursor.x = clamp(lastCursor.x + deltaX, 0, element.parentNode.offsetWidth);
+	lastCursor.y = clamp(lastCursor.y + deltaY, 0, element.parentNode.offsetHeight);
+
+	setCursor(element, lastCursor.x, lastCursor.y);
 }
 
 function loaded() {
@@ -58,6 +78,8 @@ function loaded() {
 	
 	var uniqueid = Math.floor(Math.random() * 100000);
 	
+	var thecursor = document.getElementById("realcursor");
+	positionCursor(thecursor, 0.5, 0.5); 
 	
 	//TODO: we may want this socket to default to zig.tv and not origin for remote connections notifying the tracker
 	socket = io.connect('http://'+document.location.hostname);
@@ -85,7 +107,17 @@ function loaded() {
 		zmoteReceiver.ondisconnect = function() { console.log("Zmote disconnected"); };
 		//zmoteReceiver.onorientation = function(a,b,g) { console.log("Orientation:" + a); };
 		var thecursor = document.getElementById("realcursor")
-		zmoteReceiver.oncursor = function(cursor) { return function(x,y) { positionInParent(cursor, x, y); }} (thecursor) ;
+		zmoteReceiver.oncursor = function(cursor) { 
+			return function(x,y, rel) { 
+				console.log("rel:" + rel);
+				if (rel) {
+					console.log("MoveCursorBy: " + x + ", " + y);
+					moveCursorBy(cursor, x, y);
+				} else {
+					positionCursor(cursor, x, y); 
+				}
+			}
+		} (thecursor) ;
 	});
 	
 	socket.on('userJoined', function (data) {

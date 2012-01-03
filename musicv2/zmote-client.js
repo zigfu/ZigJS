@@ -11,8 +11,8 @@ var zmote = (function() {
 	var lastOrientation = { alpha : 0, beta : 0, gamma : 0};
 	var calibrationOrientation = { alpha : 0, beta : 0, gamma : 0};
 	var lastTouch = { x : 0, y : 0 };
-	var lastCursor = { x : 0, y : 0 };
-	var lastDelta = { x : 0, y : 0 };
+	var lastCursor = { x : 0, y : 0, mode : "abs" };
+	var lastDelta = { x : 0, y : 0, mode : "rel" };
 	var controllerConnected;
 
 	function clamp01(val) { if (val < 0) return 0; if (val > 1) return 1; return val; }
@@ -21,6 +21,7 @@ var zmote = (function() {
 		return {
 			x : clamp01((lastOrientation.alpha / -50) + 0.5),
 			y : clamp01((lastOrientation.beta / -50) + 0.5),
+			mode : "motion"
 		}
 	}
 
@@ -38,6 +39,8 @@ var zmote = (function() {
 	function controller(socket, zmoteid) {
 
 		function ontouchstart(event) {
+			lastTouch.x = event.touches[0].pageX;
+			lastTouch.y = event.touches[0].pageY;
 			ontouchmove(event);
 		}
 		
@@ -81,7 +84,6 @@ var zmote = (function() {
 				surface.addEventListener("touchstart", ontouchstart, false);
 				surface.addEventListener("touchmove", ontouchmove, false);
 				surface.addEventListener("touchend", ontouchend, false);
-				ret.sendmotion = false;
 			},
 
 			onconnected : function() {},
@@ -164,7 +166,7 @@ var zmote = (function() {
 		});
 
 		socket.on('zmote-cursor', function(data) {
-			ret.oncursor(data.x, data.y);
+			ret.oncursor(data.x, data.y, data.mode == "rel");
 		});
 
 		if (undefined !== id) {
