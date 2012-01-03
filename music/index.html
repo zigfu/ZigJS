@@ -1,3 +1,4 @@
+<!-- saved from url=(0014)about:internet -->
 <html>
 <head>
 
@@ -194,7 +195,7 @@ function positionInParent(element, posX, posY) {
       }
   
   function parseFile(file, callback){
-        if(localStorage[file.fileName]) return callback(JSON.parse(localStorage[file.fileName]));
+        //if(localStorage[file.fileName]) return callback(JSON.parse(localStorage[file.fileName]));
 		console.log("Parsing " + file.fileName);
         ID3v2.parseFile(file,function(tags){
           //to not overflow localstorage
@@ -205,7 +206,7 @@ function positionInParent(element, posX, posY) {
             Genre: tags.Genre
           });
           callback(tags);
-        })
+        });
       }
   
   
@@ -263,10 +264,10 @@ function positionInParent(element, posX, posY) {
 			
 			var url = geturl(f);
 			
-            parseFile(url,function(tags){
-              console.log(tags); 
+            //parseFile(url,function(tags){
+            //  console.log(tags); 
 			  $("#thelist").append($("<li>").text(t2.Title));
-			});
+			//});
 						
 
 			
