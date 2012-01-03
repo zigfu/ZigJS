@@ -103,7 +103,7 @@ function loaded() {
 		userlist.onclear = function() { userlistScroller.refresh(); }
 
 		zmoteReceiver = zmote.receiver(socket);
-		zmoteReceiver.onconnect = function(clientid) { console.log("Zmote connected: " + clientid); };
+		zmoteReceiver.onconnect = function(clientid) { window.location = "#"; console.log("Zmote connected: " + clientid); };
 		zmoteReceiver.ondisconnect = function() { console.log("Zmote disconnected"); };
 		//zmoteReceiver.onorientation = function(a,b,g) { console.log("Orientation:" + a); };
 		var thecursor = document.getElementById("realcursor")
