@@ -11,7 +11,7 @@ var app = require('http').createServer(handler)
 app.listen(80);
 
 var roomslist = synclist.create("roomslist");
-roomslist.add({ name : "1337 H4xx0r room", location : "testing" }, 31337);
+roomslist.add({ name : "Restricted Room", location : "testing" }, 31337);
 
 // yes, these should be persistent
 //var activeRooms = {};
