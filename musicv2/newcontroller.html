@@ -60,7 +60,6 @@ var roomslist;
 var currentName = localStorage.getItem("currentName");
 if (null == currentName) currentName = "[Guest]";
 
-
 // location stuff
 var currentLocation = {};
 if (navigator.geolocation)
@@ -77,6 +76,7 @@ function noLocation() {
 }
 
 function loaded() {
+    //preventDocScrolling();
     nameChanged(currentName);
 
     gotoScreen(screenTypes.chooseScreen);
@@ -94,6 +94,7 @@ function loaded() {
         roomslist.bind(document.getElementById("roomslistList"), function(id, data) {
             var li = document.createElement('li');
             li.innerHTML = data.name;
+            addClass(li, "touchable");
             li.addEventListener("click", function() { socket.emit('joinRoom',{id: id}); });
             return li;
         });
@@ -129,7 +130,16 @@ function loaded() {
         });
 
     preventScrolling("touchpad");
-    preventScrolling("sensitivitySlider");
+    //preventScrolling("sensitivitySlider");
+    window.scrollTo(0,1);
+}
+
+function hasClass(ele,cls) {
+    return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
+}
+
+function addClass(ele,cls) {
+    if (!hasClass(ele,cls)) ele.className += " "+cls;
 }
 
 function doPointer() {
@@ -145,6 +155,18 @@ function preventScrolling(id) {
     elem.addEventListener( 'touchstart' , stopScrolling , false );
     elem.addEventListener( 'touchmove' , stopScrolling , false );
 }
+
+function preventDocScrolling(id) {
+    function stopScrolling( touchEvent ) { 
+        if (undefined !== touchEvent.target && hasClass(touchEvent.target, "touchable")) {
+            return;
+        }
+        touchEvent.preventDefault(); 
+    }
+    document.addEventListener( 'touchstart' , stopScrolling , false );
+    document.addEventListener( 'touchmove' , stopScrolling , false );
+}
+
 
 function recalibrate() {
     zmoteController.recalibrate();    
@@ -186,12 +208,13 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 <div id="wrapper">
 
 	<div class="header">
-	</div>
-	<div class="name">
-        <div id="currentUserName" onclick="nameentry();"></div>
-		<input style="display:none; width: 320px; height: 30px; font-size: 20px;" type="text" placeholder="[Enter Name]" spellcheck="off" autocomplete="off" id="currentUserNameInput" name="currentUserNameInput" onchange="nameentrydone()"/>
+	
+    	<div class="name">
+            <div id="currentUserName" onclick="nameentry();"></div>
+    		<input style="display:none; width: 320px; height: 30px; font-size: 20px;" type="text" placeholder="[Enter Name]" spellcheck="off" autocomplete="off" id="currentUserNameInput" name="currentUserNameInput" onchange="nameentrydone()"/>
 
-	</div>
+    	</div>
+    </div>
 
 	<div id="roomslist" class="invisible">
 		<ul id="roomslistList">
@@ -213,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 
 		</div><-->
-		<div class="cursor"><a href="javascript:doPointer()">Cursor</a></div>
+		<div class="cursor"><a href="javascript:doPointer()"><img src="mi/cursors.png"></a></div>
 
 
 	</div>
