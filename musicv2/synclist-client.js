@@ -181,6 +181,12 @@ var synclist = (function() {
 	function set(listid, itemid, itemdata) {
 		lists[listid].items.setItem(itemid, itemdata);
 		lists[listid].obj.onset(itemid, itemdata);
+		if (lists[listid].bound) {
+			//TODO: find a cleaner way to update an item
+			var node = getElementByItemid(lists[listid].boundelement, itemid);
+			var newElement = lists[listid].makeelement(itemid, itemdata);
+			node.innerHTML = newElement.innerHTML;
+		}
 	}
 	
 	function listify(socket) {

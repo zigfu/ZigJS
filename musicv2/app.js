@@ -42,6 +42,14 @@ function doJoin(socket, roomid) {
 		socket.on('disconnect', (function(userid) {
 			return function() { userlist.remove(userid); }
 		}(id)));
+		
+		socket.on('rename', (function(userid) {
+			return function(data) {
+				var serverData = userlist.get(userid);
+				serverData.name = data.name;
+				userlist.set(userid, data);
+			};
+		}(id)));
 	}
 }
 
