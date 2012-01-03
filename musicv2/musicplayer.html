@@ -103,15 +103,13 @@ function loaded() {
 		userlist.onclear = function() { userlistScroller.refresh(); }
 
 		zmoteReceiver = zmote.receiver(socket);
-		zmoteReceiver.onconnect = function(clientid) { window.location = "#"; console.log("Zmote connected: " + clientid); };
+		zmoteReceiver.onconnect = function(clientid) { console.log("Zmote connected: " + clientid); };
 		zmoteReceiver.ondisconnect = function() { console.log("Zmote disconnected"); };
 		//zmoteReceiver.onorientation = function(a,b,g) { console.log("Orientation:" + a); };
 		var thecursor = document.getElementById("realcursor")
 		zmoteReceiver.oncursor = function(cursor) { 
 			return function(x,y, rel) { 
-				console.log("rel:" + rel);
 				if (rel) {
-					console.log("MoveCursorBy: " + x + ", " + y);
 					moveCursorBy(cursor, x, y);
 				} else {
 					positionCursor(cursor, x, y); 
@@ -123,9 +121,18 @@ function loaded() {
 	socket.on('userJoined', function (data) {
 		window.location = "#";
 	});
+
 	socket.on('input', function (data) {
 		document.getElementById('textinputhere').innerHTML = data['value'];
 	});	
+
+	socket.on('toggleQR', function() {
+		if (window.location.hash != "#qrModalDialog") {
+			window.location = "#qrModalDialog";
+		} else {
+			window.location = "#";
+		}
+	});
 	
 	roomurl = 'http://'+document.location.hostname+"/?" + uniqueid;
 	append_qrcode(4,"qrcode",roomurl);

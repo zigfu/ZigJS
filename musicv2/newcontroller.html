@@ -159,6 +159,12 @@ function doPointer() {
     zmoteController.start();   
 }
 
+function stopCursor() {
+    zmoteController.stop();
+    gotoScreen(screenTypes.homeScreen);
+}
+
+
 function preventScrolling(id) {
     var elem = document.getElementById(id);
     function stopScrolling( touchEvent ) { touchEvent.preventDefault(); }
@@ -255,6 +261,10 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
             <p>   Cursor</p>
         </div>
 
+        <div class="qrcode">
+            <div onclick="javascript:socket.emit('toggleQR');"><img src="mi/qrcode.png"></div>
+            <p>QR Code</p>
+        </div>
 
 	</div>
 
@@ -286,7 +296,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 			<div class="closebutton">
 
-                <a href="javascript:gotoScreen(screenTypes.homeScreen);"><img src="mi/cancel.png" /></a>
+                <a href="javascript:stopCursor()"><img src="mi/cancel.png" /></a>
 
 			</div>
 
