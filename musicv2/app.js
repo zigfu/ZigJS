@@ -34,6 +34,9 @@ function doJoin(socket, roomid) {
 			medialist : joining.medialist,
 			zmoteid : joining.zmoteid,
 		});
+
+		// send the TV a msg indicating someone connected
+		io.sockets.in(socket.roomid + "_server").emit('userJoined', {name : socket.name});
 		
 		var userlist = synclist.open(joining.userlist);
 		var id = userlist.add({ name : socket.name });
