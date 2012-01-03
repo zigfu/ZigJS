@@ -103,6 +103,9 @@ function loaded() {
             li.addEventListener("click", function() { socket.emit('joinRoom',{id: id}); });
             return li;
         });
+        roomslist.onadd = function() {
+            roomlistScroller.refresh();
+        }
     });
 
     socket.on('roomJoined', function(data) {
