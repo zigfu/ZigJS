@@ -82,7 +82,7 @@ function loaded() {
     //preventDocScrolling();
     nameChanged(currentName);
 
-    roomlistScroller = new iScroll('roomslist');
+    roomlistScroller = new iScroll('roomslistContainer');
 
     gotoScreen(screenTypes.chooseScreen);
     setPointer(pointerTypes.touch);
@@ -224,9 +224,12 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
     </div>
 
 	<div id="roomslist" class="invisible">
-        <div class="scroller">
-		  <ul id="roomslistList">
-		  </ul>
+        <h2>Host Screen List</h2>
+        <div id="roomslistContainer">
+            <div class="scroller">
+		      <ul id="roomslistList">
+		      </ul>
+            </div>
         </div>
 	</div>
 
