@@ -150,6 +150,11 @@ io.sockets.on('connection', function (socket) {
 			var roomToJoin = data['id'];
 			doJoin(socket, roomToJoin);
 		});
+
+		// forward these to the TV
+		socket.on('toggleQR', function(data) {
+			io.sockets.in(socket.roomid + "_server").emit('toggleQR');
+		});
 	});
 	
 	// only the tv sends this
@@ -195,9 +200,9 @@ io.sockets.on('connection', function (socket) {
 		socket.on('setName', function(data) {
 			console.log("TV name changed: " + data.name);
 			socket.name = data.name;
-			roomslist.set(socket.roomid, roomslist.get(socket.roomid).name, data.name);
-			//activeRooms[socket.roomid].name = data.name;
-			//socket.broadcast.to(socket.roomid).emit('roomList', activeRooms);
+			var roomData = roomslist.get(socket.roomid);
+			roomData.name = data.name;
+			roomslist.set(socket.roomid, roomData);
 		});
 		
 		socket.on('disconnect', function () {
