@@ -106,10 +106,10 @@ h1, h2, h3, h4, h5, h6, p, ul {
 .cursor {
 	width: 200px;
 	height: 300px;
-	float : left;
+	margin-left: 50px;
 	font-size: 35px;
 	margin-top: 100px;
-	margin-left: 50px;
+	float: left;
 }
 .cursor p {
 	font-family: Arial;
@@ -134,6 +134,23 @@ h1, h2, h3, h4, h5, h6, p, ul {
 }
 .qrcode a {
  text-decoration: none;
+}
+.qrcode {
+	width: 200px;
+	height: 300px;
+	font-size: 35px;
+	margin-top: 100px;
+	float: left;
+}
+.qrcode p {
+	font-family: Arial;
+	font-size: 30px;
+	color:#333;
+	padding-left: 20px;
+	text-align: center;
+}
+.qrcode a {
+	text-decoration: none;
 }
 #motion {
 	background-color: rgba( 0, 0, 0, 0.4);
@@ -209,7 +226,7 @@ h1, h2, h3, h4, h5, h6, p, ul {
 	background-image: url(mi/trackpad.png);	
 }
 .closebutton {
-	width: 200px;
+	width: 100px;
 	margin: 0px auto;
 	padding-top: 20px;
 }
@@ -225,4 +242,53 @@ h1, h2, h3, h4, h5, h6, p, ul {
 	margin-top: 10px;
 	padding-top: 30px;
 	text-align: center;
+}
+/* CSS BUTTON STYLE */
+.css_button {
+	display: inline-block;
+	height
+	margin: 0px auto;
+	padding-left: 20px;
+	padding: 10px 25px 10px 20px;
+	color: rgba(255,255,255,0.8);
+	text-decoration: none;
+	background: rgba(40,100,200,1);
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	box-shadow: rgba(15,60,130,1) 0 3px 0, inset rgba(255,255,255,0.05) 0 -1px 0, inset rgba(255,255,255,0.1) 0 1px 0;
+	-moz-box-shadow: rgba(15,60,130,1) 0 3px 0, inset rgba(255,255,255,0.05) 0 -1px 0, inset rgba(255,255,255,0.1) 0 1px 0;
+	-webkit-box-shadow: rgba(15,60,130,1) 0 3px 0, inset rgba(255,255,255,0.05) 0 -1px 0, inset rgba(255,255,255,0.1) 0 1px 0;
+	position: relative;
+	top: 10px;
+	font-size: 20px !important;
+	overflow: hidden;
+	border: none;
+	cursor: pointer;
+	outline: none;
+}
+.css_button:before {
+	content: '';
+	width: 50%;
+	height: 100px;
+	position: absolute;
+	top: 100%;
+	left: 25%;
+	border-radius: 500px;
+	background: none;
+	box-shadow: rgba(255,255,255,0.5) 0 1px 20px;
+	-moz-box-shadow: rgba(255,255,255,0.5) 0 1px 20px;
+	-webkit-box-shadow: rgba(255,255,255,0.5) 0 1px 20px;
+}
+.css_button:hover {
+	background: rgba(45,115,230,1);
+	box-shadow: rgba(15,60,130,0.8) 0 3px 0, inset rgba(255,255,255,0.05) 0 -1px 0 rgba(255,255,255,0.1) 0 1px 0;
+	-moz-box-shadow: rgba(15,60,130,0.8) 0 3px 0, inset rgba(255,255,255,0.05) 0 -1px 0 rgba(255,255,255,0.1) 0 1px 0;
+	-webkit-box-shadow: rgba(15,60,130,0.8) 0 3px 0, inset rgba(255,255,255,0.05) 0 -1px 0 rgba(255,255,255,0.1) 0 1px 0;
+}
+.css_button:active {
+	background: rgba(40,100,200,0.8);
+	box-shadow: inset rgba(255,255,255,0.05) 0 -1px 0, inset (255,255,255,0.1) 0 1px 0;
+	-moz-box-shadow: inset rgba(255,255,255,0.05) 0 -1px 0, inset (255,255,255,0.1) 0 1px 0;
+	-webkit-box-shadow: inset rgba(255,255,255,0.05) 0 -1px 0, inset (255,255,255,0.1) 0 1px 0;
 }
