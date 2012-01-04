@@ -136,7 +136,6 @@ var synclist = (function() {
 		}
 
 		for (var child in toremove) {
-			console.log("Removing: " + toremove[child]);
 			parent.removeChild(toremove[child]);
 		}
 	}

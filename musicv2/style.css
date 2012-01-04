@@ -47,14 +47,14 @@ body {
 }
 .scroller li {
 	padding:0 10px;
-	height:100px;
-	line-height:100px;
+	height:52px;
+	line-height:52px;
 	//border-bottom:1px solid #ccc;
 	//border-top:1px solid #fff;
 	//background-color:#fafafa;
-	font-size:48px;
+	font-size:32px;
 	font-family: Arial;
-	letter-spacing: -2px;
+	//letter-spacing: -2px;
 	color : #ccc;
 }
 .scroller img {

@@ -171,9 +171,6 @@ io.sockets.on('connection', function (socket) {
 		var userlist = synclist.create(socket.roomid + ":userlist");
 
 		var medialist = synclist.create(socket.roomid + ":medialist");
-		medialist.add("Song 1");
-		medialist.add("Song 2");
-		medialist.add("Song 3");
 
 		var zmoteOmercy = zmote.register(socket.roomid + ":zmote", socket);
 

@@ -15,7 +15,7 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
-<script src="js/jquery.ui.touch-punch.js"></script>
+<script src="js/jquery.ui.touch-punch.min.js"></script>
 <link type="text/css" href="css/custom-theme/jquery-ui-1.8.16.custom.css" rel="Stylesheet" />
 
 <script>
@@ -24,6 +24,7 @@ var screenTypes = {
     chooseScreen : "roomslist",
     homeScreen : "homescreen",
     pointerScreen : "pointerscreen",
+    musicScreen : "musiclist",
 }
 
 function gotoScreen(screenType) {
@@ -38,6 +39,8 @@ var pointerTypes = {
 }
 
 var roomlistScroller;
+var musiclistScroller;
+
 var zmoteController;
 var currentPointerMode;
 
@@ -58,6 +61,7 @@ function setPointer(pointerType) {
 }
 
 var roomslist;
+var musicSyncList;
 
 // name stuff
 var currentName = localStorage.getItem("currentName");
@@ -83,6 +87,7 @@ function loaded() {
     nameChanged(currentName);
 
     roomlistScroller = new iScroll('roomslistContainer');
+    musiclistScroller = new iScroll('musiclistContainer');
 
     gotoScreen(screenTypes.chooseScreen);
     setPointer(pointerTypes.touch);
@@ -112,6 +117,17 @@ function loaded() {
         // did it work?
         var success = data.success;
         if (success) {
+            // connect the music list
+            musicSyncList = synclist.subscribe(socket, data.medialist);
+            musicSyncList.bind(document.getElementById("musiclistList"), function(id, data){
+                var li = document.createElement('li');
+                li.innerHTML = data.name;
+                addClass(li, "touchable");
+                li.addEventListener("click", function() { sendToTV('playSong', {songid: id}); });
+                return li;
+            });
+            musicSyncList.onadd = function() { musiclistScroller.refresh(); }
+
             // start the zmote
             zmoteController = zmote.controller(socket, data.zmoteid);
             zmoteController.bindtouchpad("touchpad");
@@ -126,7 +142,7 @@ function loaded() {
     });
 
     socket.on('tvDied', function(data) {
-        window.location = "#inputRooms";
+        gotoScreen(screenTypes.chooseScreen);
     });
 
     $("#sensitivitySlider").slider({
@@ -237,8 +253,8 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
     </div>
 
 	<div id="roomslist" class="invisible">
-        <h2>Host Screen List</h2>
-        <div id="roomslistContainer">
+        <h2 class="coollistHeader">Host Screen List</h2>
+        <div id="roomslistContainer" class="coollist">
             <div class="scroller">
 		      <ul id="roomslistList">
 		      </ul>
@@ -247,27 +263,19 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 	</div>
 
 	<div id="homescreen" class="invisible">
-    <!--
-		<div class="nowplaying">
-			TODO: Now playing
-		</div>
-		<div class="playlist">
-		<h1>playlist</h1>
-		<ul>
-			<li>LIST ITEM</li>
-			<li>LIST ITEM</li>
-
-		</ul>
-
-
-		</div><-->
-		<div class="cursor"><a href="javascript:doPointer()"><img src="mi/cursors.png"></a>
+    
+		<div class="homeScreenIcon"><a href="javascript:doPointer()"><img src="mi/cursors.png"></a>
             <p>   Cursor</p>
         </div>
 
-        <div class="qrcode">
+        <div class="homeScreenIcon">
             <div onclick="javascript:sendToTV('toggleQR');"><img src="mi/qrcode.png"></div>
             <p>QR Code</p>
+        </div>
+
+        <div class="homeScreenIcon">
+            <div onclick="javascript:(function(){gotoScreen(screenTypes.musicScreen); musiclistScroller.refresh();})()"><img src="mi/qrcode.png"></div>
+            <p>Music</p>
         </div>
 
 	</div>
@@ -304,9 +312,24 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 			</div>
 
-
-
 	</div>
+
+    <div id="musiclist" class="invisible">
+        <h2 class="coollistHeader">Music</h2>
+        <div id="musiclistContainer" class="coollist">
+            <div>
+              <ul id="musiclistList">
+              </ul>
+            </div>
+        </div>
+
+        <div class="closebutton">
+
+            <a href="javascript:stopCursor()" class="css_button">BACK</a>
+
+        </div>
+
+    </div>
 
 </div>
 </body>
