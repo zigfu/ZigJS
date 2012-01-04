@@ -131,6 +131,7 @@ function loaded() {
             // start the zmote
             zmoteController = zmote.controller(socket, data.zmoteid);
             zmoteController.bindtouchpad("touchpad");
+            zmoteController.bindtouchpad("motion");
             zmoteController.cursormode = currentPointerMode;
             zmoteController.ondisconnected = function() {
                 gotoScreen(screenTypes.chooseScreen);
@@ -154,6 +155,7 @@ function loaded() {
         });
 
     preventScrolling("touchpad");
+    preventScrolling("motion");
     //preventScrolling("sensitivitySlider");
 
     //hides address bar
@@ -263,7 +265,16 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 	</div>
 
 	<div id="homescreen" class="invisible">
-    
+        <div id="playerControls" style="width:inherit;">
+            <ul>
+                <li> <img src="musicicons/MCPrev.png" onclick="javascript:sendToTV('playPrev');">
+                </li>
+                <li> <img src="musicicons/MCPlay.png" onclick="javascript:sendToTV('togglePlayPause');">
+                </li>
+                <li> <img src="musicicons/MCNext.png" onclick="javascript:sendToTV('playNext');">
+                </li>
+            </ul>
+        </div>
 		<div class="homeScreenIcon"><a href="javascript:doPointer()"><img src="mi/cursors.png"></a>
             <p>   Cursor</p>
         </div>
@@ -287,9 +298,9 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
             
             <div id="motion" class="invisible">
             
-            	<div class="motionContainer">
+            	<div id="motionContainer" class="motionContainer">
             
-                <div class="recal"><div id="calibrateButton" ontouchend="recalibrate()"><img src="mi/recalibrate.png" /></div></div>
+                    <div class="recal"><div id="calibrateButton" ontouchend="recalibrate()"><img src="mi/recalibrate.png" /></div></div>
 
 				</div>
                         

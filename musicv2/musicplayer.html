@@ -64,6 +64,11 @@ function positionCursor(element, posX, posY) {
 	setCursor(element, lastCursor.x, lastCursor.y);
 }
 
+function doClick()
+{
+	console.log("Doing the click");
+}
+
 function clamp(val, min, max) {
 	if (val < min) return min;
 	if (val > max) return max;
@@ -85,6 +90,20 @@ function playSong(songid) {
 	player.src = geturl(song);
 	player.play();
 
+}
+function togglePlayPause() {
+	var player = document.getElementById("audioPlayer");
+	if (player.paused) { 
+		player.play();
+	} else {
+		player.pause();
+	}
+}
+function playNext() {
+	console.log("todo: play next");
+}
+function playPrev() {
+	console.log("todo: play prev");
 }
 
 function loaded() {
@@ -149,6 +168,7 @@ function loaded() {
 				}
 			}
 		} (thecursor) ;
+		zmoteReceiver.onclick = doClick;
 	});
 	
 	socket.on('userJoined', function (data) {
@@ -171,11 +191,21 @@ function loaded() {
 		playSong(data.songid);
 	});
 
+	tvCommands.on('togglePlayPause', function(data) {
+		togglePlayPause();
+	});
+	tvCommands.on('playPrev', function(data) {
+		playPrev();
+	});
+	tvCommands.on('playNext', function(data) {
+		playNext();
+	});
+
 	socket.on('sendToTV', function(data) {
 		// TODO: make sure command exists
 		tvCommands[data.command](data.data);
 	});
-	
+
 	roomurl = 'http://'+document.location.hostname+"/?" + uniqueid;
 	append_qrcode(4,"qrcode",roomurl);
 	document.getElementById("roomURL").innerHTML = '<h1><a href=\'JavaScript:newPopup("'+roomurl+'");\'>'+roomurl+'</a></h1>';
