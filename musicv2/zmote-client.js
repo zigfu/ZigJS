@@ -15,7 +15,11 @@ var zmote = (function() {
 	var lastDelta = { x : 0, y : 0, mode : "rel" };
 	var controllerConnected;
 
+	var touchStart = { x : 0, y : 0 };
+	var touchStartTime = 0;
+
 	function clamp01(val) { if (val < 0) return 0; if (val > 1) return 1; return val; }
+	function dist(p1, p2) { return Math.sqrt(((p1.x - p2.x) * (p1.x - p2.x)) + ((p1.y - p2.y) * (p1.y - p2.y))); }
 
 	function orientationToCursor(lastOrientation) {
 		return {
@@ -41,6 +45,8 @@ var zmote = (function() {
 		function ontouchstart(event) {
 			lastTouch.x = event.touches[0].pageX;
 			lastTouch.y = event.touches[0].pageY;
+			touchStart.x = lastTouch.x;
+			touchStart.y = lastTouch.y;
 			ontouchmove(event);
 		}
 		
@@ -55,6 +61,16 @@ var zmote = (function() {
 		}
 
 		function ontouchend(event) {
+			var d = dist(lastTouch, touchStart);
+			if (controllerConnected && d < 10) {
+				socket.emit('zmote-click');
+			}
+		}
+
+		function onclick(event) {
+			if (controllerConnected) {
+				socket.emit('zmote-click');
+			}
 		}
 
 		// return API
@@ -80,7 +96,7 @@ var zmote = (function() {
 			},
 
 			bindtouchpad : function(elementId) {
-				surface = document.getElementById(elementId);
+				var surface = document.getElementById(elementId);
 				surface.addEventListener("touchstart", ontouchstart, false);
 				surface.addEventListener("touchmove", ontouchmove, false);
 				surface.addEventListener("touchend", ontouchend, false);
@@ -167,6 +183,10 @@ var zmote = (function() {
 
 		socket.on('zmote-cursor', function(data) {
 			ret.oncursor(data.x, data.y, data.mode == "rel");
+		});
+
+		socket.on('zmote-click', function(data) {
+			ret.onclick();
 		});
 
 		if (undefined !== id) {

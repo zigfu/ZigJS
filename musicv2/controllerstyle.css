@@ -107,10 +107,9 @@ h1, h2, h3, h4, h5, h6, p, ul {
 }
 .homeScreenIcon {
 	width: 200px;
-	height: 300px;
-	margin-left: 50px;
+	height: 230px;
+	margin: 25px auto;
 	font-size: 35px;
-	margin-top: 100px;
 	float: left;	
 }
 .cursor {
@@ -301,4 +300,14 @@ h1, h2, h3, h4, h5, h6, p, ul {
 	box-shadow: inset rgba(255,255,255,0.05) 0 -1px 0, inset (255,255,255,0.1) 0 1px 0;
 	-moz-box-shadow: inset rgba(255,255,255,0.05) 0 -1px 0, inset (255,255,255,0.1) 0 1px 0;
 	-webkit-box-shadow: inset rgba(255,255,255,0.05) 0 -1px 0, inset (255,255,255,0.1) 0 1px 0;
+}
+#playerControls {
+	float:left;
+}
+#playerControls ul {
+	list-style-type: none;
+}
+
+#playerControls li {
+	float:left;
 }

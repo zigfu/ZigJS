@@ -14,13 +14,14 @@ body {
 	background-color: #dddddd;
 }
 .header {
-	width: 200px;
+	width : inherit;
 	height: 100px;
 	margin: 0px auto;
-	padding: 0px 0px;	
+	padding: 0px 30px;	
+	position : relative;
 }
 .header img {
-	margin: 0px auto;
+	margin: 0px 30px;
 }
 .mylist {
 	overflow: hidden;
@@ -29,6 +30,7 @@ body {
 #roomNameInput {
 	border-radius: 5px;
 	text-align: center;
+	margin-right : 30px;
 }
 .scrollerContainer {
 	width: 100%;
@@ -56,6 +58,12 @@ body {
 	font-family: Arial;
 	//letter-spacing: -2px;
 	color : #ccc;
+}
+.playing:before {
+	content : " * ";
+}
+.playing li {
+	color : red;
 }
 .scroller img {
 	padding-top: 20px;
@@ -114,15 +122,26 @@ li a:hover {
 	color: #09C;
 	text-decoration: none;
 }
+.horizontalList {
+	margin-left : 200px;
+	width : inherit;
+	position: relative;
+}
+.horizontalList ul {
+	list-style:none;
+}
+.horizontalList li {
+	float : left;
+}
 #playercontrols {
-	width : 65%;
-	height : 30%;
+	width : 98%;
+	height : 10%;
 	float : left;
 }
 
 #medialibrary {
 	width : 65%;
-	height : 60%;
+	height : 75%;
 	float : left;
 }
 #medialibraryList {
@@ -140,7 +159,7 @@ li a:hover {
 }
 #userlist {
 	width : 30%;
-	height : 35%;
+	height : 75%;
 	float : right;
 }
 #userlistList {
@@ -152,7 +171,14 @@ li a:hover {
 	height : 90%;	
 }
 
-
+.nameentry {
+	font-size: 52px;
+	width : 320px;
+	height : 40;
+	margin-top : 30px;
+	padding-right : 30px;
+	text-align : right;
+}
 
 
 /*** pop-up div to cover entire area ***/

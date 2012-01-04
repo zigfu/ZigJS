@@ -91,6 +91,11 @@ var synclist = (function() {
 				return lists[id].items.getItem(itemid);
 			},
 
+			getElement : function(itemid) {
+				if (!lists[id].bound) return null;
+				return 	getElementByItemid(lists[id].boundelement, itemid);
+			},
+
 			set : function(itemid, itemdata) {
 				socket.emit("list-set", { listid : id, itemid : itemid, itemdata : itemdata });
 			},
