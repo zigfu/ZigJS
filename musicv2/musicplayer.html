@@ -34,8 +34,8 @@ tvCommands.on = function(command, callback) {
 	this[command] = callback;
 }
 
-var currentName = localStorage.getItem("roomName");
-if (null == currentName) currentName = "[TV]";	
+var currentRoomName = localStorage.getItem("currentRoomName");
+if (null == currentRoomName) currentRoomName = "[TV Name]";	
 
 var currentLocation = {};
 if (navigator.geolocation)
@@ -82,10 +82,36 @@ function moveCursorBy(element, deltaX, deltaY) {
 	setCursor(element, lastCursor.x, lastCursor.y);
 }
 
+function hasClass(ele,cls) {
+    return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
+}
+
+function addClass(ele,cls) {
+    if (!hasClass(ele,cls)) ele.className += " "+cls;
+}
+
+function removeClass(ele,cls) {
+	if (hasClass(ele,cls)) {
+    	var reg = new RegExp('(\\s|^)'+cls+'(\\s|$)');
+		ele.className=ele.className.replace(reg,' ');
+	}
+}
+
+nowPlaying = undefined;
+
 function playSong(songid) {
+	// TODO: unhighlight previously playing song
+	if (undefined !== nowPlaying) {
+		removeClass(medialist.getElement(nowPlaying), "playing");
+	}
+	nowPlaying = songid;
+	
+	// get the song element
+	var songElem = medialist.getElement(songid);
+	addClass(songElem, "playing");
+
 	// get the actual song
 	var song = songs[songid];
-	console.log('About to play ' + song);
 	var player = document.getElementById("audioPlayer");
 	player.src = geturl(song);
 	player.play();
@@ -107,11 +133,11 @@ function playPrev() {
 }
 
 function loaded() {
-	document.documentElement.style.overflow = 'hidden';	 // firefox, chrome
-	document.body.scroll = "no";	// ie only
+	//document.documentElement.style.overflow = 'hidden';	 // firefox, chrome
+	//document.body.scroll = "no";	// ie only
 
 	medialibraryScroller = new iScroll('medialibraryScroller');
-	playlistScroller = new iScroll('playlistScroller');
+	//playlistScroller = new iScroll('playlistScroller');
 	userlistScroller = new iScroll('userlistScroller');
 	//playercontrolsScroller = new iScroll('playercontrolsScroller');
 	
@@ -123,7 +149,7 @@ function loaded() {
 	//TODO: we may want this socket to default to zig.tv and not origin for remote connections notifying the tracker
 	socket = io.connect('http://'+document.location.hostname);
 	socket.on('connect', function () {
-		socket.emit("startRoom", {id: uniqueid, name : currentName, location : currentLocation});
+		socket.emit("startRoom", {id: uniqueid, name : currentRoomName, location : currentLocation});
 	});
 		
 	socket.on('pingTV',function(data){
@@ -209,14 +235,13 @@ function loaded() {
 	roomurl = 'http://'+document.location.hostname+"/?" + uniqueid;
 	append_qrcode(4,"qrcode",roomurl);
 	document.getElementById("roomURL").innerHTML = '<h1><a href=\'JavaScript:newPopup("'+roomurl+'");\'>'+roomurl+'</a></h1>';
-	console.log(roomurl);
 	document.getElementById("qrModalDialog").addEventListener('click',function() {
 		window.location = "#";
 	});
 
 	
-	nameChanged(currentName);
-	document.getElementById("roomNameInput").addEventListener('change',nameentrydone, false);
+	nameChanged(currentRoomName);
+	document.getElementById("currentRoomNameInput").addEventListener('change',nameentrydone, false);
 
 	// Setup the dnd listeners.
 	var dropZone = document.getElementById('medialibrary');
@@ -333,18 +358,27 @@ function geturl(f) {
 	}
 
 
+function nameentry() {
+    document.getElementById("currentRoomName").style.display = "none";
+    document.getElementById("currentRoomNameInput").style.display = "block";
+    document.getElementById("currentRoomNameInput").focus();
+}
+
 function nameentrydone() {
-	var newName = document.getElementById("roomNameInput").value;
-	console.log(newName);
-	nameChanged(newName);
+    var newName = document.getElementById("currentRoomNameInput").value;
+    console.log("Name changed: " + newName);
+    nameChanged(newName);
+	socket.emit('setName',{ name : newName});
 }
 
 function nameChanged(newName) {
-	currentName = newName;
-	localStorage.setItem("roomName", currentName);
-	document.getElementById("roomNameInput").value = currentName;
-	socket.emit('setName', { name : currentName });
-}	
+    currentRoomName = newName;
+    localStorage.setItem("currentRoomName", currentRoomName);
+    document.getElementById("currentRoomNameInput").value = currentRoomName;
+    document.getElementById("currentRoomName").innerHTML = currentRoomName;
+    document.getElementById("currentRoomName").style.display = "block";
+    document.getElementById("currentRoomNameInput").style.display = "none";
+}
 
 function newPopup(url) {
 	popupWindow = window.open(
@@ -368,32 +402,47 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 </head>
 <body>
-<div class="header">
 
-<a href="#">
-<img src="i/logo.png" />
-</a>
 
-</div>
 <div id="contentwrapper">
-	<div id="playercontrols" class="mylist">
-		<div class="scrollerheader"><a href="#">Info</a></div>
-		<div id="playercontrolsScroller" class="scrollerContainer">
-			<div class="scroller">
 
-			<div id="roomnameArea">
-				<INPUT type="text" placeholder="[Enter TV Name]" spellcheck="off" autocomplete="off" id="roomNameInput" name="roomNameInput"/>
-			</div>
-			<ul>
-	<li>
-		<a href="#qrModalDialog"><img src="i/getqr.png"></a>
-	</li>
-		</ul>
-		
-			</div>
+	<div class="header">
+
+		<a href="#" style="float : left">
+			<img src="i/logo.png" />
+		</a>
+
+		<a href="#qrModalDialog" style="float : right"><img src="i/qrcode_small.png"></a>
+
+		<!--
+		<div id="roomnameArea" style="float : right">
+			<INPUT type="text" style="float : right" placeholder="[Enter TV Name]" spellcheck="off" autocomplete="off" id="roomNameInput" name="roomNameInput"/>
 		</div>
+		-->
+		<div style="float : right; width:320px">
+			<div id="currentRoomName" onclick="nameentry();" class="nameentry">Test</div>
+
+    		<input class="nameentry" style="display:none; " type="text" placeholder="[Enter TV Name]" spellcheck="off" autocomplete="off" id="currentRoomNameInput" name="currentRoomNameInput" onchange="nameentrydone()"/>
+    	</div>
+
+		
+
 	</div>
 
+
+	<div id="playercontrols" class="horizontalList">
+		<div >
+			<ul>
+                <li> <img src="musicicons/MCPrev.png" onclick="javascript:playPrev();">
+                </li>
+                <li> <img src="musicicons/MCPlay.png" onclick="javascript:togglePlayPause();">
+                </li>
+                <li> <img src="musicicons/MCNext.png" onclick="javascript:playNext();">
+                </li>
+            </ul>
+          </div>
+	</div>
+<!--
 	<div id="playlist" class="mylist">
 		<div class="scrollerheader"><a href="#">Playlist</a></div>
 		<div id="playlistScroller" class="scrollerContainer">
@@ -405,7 +454,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 			<div id="cursorCenter" class="showinsession pushable"></div>
 		</div>
 	</div>
-
+-->
 	<div id="medialibrary" class="mylist">
 		<div class="scrollerheader"><a href="#">Media Library</a></div>
 		<div id="medialibraryScroller" class="scrollerContainer">
