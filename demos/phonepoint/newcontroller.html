@@ -1,0 +1,101 @@
+<html>
+<head>
+<title>Zorlak Controller</title>
+
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="viewport" content="width=device-width, user-scalable=no"/>
+
+<link rel="stylesheet" type="text/css" href="controllerstyle.css" />
+
+<script type="text/javascript" src="iscroll.js"></script> 
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/synclist-client.js"></script>
+<script src="/zmote-client.js"></script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script src="js/jquery.ui.touch-punch.min.js"></script>
+<link type="text/css" href="css/custom-theme/jquery-ui-1.8.16.custom.css" rel="Stylesheet" />
+
+<script>
+
+var zmoteid = 123456;
+
+var zmoteController;
+
+function loaded() {
+	socket = io.connect('http://'+document.location.hostname);
+
+	socket.on('connect',function () {
+		
+		zmoteController = zmote.controller(socket,zmoteid);
+		zmoteController.cursormode = zmote.cursorModes.motion;
+		zmoteController.updateorientation = true;
+
+		zmoteController.ondisconnected = function() {
+			// bummer
+			console.log('Oh noess.... disconnected');
+		};
+
+		zmoteController.onconnected = function() {
+			console.log('zmote connected.  Huzzah!');
+		}
+
+		zmoteController.start();
+	});
+}
+
+function zmoteStart() {
+	zmoteController.start();
+}
+
+function zmoteStop() {
+	zmoteController.stop();
+}
+
+function recalibrate() {
+	console.log('recalibrating...');
+	zmoteController.recalibrate();
+}
+
+function sendToTV(command,data) {
+	socket.emit( 'sendToTV', { command : command, data : data } );
+}
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
+</script>
+
+</head>
+
+<body>
+<div id='wrapper'>
+
+	<div class='header'>
+		<div class='name'>
+			<div id='currentUserName'>
+			</div>
+		</div>
+	</div>
+
+	<div id="pointerscreen">
+        <div id="motion">
+        	<div class="motionContainer">
+            	<div class="recal">
+            		<div id="calibrateButton" ontouchend="recalibrate()" onclick='recalibrate()'>
+            			<img src="mi/recalibrate.png" />
+        			</div>
+    			</div>
+			</div>                    
+        </div>
+	</div>
+
+	<div id='start' ontouchend='zmoteStart()' style='float:left; font-size: 120px; margin-left: 40px'>
+		Start
+	</div>
+	<div id='stop' ontouchend='zmoteStop()' style='float:right; font-size: 120px; margin-right: 40px'>
+		Stop
+	</div>
+</div>
+</body>

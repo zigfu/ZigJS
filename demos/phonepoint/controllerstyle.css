@@ -1,0 +1,304 @@
+html, body {
+	margin: 0px 0px;
+	padding: 0px 0px;
+}
+h1, h2, h3, h4, h5, h6, p, ul {
+	margin: 0px 0px;
+	padding: 0px 0px;
+}
+.invisible {
+	display: none;
+}
+.targetable {
+	display: none;
+}
+.targetable:target {
+	display: block;	
+}
+#wrapper {
+	width: 640px;
+	height: 960px;
+	background-color: #ccc;
+}
+.header {
+	width: 100%;
+	height: 150px;
+	background-image: url(mi/logo.png);
+	background-repeat: no-repeat;
+	background-color: rgba( 0, 0, 0, 0.2);
+}
+.name {
+	width: 240px;
+	margin-left: 400px;
+	padding-top: 60px;
+}
+.name div {
+	color: #231f20;
+	font-family: Arial;
+	letter-spacing: -2px;
+	font-size: 46px;
+}
+
+.coollist {
+	width: 500px;
+	height: 500px;
+	margin: 0px auto;
+	margin-top: 20px;
+	background-color: #666;
+	border-radius: 10px;
+	box-shadow: 1px 3px 5px #333;
+	-webkit-box-shadow: 1px 3px 5px #333;
+	position:relative;
+}
+.coollist ul {
+	padding-top: 30px;
+	margin : 0px 20px;
+	//padding-left: 75px;
+}
+.coollist li {
+	font-family: Arial;
+	color: #FFF;
+	list-style-type: none;
+	padding-top: 20px;
+	font-size: 46px;
+	border-bottom: 1px solid #ccc;
+	margin : 0px auto;
+	text-align:center;
+	//width: 300px;
+}
+.coollistHeader {
+	font-family: Arial;
+	font-size: 30px;
+	color: #333;
+	text-align:center;
+	padding-top : 20px;
+	margin: 0px 0px;
+}
+#homescreen {
+	width: 500px;
+	height: 650px;
+	margin: 0px auto;	
+}
+.nowplaying {
+	width: 500px;
+	height: 75px;
+	background-color: red;
+	margin-top: 10px;
+	font-family: Arial;
+	font-size: 20px;
+}
+.playlist {
+	float: left;
+	width: 300px;
+	height: 300px;
+	margin-top: 100px;
+}
+.playlist h1 {
+	font-family: Arial;
+	margin: 20px;
+	height: 20px;
+}
+.playlist ul {
+	list-style-type: none;
+}
+.playlist li {
+	font-size: 35px;
+	padding-top: 10px;
+}
+.homeScreenIcon {
+	width: 200px;
+	height: 300px;
+	margin-left: 50px;
+	font-size: 35px;
+	margin-top: 100px;
+	float: left;	
+}
+.cursor {
+	width: 200px;
+	height: 300px;
+	margin-left: 50px;
+	font-size: 35px;
+	margin-top: 100px;
+	float: left;
+}
+.homeScreenIcon p {
+	font-family: Arial;
+	font-size: 30px;
+	color:#333;
+	padding-left: 20px;
+	text-align: center;
+}
+.qrcode {
+ width: 200px;
+ height: 300px;
+ font-size: 35px;
+ margin-top: 100px;
+ float: left;
+}
+.qrcode p {
+ font-family: Arial;
+ font-size: 30px;
+ color:#333;
+ padding-left: 20px;
+ text-align: center;
+}
+.homeScreenIcon a {
+ text-decoration: none;
+}
+.qrcode {
+	width: 200px;
+	height: 300px;
+	font-size: 35px;
+	margin-top: 100px;
+	float: left;
+}
+.qrcode p {
+	font-family: Arial;
+	font-size: 30px;
+	color:#333;
+	padding-left: 20px;
+	text-align: center;
+}
+.qrcode a {
+	text-decoration: none;
+}
+#motion {
+	background-color: rgba( 0, 0, 0, 0.4);
+	border-radius: 10px;
+	width: 500px;
+	height: 500px;
+	margin: 0px auto;
+	padding: 0px 0px;
+	margin-top: 50px;
+	
+}
+.motionController {
+	width: 500px;
+	height: 500px;
+	margin: 0px auto;
+	background-color: #FFF;
+}
+.controllerOptions {
+}
+.controllerOptions a {
+	text-decoration: none;
+}
+.controllerOptions a:hover {
+	text-decoration: none;
+}
+.controllerOptions .pointer {
+	width: 175px;
+	height: 75px;
+	background-color: rgba( 0, 0, 0, 0.4);
+	margin-left: 100px;
+	float: left;
+	text-align: center;
+	color: #fff;
+}
+.controllerOptions .pointer h2 {
+	color: #fff;
+	margin-top: 20px;
+}
+.controllerOptions .touchpad {
+	width: 175px;
+	height: 75px;
+	background-color: rgba( 0, 0, 0, 0.2);
+	margin-left: 25px;
+	float: left;
+	text-align: center;
+}
+.controllerOptions .touchpad h2 {
+	color: #fff;
+	margin-top: 20px;
+}
+.recal {
+	width: 211px;
+	margin: 0px auto;
+}
+#sensitivitySlider {
+	height: 500px;
+	float: right;
+	margin-right: 30px;
+	margin-top: -500px;
+}
+#slidernub {
+	width: 20px;
+	height: 20px;
+	background-color: blue;
+	position:absolute;
+	margin-right: 10px;
+}
+#touchpad {
+	margin: 0px auto;
+	margin-top: 50px;
+	width: 500px;
+	height: 500px;
+	background-image: url(mi/trackpad.png);	
+}
+.closebutton {
+	width: 100px;
+	margin: 0px auto;
+	padding-top: 20px;
+}
+#connecting {
+	width: 200px;
+	height: 80px;
+	background-color: #000;
+	margin: 0px auto;
+	border-radius: 10px;
+	color: #FFF;
+	font-family: Arial;
+	font-size: 30px;
+	margin-top: 10px;
+	padding-top: 30px;
+	text-align: center;
+}
+/* CSS BUTTON STYLE */
+.css_button {
+	display: inline-block;
+	height
+	margin: 0px auto;
+	padding-left: 20px;
+	padding: 10px 25px 10px 20px;
+	color: rgba(255,255,255,0.8);
+	text-decoration: none;
+	background: rgba(40,100,200,1);
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	box-shadow: rgba(15,60,130,1) 0 3px 0, inset rgba(255,255,255,0.05) 0 -1px 0, inset rgba(255,255,255,0.1) 0 1px 0;
+	-moz-box-shadow: rgba(15,60,130,1) 0 3px 0, inset rgba(255,255,255,0.05) 0 -1px 0, inset rgba(255,255,255,0.1) 0 1px 0;
+	-webkit-box-shadow: rgba(15,60,130,1) 0 3px 0, inset rgba(255,255,255,0.05) 0 -1px 0, inset rgba(255,255,255,0.1) 0 1px 0;
+	position: relative;
+	top: 10px;
+	font-size: 20px !important;
+	overflow: hidden;
+	border: none;
+	cursor: pointer;
+	outline: none;
+}
+.css_button:before {
+	content: '';
+	width: 50%;
+	height: 100px;
+	position: absolute;
+	top: 100%;
+	left: 25%;
+	border-radius: 500px;
+	background: none;
+	box-shadow: rgba(255,255,255,0.5) 0 1px 20px;
+	-moz-box-shadow: rgba(255,255,255,0.5) 0 1px 20px;
+	-webkit-box-shadow: rgba(255,255,255,0.5) 0 1px 20px;
+}
+.css_button:hover {
+	background: rgba(45,115,230,1);
+	box-shadow: rgba(15,60,130,0.8) 0 3px 0, inset rgba(255,255,255,0.05) 0 -1px 0 rgba(255,255,255,0.1) 0 1px 0;
+	-moz-box-shadow: rgba(15,60,130,0.8) 0 3px 0, inset rgba(255,255,255,0.05) 0 -1px 0 rgba(255,255,255,0.1) 0 1px 0;
+	-webkit-box-shadow: rgba(15,60,130,0.8) 0 3px 0, inset rgba(255,255,255,0.05) 0 -1px 0 rgba(255,255,255,0.1) 0 1px 0;
+}
+.css_button:active {
+	background: rgba(40,100,200,0.8);
+	box-shadow: inset rgba(255,255,255,0.05) 0 -1px 0, inset (255,255,255,0.1) 0 1px 0;
+	-moz-box-shadow: inset rgba(255,255,255,0.05) 0 -1px 0, inset (255,255,255,0.1) 0 1px 0;
+	-webkit-box-shadow: inset rgba(255,255,255,0.05) 0 -1px 0, inset (255,255,255,0.1) 0 1px 0;
+}

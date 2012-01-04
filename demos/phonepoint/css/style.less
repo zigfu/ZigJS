@@ -1,0 +1,161 @@
+/*---------------------------------------------------------
+colors
+---------------------------------------------------------*/
+@gallerybg: 	#16181a;
+@cobaltdark: 	#151b23;
+@cobaltlight: 	#3d5362;
+@footerdark: 	#0b0b0b;
+
+/*---------------------------------------------------------
+sizes
+---------------------------------------------------------*/
+@page_width:		960px;
+@gutter_width: 		20px;
+@left_width:		@page_width / 2 - @gutter_width;
+@right_width:		@page_width / 2 - @gutter_width;
+@one_fourth_width:	@page_width / 4 - 3*@gutter_width;
+@gallery_width: 	1100px;
+
+/*---------------------------------------------------------
+fonts
+---------------------------------------------------------*/
+@font-face {
+  font-family: 'Rokkitt';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Rokkitt'), url('http://themes.googleusercontent.com/static/fonts/rokkitt/v4/RcB7dRNAX_8JE8zinU47YALUuEpTyoUstqEm5AMlJo4.woff') format('woff');
+}
+@font-face {
+  font-family: 'Rokkitt';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Rokkitt Bold'), local('Rokkitt-Bold'), url('http://themes.googleusercontent.com/static/fonts/rokkitt/v4/Mef17w3J4CtS0lw4Wa_8r73hpw3pgy2gAi-Ip7WPMi0.woff') format('woff');
+}
+
+/*---------------------------------------------------------
+utility functions
+---------------------------------------------------------*/
+.cobaltradialgradient {
+	background: @cobaltlight; /* Old browsers */
+	background-position: center 100px;
+	background: -moz-radial-gradient(center 100px, ellipse cover,  @cobaltlight 25%, @cobaltdark 65%); /* FF3.6+ */
+	background: -webkit-gradient(radial, center 100px, 0px, center center, 65%, color-stop(0%,@cobaltlight), color-stop(65%,@cobaltdark)); /* Chrome,Safari4+ */
+	background: -webkit-radial-gradient(center 100px, ellipse cover,  @cobaltlight 25%,@cobaltdark 65%); /* Chrome10+,Safari5.1+ */
+	background: -o-radial-gradient(center 100px, ellipse cover,  @cobaltlight 25%,@cobaltdark 65%); /* Opera 12+ */
+	background: -ms-radial-gradient(center 100px, ellipse cover,  @cobaltlight 25%,@cobaltdark 65%); /* IE10+ */
+	background: radial-gradient(center 100px, ellipse cover,  @cobaltlight 25%,@cobaltdark 65%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='@cobaltlight', endColorstr='@cobaltdark',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+}
+.box-shadow (@shadowstring) {
+	box-shadow: 		@shadowstring;
+	-moz-box-shadow: 	@shadowstring;
+	-webkit-box-shadow:	@shadowstring;
+}
+
+
+.box-shadow-2 (@firststring,@secondstring) {
+	box-shadow: 		@firststring,@secondstring;
+	-moz-box-shadow: 	@firststring,@secondstring;
+	-webkit-box-shadow:	@firststring,@secondstring;
+}
+
+.fillwidth {
+	width: 100%;
+}
+.fillheight {
+	height: 100%;
+}
+.fill {
+	.fillwidth;
+	.fillheight;
+}
+
+.nospacing {
+	margin: 0;
+	padding: 0;
+}
+
+.center {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/*---------------------------------------------------------
+styles
+---------------------------------------------------------*/
+
+html, body {
+	.nospacing;
+	.cobaltradialgradient;
+}
+
+#wrapper {
+	.fill;
+}
+
+.row {
+	width:	@page_width;
+	.center;
+}
+
+.left {
+	float: left;
+	width: @left_width;
+}
+
+.right {
+	float: right;
+	width: @right_width;
+	h1 {
+		font-family: 		'Rokkitt';
+		font-size: 			31pt;
+		font-weight: 		bold;
+		color:				rgba(0,0,0,0.2);
+		text-shadow: 		0px 1px rgba(255,255,255,1.0);
+	}
+}
+
+#header {
+	.fillwidth;
+	height: 			100px;
+	//background-color:	red;
+	font-family: 		'Droid Sans';
+	border-width:		0 0 12 0;
+	margin: 			0;
+	padding: 			0;
+	.box-shadow(0px -5px 5px -2px rgba(255,255,255,0.1) inset);
+}
+
+#gallery {
+	.fillwidth;
+	background-color: 	@gallerybg;
+	
+	.butholder {
+		width:			@gallery_width;
+		.center;
+		padding-top:	30px;
+		padding-bottom: 10px;
+		ul {
+			.center;
+			li {
+				.center;
+				display: inline;
+				padding-right: 12px;
+			}
+		}
+	}
+}
+
+#content {
+	.fillwidth;
+	height: 			300px;
+	//background-color: 	green;
+	
+	.box-shadow-2(0px 5px 5px -2px rgba(255,255,255,0.1) inset, 0px -10px 10px -2px rgba(0,0,0,0.2) inset);	
+}
+
+#footer {
+	.fillwidth;
+	height: 200px;
+	background-color: 	@footerdark;
+}

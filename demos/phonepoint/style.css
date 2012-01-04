@@ -1,0 +1,256 @@
+/* CSS by Bryce Tucker @ Zigfu */
+html, body {
+	margin: 0px 0px;
+	padding: 0px 0px;
+}
+h1, h2, h3, h4, h5, h6, p {
+	margin: 0px 0px;
+	padding: 0px 0px;	
+}
+body {
+	background-image: url(i/bg.jpg);
+	background-repeat: repeat-x;
+	background-position: top;
+	background-color: #dddddd;
+}
+.header {
+	width: 200px;
+	height: 100px;
+	margin: 0px auto;
+	padding: 0px 0px;	
+}
+.header img {
+	margin: 0px auto;
+}
+.mylist {
+	overflow: hidden;
+	margin : 1%;
+}
+#roomNameInput {
+	border-radius: 5px;
+	text-align: center;
+}
+.scrollerContainer {
+	width: 100%;
+	height : 100%;
+	margin: auto;
+	overflow:hidden;
+	position:relative;
+	background-color: #231f20;
+}
+.scroller ul {
+	list-style:none;
+	padding:0;
+	margin:0;
+	width:100%;
+	text-align:left;
+}
+.scroller li {
+	padding:0 10px;
+	height:52px;
+	line-height:52px;
+	//border-bottom:1px solid #ccc;
+	//border-top:1px solid #fff;
+	//background-color:#fafafa;
+	font-size:32px;
+	font-family: Arial;
+	//letter-spacing: -2px;
+	color : #ccc;
+}
+.scroller img {
+	padding-top: 20px;
+}
+.scroller a {
+	opacity: 0.4;
+}
+.scroller a:hover {
+	opacity: 1;
+}
+.scrollerheader {
+	width:100%;
+	height:45px;
+	border-top-right-radius: 5px;
+	border-top-left-radius: 5px;
+	line-height:45px;
+	background-color:#526071;
+	background: #2d2d2d; /* Old browsers */
+	background: -moz-linear-gradient(top,  #2d2d2d 0%, #000000 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#2d2d2d), color-stop(100%,#000000)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #2d2d2d 0%,#000000 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #2d2d2d 0%,#000000 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #2d2d2d 0%,#000000 100%); /* IE10+ */
+	background: linear-gradient(top,  #2d2d2d 0%,#000000 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2d2d2d', endColorstr='#000000',GradientType=0 ); /* IE6-9 */
+	border-bottom: 1px solid #ccc;
+	padding:0;
+	color:#eee;
+	font-size:20px;
+	font-family: 'Chivo';
+	text-align:center;
+}
+
+.scrollerheader a {
+	color:#f3f3f3;
+	text-decoration:none;
+	font-weight:bold;
+	text-shadow:0 -1px 0 rgba(0,0,0,0.3);
+}
+.scrollerheader a:hover {
+	color: #ccc;
+
+
+}
+@font-face {
+  font-family: 'Chivo';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Chivo'), local('Chivo-Regular'), url('http://themes.googleusercontent.com/static/fonts/chivo/v3/2vOGounxqJdQZmH7ou5HpA.woff') format('woff');
+}
+li a {
+	color: #526071;
+	text-decoration: none;
+}
+li a:hover {
+	color: #09C;
+	text-decoration: none;
+}
+#playercontrols {
+	width : 65%;
+	height : 30%;
+	float : left;
+}
+
+#medialibrary {
+	width : 65%;
+	height : 60%;
+	float : left;
+}
+#medialibraryList {
+	font-family: Arial;
+	letter-spacing: -2px;
+}
+#playlist {
+	width : 30%;
+	height : 55%; 
+	float : right;
+}
+#playlistList {
+	font-family: Arial;
+	letter-spacing: -2px;
+}
+#userlist {
+	width : 30%;
+	height : 35%;
+	float : right;
+}
+#userlistList {
+	font-family: Arial;
+	letter-spacing: -2px;
+}
+
+#contentwrapper {
+	height : 90%;	
+}
+
+
+
+
+/*** pop-up div to cover entire area ***/
+	    .divModalDialog  {
+	        position:fixed;
+		    top:0;
+		    left:0;
+		    width:100%;
+		    height:100%;
+		    /*! important !*/
+		    display:none;
+		    /* last attribute set darkness on scale: 0...1.0 */
+		    background-color:rgba(0,0,0,0.9);
+		    text-align:center;
+		    //z-index:101;
+	    }
+	    
+	    /*** ! target attribute does the job ! ***/
+	    .divModalDialog:target  { display:block; }
+        
+        /*** virtual frame containing controls, image and caption ***/
+	    .divModalDialog div  {
+	       /* either absolute or fixed */
+		    position:absolute;
+		    top:5%;
+		    width:100%;
+		    height:80%;
+            /* rounded corners */
+	        -moz-border-radius: 10px;
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+            //z-index:102;
+	    }
+	    
+        /*** header used as main image caption  ***/
+        .divModalDialog div h1  {
+            width:100%;
+            font-size:2em;
+            color:#dadada;
+            //z-index:103;
+            /* add shadows to text */
+            -moz-text-shadow: 10px 3px 4px 6px rgba(0,0,0,0.9);  
+            -webkit-text-shadow: 3px 4px 6px rgba(0,0,0,0.9);  
+            text-shadow: 10px 4px 6px rgba(0,0,0,0.9); 
+        }	    
+
+        /*** main image style ***/
+        .divModalDialog img {
+            padding:20px;
+            z-index:105;
+            border: solid 1px gray;
+            /* rounded corners */
+        	-moz-border-radius: 10px;
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+            background: -moz-linear-gradient(top, #dadada, 
+                                                    #505050 5%, 
+                                                    #bababa 50%, 
+                                                    #303030 50%, 
+                                                    #101010);
+            background: -webkit-gradient(linear, center top, center bottom, 
+                                                    from(#dadada), 
+                                                    color-stop(0.05, #505050), 
+                                                    color-stop(0.5, #bababa), 
+                                                    color-stop(0.5, #303030), 
+                                                    to(#101010));
+        } 
+
+        /*** navigation controls style: highest z-index ! ***/
+	    .divModalDialog ul a  {
+		    padding:5px;
+		    font-size:3em;
+		    font-weight:bold;
+		    color:Yellow;
+		    text-decoration:none;
+		    border: solid 1px Gray;
+		    /* rounded corners */
+		    -moz-border-radius: 10px;
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+            z-index:500;
+	    }
+		
+		#qrDialog {
+			margin  : 0 auto;			
+		}
+
+		#qrcode {
+			border : solid 10px white;
+			width : auto;
+			height : auto;
+			margin-left : auto;
+			margin-right : auto;
+			position : relative;
+			//display:inline;
+	        //-moz-border-radius: 0px;
+            //-webkit-border-radius: 0px;
+            //border-radius: 0px;
+			}
+
+

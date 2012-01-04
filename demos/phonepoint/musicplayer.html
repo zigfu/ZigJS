@@ -1,0 +1,203 @@
+<!-- saved from url=(0014)about:internet -->
+<!-- mo'tw o'mercy -->
+<html>
+<head>
+
+<link rel="stylesheet" type="text/css" href="style.css" />
+
+<script type="text/javascript" src="iscroll.js"></script>
+
+<script src="/socket.io/socket.io.js"></script> 
+<script type="text/javascript" src="./qrcode_files/qrcode.js"></script>
+<script type="text/javascript" src="./qrcode_files/qrcanvas.js"></script>
+<script type="text/javascript" src="id3v2.js"></script>
+
+<script src="/synclist-client.js"></script>
+<script src="/zmote-client.js"></script>
+
+<script type="text/javascript">
+
+var socket;
+var zmoteReceiver;
+
+var currentLocation = {};
+if (navigator.geolocation)
+{
+	navigator.geolocation.getCurrentPosition(gotLocation, noLocation);
+}
+
+function gotLocation(position) {
+	currentLocation = position;
+}
+
+function noLocation() {
+	// bummer
+}
+
+var lastCursor = {x : 0, y : 0};
+
+function setCursor(element, xpx, ypx) {
+	element.style.left = lastCursor.x + "px";
+	element.style.top = lastCursor.y + "px";
+}
+
+function positionCursor(element, posX, posY) {
+	lastCursor.x = (posX * element.parentNode.offsetWidth - (element.offsetWidth / 2));
+	lastCursor.y = (posY * element.parentNode.offsetHeight - (element.offsetHeight / 2));
+	setCursor(element, lastCursor.x, lastCursor.y);
+}
+
+function clamp(val, min, max) {
+	if (val < min) return min;
+	if (val > max) return max;
+	return val;
+}
+
+function moveCursorBy(element, deltaX, deltaY) {
+	lastCursor.x = clamp(lastCursor.x + deltaX, 0, element.parentNode.offsetWidth);
+	lastCursor.y = clamp(lastCursor.y + deltaY, 0, element.parentNode.offsetHeight);
+
+	setCursor(element, lastCursor.x, lastCursor.y);
+}
+
+function loaded() {
+	document.documentElement.style.overflow = 'hidden';	 // firefox, chrome
+	document.body.scroll = "no";	// ie only
+
+	var uniqueid = 123456; // Math.floor(Math.random() * 100000);
+	
+	var thecursor = document.getElementById("realcursor");
+	positionCursor(thecursor, 0.5, 0.5); 
+	
+	//TODO: we may want this socket to default to zig.tv and not origin for remote connections notifying the tracker
+	socket = io.connect('http://'+document.location.hostname);
+	socket.on('connect', function () {
+
+		// zmote stuff
+		zmoteReceiver = zmote.receiver(socket, uniqueid);
+		zmoteReceiver.onconnect = function(clientid) { console.log("Zmote connected: " + clientid); };
+		zmoteReceiver.ondisconnect = function() { console.log("Zmote disconnected"); };
+		var thecursor = document.getElementById("realcursor")
+		zmoteReceiver.oncursor = function(cursor) { 
+			return function(x,y, rel) { 
+				console.log('got data, bitches! x: '+x+' y: '+y);
+				if (rel) {
+					moveCursorBy(cursor, x, y);
+				} else {
+					positionCursor(cursor, x, y); 
+				}
+			}
+		} (thecursor) ;
+	});
+	
+	socket.on('input', function (data) {
+		document.getElementById('textinputhere').innerHTML = data['value'];
+	});	
+
+	socket.on('sendToTV', function(data) {
+		// TODO: make sure command exists
+		tvCommands[data.command](data.data);
+	});
+}
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
+</script>
+
+<style>
+
+#realcursor {
+	width : 28;
+	height : 35;
+	position:absolute;
+	background-image : url("i/hand-pointer.png");
+}
+
+</style>
+
+</head>
+<body>
+<div class="header">
+
+<a href="#">
+<img src="i/logo.png" />
+</a>
+
+</div>
+<div id="contentwrapper">
+	<!--
+	<div id="playercontrols" class="mylist">
+		<div class="scrollerheader"><a href="#">Info</a></div>
+		<div id="playercontrolsScroller" class="scrollerContainer">
+			<div class="scroller">
+
+			<div id="roomnameArea">
+				<INPUT type="text" placeholder="[Enter TV Name]" spellcheck="off" autocomplete="off" id="roomNameInput" name="roomNameInput"/>
+			</div>
+			<ul>
+	<li>
+		<a href="#qrModalDialog"><img src="i/getqr.png"></a>
+	</li>
+		</ul>
+		
+			</div>
+		</div>
+	</div>
+
+	<div id="playlist" class="mylist">
+		<div class="scrollerheader"><a href="#">Playlist</a></div>
+		<div id="playlistScroller" class="scrollerContainer">
+			<div class="scroller">
+				<ul id="playlistList">
+				</ul> 
+			</div>
+			<div id="cursor" class="showinsession pushable"></div>
+			<div id="cursorCenter" class="showinsession pushable"></div>
+		</div>
+	</div>
+
+	<div id="medialibrary" class="mylist">
+		<div class="scrollerheader"><a href="#">Media Library</a></div>
+		<div id="medialibraryScroller" class="scrollerContainer">
+			<div class="scroller">
+				<ul id="medialibraryList">
+				</ul> 
+			</div>
+			<div id="cursor" class="showinsession pushable"></div>
+			<div id="cursorCenter" class="showinsession pushable"></div>
+		</div>
+	</div>
+
+
+
+	<div id="userlist" class="mylist">
+		<div class="scrollerheader"><a href="#">User list</a></div>
+		<div id="userlistScroller" class="scrollerContainer">
+			<div class="scroller">
+				<ul id="userlistList">
+					
+				</ul> 
+			</div>
+			<div id="cursor" class="showinsession pushable"></div>
+			<div id="cursorCenter" class="showinsession pushable"></div>
+		</div>
+	</div>
+</div>
+
+ <div id="qrModalDialog" class="divModalDialog">
+        <div id="qrDialog">
+            <h1>Scan in QR reader</h1>
+			<div id="roomURL"></div>
+			<div style="background-color : white; width: auto; margin : auto">
+				<div id="qrcode"/></div>
+			</div>
+        </div>
+        -->
+</div>
+
+<div id="realcursor" class="showinsession">
+
+</div>
+<audio id="audioPlayer">
+</body>
+</html>
