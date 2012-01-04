@@ -114,7 +114,7 @@ function handler (request, response) {
                     response.end();
                 }
                 else {
-                    response.writeHead(200, { 'Content-Type': contentType });
+                    response.writeHead(200, { 'Content-Type': contentType, 'Cache-Control': 'No-Cache' });
                     response.end(content, 'utf-8');
                 }
             });
