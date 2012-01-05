@@ -18,14 +18,41 @@ h1, h2, h3, h4, h5, h6, p, ul {
 #wrapper {
 	width: 640px;
 	height: 960px;
-	background-color: #ccc;
+	background-image:url(mi/background.jpg);
+	background-repeat:no-repeat;
+}
+.navBar {
+	width: 100%;
+	height: 75px;
+	background-image: url(mi/navBar.png);
+	background-repeat: no-repeat;
+	-webkit-box-shadow: inset 0px 2px 2px rgba(0,0,0,0.8);
+}
+.navBar .pp {
+	display: none;
+}
+.navBar .pp:target {
+	display: none;
+}
+.navBar a {
+	-webkit-touch-callout: none;
+}
+.navBar ul {
+	margin-left: 105px;
+	display: inline;
+}
+.navBar li {
+	padding: 0px 10px;
+	display: inline;
+}
+.navBar li a {
+	-webkit-touch-callout: none;
 }
 .header {
 	width: 100%;
 	height: 150px;
-	background-image: url(mi/logo.png);
+	background-image: url(mi/header-bg.png);
 	background-repeat: no-repeat;
-	background-color: rgba( 0, 0, 0, 0.2);
 }
 .name {
 	width: 240px;
@@ -37,8 +64,36 @@ h1, h2, h3, h4, h5, h6, p, ul {
 	font-family: Arial;
 	letter-spacing: -2px;
 	font-size: 46px;
+	text-shadow: 0x -1px 1px #FFF;
+	-webkit-text-shadow: 0px -1px 1px #FFF;
+}
+img {
+	-webkit-touch-callout: none;
+}
+#thebutton {
+	float:right;
+}
+#volumeSlider {
+	float: right;
+	margin-right: 10px;
+	display: none;
+	height : 300px;
+	z-index: 999;
 }
 
+#volumeLabel {
+	width : 80px;
+	height : 30px;
+	background-image: url(mi/controller/volumeSlider.png);
+	background-repeat: no-repeat;
+	display : block;
+	text-align : center;
+	display : none;
+	color: #FFF;
+	font-family: Arial, Helvetica, sans-serif;
+	padding-top: 5px;
+	font-weight: bold;
+}
 .coollist {
 	width: 500px;
 	height: 500px;
@@ -46,9 +101,9 @@ h1, h2, h3, h4, h5, h6, p, ul {
 	margin-top: 20px;
 	background-color: #666;
 	border-radius: 10px;
-	box-shadow: 1px 3px 5px #333;
-	-webkit-box-shadow: 1px 3px 5px #333;
-	position:relative;
+	box-shadow:  0px 5px 10px #333;
+	-webkit-box-shadow:  0px 5px 10px #333;
+	z-index: 1;
 }
 .coollist ul {
 	padding-top: 30px;
@@ -64,18 +119,21 @@ h1, h2, h3, h4, h5, h6, p, ul {
 	border-bottom: 1px solid #ccc;
 	margin : 0px auto;
 	text-align:center;
+	text-shadow: 1px 2px 0px #333;
 	//width: 300px;
 }
 .coollistHeader {
 	font-family: Arial;
 	font-size: 30px;
-	color: #333;
+	color: #ccc;
 	text-align:center;
 	padding-top : 20px;
+	margin-bottom: 20px;
 	margin: 0px 0px;
+	
 }
 #homescreen {
-	width: 500px;
+	width: 640px;
 	height: 650px;
 	margin: 0px auto;	
 }
@@ -106,11 +164,12 @@ h1, h2, h3, h4, h5, h6, p, ul {
 	padding-top: 10px;
 }
 .homeScreenIcon {
-	width: 200px;
-	height: 230px;
-	margin: 25px auto;
+	width: 640px;
+	padding: 0px 0px;
+	margin:0px auto;
+	margin-top: 10px;
 	font-size: 35px;
-	float: left;	
+		
 }
 .cursor {
 	width: 200px;
@@ -217,8 +276,8 @@ h1, h2, h3, h4, h5, h6, p, ul {
 #sensitivitySlider {
 	height: 500px;
 	float: right;
-	margin-right: 30px;
-	margin-top: -500px;
+	margin-right: 600px;
+	margin-top: -570px;
 }
 #slidernub {
 	width: 20px;
@@ -301,11 +360,34 @@ h1, h2, h3, h4, h5, h6, p, ul {
 	-moz-box-shadow: inset rgba(255,255,255,0.05) 0 -1px 0, inset (255,255,255,0.1) 0 1px 0;
 	-webkit-box-shadow: inset rgba(255,255,255,0.05) 0 -1px 0, inset (255,255,255,0.1) 0 1px 0;
 }
+#iconContainer {
+	width: 640px;
+	height: 600px;
+	padding-top: 20px;
+}
+#homeScreenIcon ul {
+	display: inline;
+	list-style-type: none;
+}
+#homeScreenIcon li {
+	display: inline;
+}
+.styletypenone {
+	list-style-type: none;
+	display: inline;
+}
+.homeScreenIcon a {
+	-webkit-touch-callout: none;
+}
 #playerControls {
-	float:left;
+	float:;
+	padding-top: 40px;
+	width: 300px;
+	margin: 0px auto;
 }
 #playerControls ul {
 	list-style-type: none;
+	display: inline;
 }
 
 #playerControls li {
