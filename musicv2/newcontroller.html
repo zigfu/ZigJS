@@ -273,40 +273,6 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 </script>
 
-<script>
-
-$(function() {
-	
-	$("#thebutton").click(function() {
-		$("#volumeSlider").toggle("slide", { direction: "up" }, 300);
-	})
-
-	$("#volumeSlider").slider({
-            orientation: "vertical",
-            range: "min",
-            min: 0,
-            max: 100,
-            value: 60,
-            start : function(event, ui) { 
-	            $("#volumeLabel")
-	            	.show("fade"); 
-	            },
-            slide : function(event, ui) { 
-	            $("#volumeLabel")
-	            	.text(ui.value)
-	            	.position({
-            			my : "left center",
-            			at : "right center",
-            			of : ui.handle,
-            			offset : "10 3.5"}); 
-	        	},
-            stop : function(event, ui) { $("#volumeLabel").hide("fade"); }
-        });
-
-});
-
-</script>
-
 </head>
 
 <body>
