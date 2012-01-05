@@ -172,7 +172,10 @@ function loaded() {
             value: 60,
             start : function(event, ui) { 
 	            $("#volumeLabel")
-	            	.show("fade"); 
+	            	.show("fade");
+				$(ui.handle).attr("data-updateTimer", setInterval(function() {
+						sendToTV("setVolume", {volume: ($("#volumeSlider").slider("option", "value") / 100)});
+					}, 300));
 	            },
             slide : function(event, ui) { 
 	            $("#volumeLabel")
@@ -183,7 +186,11 @@ function loaded() {
             			of : ui.handle,
             			offset : "10 3.5"}); 
 	        	},
-            stop : function(event, ui) { $("#volumeLabel").hide("fade"); }
+            stop : function(event, ui) { 
+				$("#volumeLabel").hide("fade"); 
+				clearInterval($(ui.handle).attr("data-updateTimer"));
+				sendToTV("setVolume", {volume: (ui.value / 100)});
+				}
         });
 
     preventScrolling("touchpad");
