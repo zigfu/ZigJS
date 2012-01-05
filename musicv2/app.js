@@ -48,6 +48,8 @@ function doJoin(socket, roomid) {
 		
 		socket.on('rename', (function(userid) {
 			return function(data) {
+				if (undefined === data.name) return;
+
 				var serverData = userlist.get(userid);
 				serverData.name = data.name;
 				userlist.set(userid, data);
