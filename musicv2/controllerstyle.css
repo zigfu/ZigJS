@@ -393,3 +393,11 @@ img {
 #playerControls li {
 	float:left;
 }
+#currentUserName {
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+#navBar {
+	display : none;
+}

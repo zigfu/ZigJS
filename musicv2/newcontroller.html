@@ -31,6 +31,12 @@ function gotoScreen(screenType) {
     for (var screen in screenTypes) {
         document.getElementById(screenTypes[screen]).style.display = (screenTypes[screen] == screenType) ? "block" : "none";
     }
+
+    showNavBar(screenType != screenTypes.chooseScreen);
+}
+
+function showNavBar(show) {
+    document.getElementById("navBar").style.display = (show) ? "block" : "none";
 }
 
 var pointerTypes = {
@@ -152,6 +158,32 @@ function loaded() {
             min: 0,
             max: 100,
             value: 60
+        });
+
+    $("#thebutton").click(function() {
+		$("#volumeSlider").toggle("slide", { direction: "up" }, 300);
+	})
+
+	$("#volumeSlider").slider({
+            orientation: "vertical",
+            range: "min",
+            min: 0,
+            max: 100,
+            value: 60,
+            start : function(event, ui) { 
+	            $("#volumeLabel")
+	            	.show("fade"); 
+	            },
+            slide : function(event, ui) { 
+	            $("#volumeLabel")
+	            	.text(ui.value)
+	            	.position({
+            			my : "left center",
+            			at : "right center",
+            			of : ui.handle,
+            			offset : "10 3.5"}); 
+	        	},
+            stop : function(event, ui) { $("#volumeLabel").hide("fade"); }
         });
 
     preventScrolling("touchpad");
@@ -283,12 +315,12 @@ $(function() {
 	<div class="header">
     	<div class="name">
             <div id="currentUserName" onClick="nameentry();"></div>
-    		<input style="display:none; width: 320px; height: 30px; font-size: 20px;" type="text" placeholder="[Enter Name]" spellcheck="off" autocomplete="off" id="currentUserNameInput" name="currentUserNameInput" onChange="nameentrydone()"/>
+    		<input style="display:none; width: 220px; height: 30px; font-size: 20px;" type="text" placeholder="[Enter Name]" spellcheck="off" autocomplete="off" id="currentUserNameInput" name="currentUserNameInput" onchange="nameentrydone()"/>
 
     	</div>
     </div>
 
-	<div class="navBar">
+	<div id="navBar" class="navBar">
     
     <a href="javascript:(function(){gotoScreen(screenTypes.roomslist);"><img src="mi/controller/home.png" /></a>
     
@@ -312,7 +344,7 @@ $(function() {
         </div>
 	</div>
 
-	<div id="homescreen" class="invisible">       
+<div id="homescreen" class="invisible">       
         
 		<div class="homeScreenIcon">
         
