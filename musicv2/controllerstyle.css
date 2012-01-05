@@ -74,8 +74,7 @@ img {
 	float:right;
 }
 #volumeSlider {
-	float: right;
-	margin-right: 10px;
+	margin-left: 600px;
 	display: none;
 	height : 300px;
 	z-index: 999;
@@ -93,6 +92,7 @@ img {
 	font-family: Arial, Helvetica, sans-serif;
 	padding-top: 5px;
 	font-weight: bold;
+	z-index: 999;
 }
 .coollist {
 	width: 500px;

@@ -178,12 +178,12 @@ function loaded() {
 	            $("#volumeLabel")
 	            	.text(ui.value)
 	            	.position({
-            			my : "left center",
-            			at : "right center",
+            			my : "right center",
+            			at : "left center",
             			of : ui.handle,
-            			offset : "10 3.5"}); 
+            			offset : "-10 3.5"}); 
 	        	},
-            stop : function(event, ui) { $("#volumeLabel").hide("fade"); }
+            stop : function(event, ui) { $("#volumeLabel").hide("fade"); $("#volumeSlider").hide("fade")}
         });
 
     preventScrolling("touchpad");
