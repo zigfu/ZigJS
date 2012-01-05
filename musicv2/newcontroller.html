@@ -322,14 +322,18 @@ $(function() {
 
 	<div id="navBar" class="navBar">
     
-    <a href="javascript:(function(){gotoScreen(screenTypes.roomslist);"><img src="mi/controller/home.png" /></a>
+    <a href="/"><img src="mi/controller/home.png" /></a>
     
     <ul>
     
     	<li><img src="mi/controller/mu_back.png" onClick="javascript:sendToTV('playPrev');" /></li>
+        
         <li><img src="mi/controller/mu_play.png" onClick="javascript:sendToTV('togglePlayPause');" /></li>
+        
         <li class="pp"><img src="mi/controller/mu_pause.png" /></li>
+        
         <li><img src="mi/controller/mu_forward.png" onClick="javascript:sendToTV('playNext');" /></li>
+        
     </ul>
             <img id="thebutton" src="mi/controller/mu_volume.png" /><div id="volumeSlider"></div><div id="volumeLabel"></div>
     </div>

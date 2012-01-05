@@ -276,12 +276,13 @@ img {
 #sensitivitySlider {
 	height: 500px;
 	float: right;
+	width: 30px;
 	margin-right: 600px;
 	margin-top: -570px;
 }
 #slidernub {
-	width: 20px;
-	height: 20px;
+	width: 30px;
+	height: 30px;
 	background-color: blue;
 	position:absolute;
 	margin-right: 10px;
