@@ -181,13 +181,14 @@ function loaded() {
 	            $("#volumeLabel")
 	            	.text(ui.value)
 	            	.position({
-            			my : "left center",
-            			at : "right center",
+            			my : "right center",
+            			at : "left center",
             			of : ui.handle,
-            			offset : "10 3.5"}); 
+            			offset : "-10 3.5"}); 
 	        	},
             stop : function(event, ui) { 
-				$("#volumeLabel").hide("fade"); 
+				$("#volumeLabel").hide("fade");
+				$("#volumeSlider").hide("fade"); 
 				clearInterval($(ui.handle).attr("data-updateTimer"));
 				sendToTV("setVolume", {volume: (ui.value / 100)});
 				}
