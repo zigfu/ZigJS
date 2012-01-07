@@ -5,10 +5,16 @@ var zigmote = (function() {
 
 		var commands = {};
 
+		var lockCallbacks = {};
+		var pendingLocks = {};
+
 		var ret = {
 			startRoom : startRoom,
 			rename : rename,
 			on : on,
+			onLock : onLock, 
+			lock : lock,
+			unlock : unlock,
 		};
 
 		function startRoom(roomid, name, successcb) {
@@ -22,6 +28,25 @@ var zigmote = (function() {
 						commands[data.command](data.data);
 					}
 				});
+				
+				socket.on('zigmote-lock', function(data) {
+					if (pendingLocks.hasOwnProperty(data.lockid)) {
+						pendingLocks[data.lockid](data.success);
+						delete pendingLocks[data.lockid];
+					}
+				});
+				
+				socket.on('zigmote-locked', function(data) {
+					if (lockCallbacks.hasOwnProperty(data.lockid)) {
+						lockCallbacks[data.lockid].locked(data);
+					}
+				});
+				
+				socket.on('zigmote-unlocked', function(data) {
+					if (lockCallbacks.hasOwnProperty(data.lockid)) {
+						lockCallbacks[data.lockid].unlocked(data);
+					}
+				})	
 			});
 
 			socket.emit('zigmote-startRoom', {
@@ -41,6 +66,30 @@ var zigmote = (function() {
 			commands[command] = callback;
 		}
 
+		function onLock(lockid, lockcallback, unlockcallback) {
+			if (undefined === lockcallback) {
+				lockcallback = function() {};
+			}
+
+			if (undefined === unlockcallback) {
+				unlockcallback = function() {};
+			}
+
+			lockCallbacks[lockid] = {
+				locked : lockcallback,
+				unlocked : unlockcallback,
+			};
+		}
+
+		function lock(lockid, callback) {
+			pendingLocks[lockid] = callback;
+			socket.emit('zigmote-lock', { lockid : lockid });
+		}
+
+		function unlock(lockid) {
+			socket.emit('zigmote-unlock', { lockid : lockid });
+		}
+
 		return ret;
 	}
 
@@ -48,11 +97,19 @@ var zigmote = (function() {
 
 		var location = {}; // TODO : fill me in!
 
+		var pendingLocks = {};
+
 		var ret = {
 			getRoomList : getRoomList,
 			joinRoom : joinRoom,
 			rename : rename,
 			sendToHost : sendToHost,
+			lock : lock,
+			unlock : unlock,
+
+			onjoin : function() {},
+			onjoinerror : function() {},
+			ondisconnect : function() {},
 		};
 
 		function getRoomList() {
@@ -73,8 +130,18 @@ var zigmote = (function() {
 			socket.on('zigmote-joinedRoom', function(data) {
 				if (data.success) {
 					successcb();
+					ret.onjoin();
 				} else {
 					failcb(data.errormsg);
+					ret.onjoinerror();
+				}
+			});
+
+			socket.on('zigmote-lock', function(data) {
+				console.log('got a lock response ' + data.success);
+				if (pendingLocks.hasOwnProperty(data.lockid)) {
+					pendingLocks[data.lockid](data.success);
+					delete pendingLocks[data.lockid];
 				}
 			});
 
@@ -91,6 +158,15 @@ var zigmote = (function() {
 
 		function sendToHost(command, data) {
 		    socket.emit('zigmote-sendToHost', { command : command, data : data });
+		}
+
+		function lock(lockid, callback) {
+			pendingLocks[lockid] = callback;
+			socket.emit('zigmote-lock', { lockid : lockid });
+		}
+
+		function unlock(lockid) {
+			socket.emit('zigmote-unlock', { lockid : lockid });	
 		}
 
 		return ret;

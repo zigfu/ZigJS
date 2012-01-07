@@ -33,7 +33,6 @@ function loaded() {
 			var newElem = document.createElement('li');
 			newElem.innerHTML = data.roomname;
 			newElem.addEventListener('click', function() {
-				console.log("clicked on " + data.roomname);
 				controller = zigmote.controller(socket);
 				controller.joinRoom(id, getControllerName(), function(){
 					setStatus("Joined " + data.roomname);
@@ -48,6 +47,17 @@ function loaded() {
 
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
 
+function dolock() {
+	console.log('do lock');
+	var lockid = document.getElementById("tolock").value;
+	controller.lock(lockid, function(success) {console.log('attemp to lock ' + lockid + ':' + success);});
+}
+
+function dounlock() {
+	console.log('do unlock');
+	var lockid = document.getElementById("tolock").value;
+	controller.unlock(lockid);
+}
 
 </script>
 
@@ -58,6 +68,9 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 <ul id="roomslist">
 </ul>
+
+<input type='text' id='tolock'> <input type='button' value='Lock' onclick='dolock()'> <input type='button' value='Lock' onclick='dounlock()'>
+
 
 </body>
 </html>

@@ -51,6 +51,8 @@ function loaded() {
 		socket.on('disconnect', function() {
 			setStatus("Disconnected");
 		});
+
+		host.onLock("lockTest", function() {console.log("lockTest locked");}, function() {console.log("lockTest unlocked");});
 	});
 }
 
