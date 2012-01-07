@@ -1,0 +1,452 @@
+<html>
+
+<head>
+
+<title>Music player v3</title>
+
+<link rel="shortcut icon" href="i/favicon.ico" />
+
+<link rel="stylesheet" type="text/css" href="style.css" />
+
+<script type="text/javascript" src="js/iscroll.js"></script>
+<script type="text/javascript" src="js/id3v2.js"></script>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/synclist-client.js"></script>
+<script src="/zigmote-client.js"></script>
+<script type="text/javascript">
+// zigmote boilerplate
+var host;
+var roomdetails;
+var userslist;
+
+function getRoomId() {
+	var roomid = localStorage.getItem("zigmoteHostId");
+	if (null == roomid) {
+		roomid = Math.floor(Math.random() * 1000000);
+		localStorage.setItem("zigmoteHostId", roomid);
+	}
+	return roomid;
+}
+
+function getRoomName() {
+	var roomname = localStorage.getItem("zigmoteHostName");
+	if (null == roomname) {
+		roomname = "[Unnamed TV]";
+		localStorage.setItem("zigmoteHostName", roomname);
+	}
+	return roomname;
+}
+
+function setStatus(status) {
+	//document.getElementById('status').innerHTML = status;
+	console.log("status set to: " + status);
+}
+// end of boilerplate (or at least most of it)
+var medialibraryScroller;
+var userslistScroller;
+var playercontrolsScroller;
+var player;
+var medialist;
+var userslist;
+
+var songs = {};
+
+function hasClass(ele,cls) {
+    return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
+}
+
+function addClass(ele,cls) {
+    if (!hasClass(ele,cls)) ele.className += " "+cls;
+}
+
+function removeClass(ele,cls) {
+	if (hasClass(ele,cls)) {
+    	var reg = new RegExp('(\\s|^)'+cls+'(\\s|$)');
+		ele.className=ele.className.replace(reg,' ');
+	}
+}
+
+nowPlaying = undefined;
+
+function playSong(songid) {
+	// TODO: reconnect this shit
+	if (undefined !== nowPlaying) {
+		removeClass(medialist.getElement(nowPlaying), "playing");
+	}
+	nowPlaying = songid;
+	
+	// get the song element
+	var songElem = medialist.getElement(songid);
+	addClass(songElem, "playing");
+
+	// get the actual song
+	var song = songs[songid];
+	player.src = geturl(song);
+	player.play();
+
+}
+function togglePlayPause() {
+	if (player.paused) { 
+		player.play();
+	} else {
+		player.pause();
+	}
+}
+function playNext() {
+	console.log("todo: play next");
+}
+function playPrev() {
+	console.log("todo: play prev");
+}
+
+function loaded() {
+	player = document.getElementById("audioPlayer");
+	medialibraryScroller = new iScroll('medialibraryScroller');
+	userslistScroller = new iScroll('userslistScroller');
+
+	socket = io.connect('http://'+document.location.hostname);
+	socket.on('connect', function () {
+		host = zigmote.host(socket);
+		host.startRoom(getRoomId(), getRoomName(), function(roomdata) {
+			// unneeded for now
+			//roomShared = synclist.subscribe(socket, roomdata.roomsharedid);
+			//roomShared.bind(document.getElementById("roomdetails"));
+
+			userslist = synclist.subscribe(socket, roomdata.userslistid);
+			userslist.bind(document.getElementById("userslist"));
+			userslist.onadd = function() { userslistScroller.refresh(); }
+			userslist.onremove = function() { userslistScroller.refresh(); }
+			userslist.onclear = function() { userslistScroller.refresh(); }
+		// media list
+			medialist = synclist.subscribe(socket, roomdata.medialist);
+			medialist.bind(document.getElementById('medialibraryList'), function(songid, songdata) {
+				var row = document.createElement('tr');
+				var songName = document.createElement('td');
+				songName.innerHTML = songdata.name;
+				var artist = document.createElement('td');
+				var album = document.createElement('td');
+				var duration = document.createElement('td');
+				//TODO: fill in data
+				row.appendChild(songName);
+				row.appendChild(artist);
+				row.appendChild(album);
+				row.appendChild(duration);
+				row.addEventListener("click", function() { playSong(songid); });
+				return row;
+			});
+			medialist.onadd = function() { medialibraryScroller.refresh(); }
+			medialist.onremove = function() { medialibraryScroller.refresh(); }
+			medialist.onclear = function() { medialibraryScroller.refresh(); }
+
+			setStatus("Connected");
+		});
+		//TODO: connect other side
+		host.on('playSong', function(data) {
+			playSong(data.songid);
+		});
+
+		host.on('togglePlayPause', function(data) {
+			togglePlayPause();
+		});
+		host.on('playPrev', function(data) {
+			playPrev();
+		});
+		host.on('playNext', function(data) {
+			playNext();
+		});
+		host.on('setVolume', function(data) {
+			var vol = data.volume;
+			if (vol !== undefined) {
+				player.volume = vol;
+			}
+		});
+
+		socket.on('disconnect', function() {
+			setStatus("Disconnected");
+		});
+	});
+
+	// Setup the dnd listeners.
+	var dropZone = document.getElementById('medialibrary');
+	dropZone.addEventListener('dragover', handleDragOver, false);
+	dropZone.addEventListener('drop', handleFileSelect, false);
+}
+
+function parseFile(file, callback){
+        //if(localStorage[file.fileName]) return callback(JSON.parse(localStorage[file.fileName]));
+		console.log("Parsing " + file.fileName);
+        ID3v2.parseFile(file,function(tags){
+          //to not overflow localstorage
+          localStorage[file.fileName] = JSON.stringify({
+            Title: tags.Title,
+            Artist: tags.Artist,
+            Album: tags.Album,
+            Genre: tags.Genre
+          });
+          callback(tags);
+        });
+      }
+
+  function handleFileSelect(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    files = evt.dataTransfer.files;
+	getSongs(files);
+  }
+
+  function handleDragOver(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+  }
+
+var lastSongId = 0;
+function getNextSongId() {
+	lastSongId++;
+	return lastSongId;
+}
+
+function canPlay(type){
+        var a = document.createElement('audio');
+        return !!(a.canPlayType && a.canPlayType(type).replace(/no/, ''));
+      }
+  
+
+function geturl(f) {
+	var url;
+    if(window.createObjectURL){
+	  url = window.createObjectURL(f)
+	}else if(window.createBlobURL){
+	  url = window.createBlobURL(f)
+	}else if(window.URL && window.URL.createObjectURL){
+	  url = window.URL.createObjectURL(f)
+	}else if(window.webkitURL && window.webkitURL.createObjectURL){
+	  url = window.webkitURL.createObjectURL(f)
+	}
+	return url;
+  }
+
+	function getSongs(files){
+    var queue = [];
+    var mp3 = canPlay('audio/mpeg;'), ogg = canPlay('audio/ogg; codecs="vorbis"');
+
+	for(var i = 0; i < files.length; i++) {
+		var file = files[i];
+		var path = file.webkitRelativePath || file.mozFullPath || file.fileName;
+		if (path.indexOf('.AppleDouble') != -1) {
+			// Meta-data folder on Apple file systems, skip
+			continue;
+		}         
+  
+		var size = file.size || file.fileSize || 4096;
+		if(size < 4095) { 
+			// Most probably not a real MP3
+			continue;
+		}
+
+		if(file.fileName.indexOf('mp3') != -1) {
+			if(mp3) {
+				queue.push(file);
+			}
+		}
+      
+		if(file.fileName.indexOf('ogg') != -1  || file.fileName.indexOf('oga') != -1){
+			if(ogg){
+				queue.push(file);
+			}
+		}
+    }
+
+	var process = function() {
+      if(queue.length){
+        
+        var f = queue.shift();
+		var t2 = guessSong(f.webkitRelativePath || f.mozFullPath || f.fileName);
+		
+        parseFile(f,function(tags){
+        	var theid = getNextSongId();
+        	songs[theid] = f;
+        	medialist.add({name : tags.Title}, theid);			  //$("#thelist").append($("<li>").text(t2.Title));
+		});
+					
+        var lq = queue.length;
+        setTimeout(function(){
+          if(queue.length == lq){
+            process();
+          }
+        },300);
+      }
+    }
+    process();
+}
+
+
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
+</script>
+
+</head>
+
+<body>
+
+<div id="wrapper">
+
+	<div class="header">
+
+		<div class="logo"><img src="i/logo.png" /></div>
+
+		<div class="musicPlayer">
+			
+			<img src="i/mubrowser-back.png" onclick="javascript:playPrev();" />
+
+			<img src="i/mubrowser-play.png" onclick="javascript:togglePlayPause();"/>
+
+			<img src="i/mubrowser-forward.png" onclick="javascript:playNext();"/>
+
+			<img src="i/mubrowser-volume.png" />
+
+		</div>
+
+		<div style="float : right; width:320px">
+
+			<div id="currentRoomName" onClick="nameentry();" class="nameentry">[Room Name]</div>
+
+    		<input class="nameentry" style="display:none; margin-top: 20px; " type="text" placeholder="[Enter TV Name]" spellcheck="off" 
+    		autocomplete="off" id="currentRoomNameInput" name="currentRoomNameInput" onChange="nameentrydone()"/>
+
+    	<div id="enterName">Click above to change the TV name!</div>
+
+
+    	</div> 
+
+
+	</div>
+
+
+	<div id="mediaContainer">
+
+	<div id="medialibrary" class="mylist">
+	
+			<div class="scrollerheader"><a href="#">Media Library</a></div>		
+
+			<div id="mediaSplash" style="display: none;">
+
+				<h1>Welcome to zig.tv</h1>
+
+				<p>To begin listening to music, drag and drop your .mp3
+				files into the media library.</p>
+
+				<center><img src="i/example.png" /></center>
+
+			</div>
+
+			<!-- I have it displayed none to hide the songs list until the user drags files into the browser -->
+
+
+
+
+			<div id="medialibraryScroller" class="scrollerContainer">
+
+				<div class="scroller">
+
+					<!--<ul id="medialibraryList">
+
+					</ul> -->
+					<table id="songlist" width="100%" height="25px" border="0">
+					<thead id="">
+					  <tr>
+					    <td class="tablerow">Track title</td>
+					    <td class="tablerow">Artist</td>
+					    <td class="tablerow">Album</td>
+					    <td class="tablerow">Track time</td>
+					  </tr>
+					</thead>
+					<tbody id="medialibraryList">
+
+					</tbody>
+					</table>
+				</div>
+
+				<div id="cursor" class="showinsession pushable"></div>
+
+				<div id="cursorCenter" class="showinsession pushable"></div>
+
+			</div>
+
+	</div>
+
+	
+
+	<div id="userslist" class="mylist">
+
+		<div class="scrollerheader"><a href="#">User list</a></div>
+
+		<div id="userslistScroller" class="scrollerContainer">
+
+			<div class="scroller">
+
+				<ul id="userslistList">
+					
+				</ul> 
+
+			</div>
+
+			<div id="cursor" class="showinsession pushable"></div>
+
+			<div id="cursorCenter" class="showinsession pushable"></div>
+
+		</div>
+
+	</div>
+
+	</div>
+
+	<div id="nowPlaying">
+
+		<div id="musicHolder">
+
+			<div class="songitems">
+
+				<ul id="trackid">
+
+					<li id="albumArt"><img src="i/music.png" /></li>
+
+					<li id="songTitle">Title</li>
+
+					<li id="artist">Artist</li>
+
+					<li id="album">Album</li>
+
+				</ul>
+
+			</div>
+
+			<div class="songitems">
+
+				<ul id="trackid">
+
+					<li id="albumArt"><img src="i/music.png" /></li>
+
+					<li id="songTitle">Title2</li>
+
+					<li id="artist">Artist2</li>
+
+					<li id="album">Album2</li>
+
+				</ul>
+
+			</div>
+
+		</div>
+
+	</div> 
+
+
+</div>
+<audio id="audioPlayer">
+</body>
+
+</html>
