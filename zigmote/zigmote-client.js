@@ -14,7 +14,7 @@ var zigmote = (function() {
 		function startRoom(roomid, name, successcb) {
 
 			socket.on('zigmote-roomStarted', function(data) {
-				successcb(data.roomid, data.roomdata);
+				successcb(data);
 
 				socket.on('zigmote-sendToHost', function(data) {
 					console.log("Received command from controller: " + data.command);

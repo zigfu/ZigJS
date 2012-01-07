@@ -9,7 +9,7 @@
 <script>
 
 var host;
-var roomdetails;
+var roomShared;
 var userslist;
 
 function getRoomId() {
@@ -38,15 +38,13 @@ function loaded() {
 	socket = io.connect('http://'+document.location.hostname);
 	socket.on('connect', function () {
 		host = zigmote.host(socket);
-		host.startRoom(getRoomId(), getRoomName(), function(roomid, roomdataid) {
-			roomdetails = synclist.subscribe(socket, roomdataid);
-			roomdetails.bind(document.getElementById("roomdetails"));
-			roomdetails.onadd = function(id, data) {
-				if ("userslist" == id) {
-					userslist = synclist.subscribe(socket, roomdetails.get("userslist"));
-					userslist.bind(document.getElementById("userslist"));
-				}
-			}
+		host.startRoom(getRoomId(), getRoomName(), function(roomdata) {
+			roomShared = synclist.subscribe(socket, roomdata.roomsharedid);
+			roomShared.bind(document.getElementById("roomdetails"));
+
+			userslist = synclist.subscribe(socket, roomdata.userslistid);
+			userslist.bind(document.getElementById("userslist"));
+
 			setStatus("Connected");
 		});
 
