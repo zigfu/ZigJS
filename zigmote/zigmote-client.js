@@ -130,7 +130,8 @@ var zigmote = (function() {
 
 			socket.on('zigmote-joinedRoom', function(data) {
 				if (data.success) {
-					successcb();
+					ret.roomsharedid = data.roomsharedid;
+					successcb(data);
 					ret.onjoin();
 				} else {
 					failcb(data.errormsg);
