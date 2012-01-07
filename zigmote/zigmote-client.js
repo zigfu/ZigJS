@@ -110,6 +110,7 @@ var zigmote = (function() {
 			onjoin : function() {},
 			onjoinerror : function() {},
 			ondisconnect : function() {},
+			onhostgone : function() {},
 		};
 
 		function getRoomList() {
@@ -143,6 +144,10 @@ var zigmote = (function() {
 					pendingLocks[data.lockid](data.success);
 					delete pendingLocks[data.lockid];
 				}
+			});
+
+			socket.on('zigmote-hostGone', function() {
+				ret.onhostgone();
 			});
 
 			socket.emit('zigmote-joinRoom', {
