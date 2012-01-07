@@ -115,6 +115,22 @@ var synclist = (function() {
 				lists[id].makeelement = makeelement;
 			},
 
+			bindkey : function(key, element, makeelement) {
+
+				if (undefined === makeelement) {
+					makeelement = function(id, data) {
+						var li = document.createElement('li');
+						li.innerHTML = data;
+						return li;
+					};					
+				}
+
+				lists[id].boundkeys[key] = {
+						element : element,
+						makeelement : makeelement 
+					};
+			},
+
 			onadd : function() {},
 			onremove : function() {},
 			onclear : function() {},
@@ -126,6 +142,7 @@ var synclist = (function() {
 			items : new Hash(),
 			obj : ret,
 			bound : false,
+			boundkeys : {},
 			};
 		
 		socket.emit("list-subscribe", { listid : id });
@@ -163,6 +180,11 @@ var synclist = (function() {
 			newElement.setAttribute("data-syncitemid", itemid);
 			lists[listid].boundelement.appendChild(newElement)
 		}
+
+		if (undefined !== lists[listid].boundkeys[itemid]) {
+			lists[listid].boundkeys[itemid].element.innerHTML = 
+				lists[listid].boundkeys[itemid].makeelement(itemid, itemdata).innerHTML;
+		}
 	}
 
 	function remove(listid, itemid) {
@@ -190,6 +212,11 @@ var synclist = (function() {
 			var node = getElementByItemid(lists[listid].boundelement, itemid);
 			var newElement = lists[listid].makeelement(itemid, itemdata);
 			node.innerHTML = newElement.innerHTML;
+		}
+
+		if (undefined !== lists[listid].boundkeys[itemid]) {
+			lists[listid].boundkeys[itemid].element.innerHTML = 
+				lists[listid].boundkeys[itemid].makeelement(itemid, itemdata).innerHTML;
 		}
 	}
 	
