@@ -67,6 +67,13 @@ function positionCursor(element, posX, posY) {
 function doClick()
 {
 	console.log("Doing the click");
+	x = parseInt(document.getElementById("realcursor").style.left);
+	y =	parseInt(document.getElementById("realcursor").style.top);
+	elt = document.elementFromPoint(x,y-1); //subtract one to get the thing cursor points to
+	var evt = document.createEvent("MouseEvents");
+    evt.initMouseEvent("click", true, true, window, 1, x, y, x, y,
+        false, false, false, false, 0, null);
+	elt.dispatchEvent(evt);
 }
 
 function clamp(val, min, max) {
