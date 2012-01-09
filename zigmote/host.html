@@ -5,12 +5,15 @@
 <script src="/socket.io/socket.io.js"></script>
 <script src="/synclist-client.js"></script>
 <script src="/zigmote-client.js"></script>
+<script src="/zigmote.cursor.js"></script>
 
 <script>
 
 var host;
 var roomShared;
 var userslist;
+
+var cursor;
 
 function getRoomId() {
 	var roomid = localStorage.getItem("zigmoteHostId");
@@ -34,6 +37,15 @@ function setStatus(status) {
 	document.getElementById('status').innerHTML = status;
 }
 
+cursors = {}
+function cursorcallback(x, y, relative, userid) {
+	if (relative) {
+		// something 
+	}
+
+	//positionInParent(cursors[userid].cursor, x, y);
+}
+
 function loaded() {
 	socket = io.connect('http://'+document.location.hostname);
 	socket.on('connect', function () {
@@ -44,6 +56,21 @@ function loaded() {
 
 			userslist = synclist.subscribe(socket, roomdata.userslistid);
 			userslist.bind(document.getElementById("userslist"));
+			userslist.onadd = function(userid, userdata) {
+				cursors[userid] = {};
+			}
+			userslist.onremove = function(userid) {
+				delete cursors[userid];
+			}
+
+			cursor = zigmotecursor.host(host);
+			cursor.oncursorlock = function(userid) { console.log("Cursor locked by userid " + userid);}
+			cursor.oncursorunlock = function(userid) { console.log("Cursor unlocked by userid " + userid);}
+
+			cursor.onorientation = function(alpha, beta, gamma, userid) {
+				console.log("Alpha: " + alpha + "   Beta: " + beta + "   Gamma: " + gamma);
+
+			}
 
 			setStatus("Connected");
 		});
@@ -52,7 +79,7 @@ function loaded() {
 			setStatus("Disconnected");
 		});
 
-		host.onLock("lockTest", function() {console.log("lockTest locked");}, function() {console.log("lockTest unlocked");});
+		
 	});
 }
 
