@@ -1,0 +1,111 @@
+<html>
+<head>
+<title>Mobile Controller</title>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/synclist-client.js"></script>
+<script src="/zigmote-client.js"></script>
+<script src="/zigmote.cursor.js"></script>
+<script type="text/javascript" src="jscolor/jscolor.js"></script>
+
+<script>
+
+var roomslist;
+var controller;
+var cursor;
+
+function getControllerName() {
+	var roomname = localStorage.getItem("zigmoteControllerName");
+	if (null == roomname) {
+		roomname = "[Guest]";
+		localStorage.setItem("zigmoteControllerName", roomname);
+	}
+	return roomname;
+}
+
+function setStatus(status) {
+	document.getElementById('status').innerHTML = status;
+}
+
+function loaded() {
+	socket = io.connect('http://'+document.location.hostname);
+	socket.on('connect', function () {
+		setStatus("Connected");
+		roomslist = synclist.subscribe(socket, zigmote.roomslistid);
+		roomslist.bind(document.getElementById("roomslist"), function(id, data) {
+			var newElem = document.createElement('li');
+			newElem.innerHTML = data.roomname;
+			newElem.addEventListener('click', function() {
+				controller = zigmote.controller(socket);
+				controller.joinRoom(id, getControllerName(), function(){
+					setStatus("Joined " + data.roomname);
+					document.getElementById("roomslist").style.display = "none";
+					cursor = zigmotecursor.controller(controller);
+				}, function(errormsg) {
+					setStatus("Error joining " + data.roomname);
+				});
+			});
+			return newElem;
+		});
+	});
+}
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
+function dolock() {
+	console.log('do lock');
+	var lockid = document.getElementById("tolock").value;
+	controller.lock(lockid, function(success) {console.log('attemp to lock ' + lockid + ':' + success);});
+}
+
+function dounlock() {
+	console.log('do unlock');
+	var lockid = document.getElementById("tolock").value;
+	controller.unlock(lockid);
+}
+
+var exclusive = false;
+var started = false;
+
+function togglecursor() {
+	if (started) {
+		cursor.stop();
+		document.getElementById("cursorbutton").value = 'Start';
+		started = false;
+	} else {
+		cursor.cursormode = zigmotecursor.cursorModes.motion;
+		cursor.updateorientation = true;
+		cursor.start(exclusive, function(success) {
+			if (success) {
+				started = true;
+				document.getElementById("cursorbutton").value = 'Stop';
+			} else {
+				console.log("Error starting cursor");
+			}
+		});
+	}
+}
+
+function colorchanged() {
+	var newColor = document.getElementById("colorpicker").value;
+	controller.sendToHost('colorChange', newColor);
+}
+
+</script>
+
+</head>
+<body>
+
+<div id="status">Connecting...</div>
+
+<ul id="roomslist">
+</ul>
+
+<input type='text' id='tolock'> <input type='button' value='Lock' onclick='dolock()'> <input type='button' value='Unlock' onclick='dounlock()'>
+
+<p>
+<input type='button' value='Start' id='cursorbutton' onclick='togglecursor()'> Color: <input class="color" id="colorpicker" onchange="colorchanged()">
+
+
+</body>
+</html>

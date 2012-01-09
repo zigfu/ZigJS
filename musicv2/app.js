@@ -1,5 +1,5 @@
 var app = require('http').createServer(handler)
-  , io = require('socket.io').listen(app)
+  , io = require('socket.io').listen(app, {origins: '*:*'}) // TODO: Origins
   , fs = require('fs')
   , path = require('path')
   , net = require('net')

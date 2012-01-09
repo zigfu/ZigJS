@@ -1,0 +1,155 @@
+<html>
+<head>
+<title>Host o'mercy</title>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/synclist-client.js"></script>
+<script src="/zigmote-client.js"></script>
+<script src="/zigmote.cursor.js"></script>
+
+<script>
+
+var host;
+var roomShared;
+var userslist;
+
+var cursor;
+
+function getRoomId() {
+	var roomid = localStorage.getItem("zigmoteHostId");
+	if (null == roomid) {
+		roomid = Math.floor(Math.random() * 1000000);
+		localStorage.setItem("zigmoteHostId", roomid);
+	}
+	return roomid;
+}
+
+function getRoomName() {
+	var roomname = localStorage.getItem("zigmoteHostName");
+	if (null == roomname) {
+		roomname = "[Unnamed TV]";
+		localStorage.setItem("zigmoteHostName", roomname);
+	}
+	return roomname;
+}
+
+function setStatus(status) {
+	document.getElementById('status').innerHTML = status;
+}
+
+function clamp(val, min, max) {
+	if (val < min) return min;
+	if (val > max) return max;
+	return val;
+}
+
+function positionInParent(element, posX, posY) {
+	element.style.left = (posX * element.parentNode.offsetWidth - (element.offsetWidth / 2)) + "px";
+	element.style.top = (posY * element.parentNode.offsetHeight - (element.offsetHeight / 2)) + "px";
+}
+
+cursors = {}
+function cursorcallback(x, y, relative, userid) {
+	if (relative) {
+		var cc = cursors[userid];
+		cc.x = clamp(cc.x + x, 0, cc.cursor.parentNode.offsetWidth);
+		cc.y = clamp(cc.y + y, 0, cc.cursor.parentNode.offsetHeight);
+		cc.cursor.style.left = cc.x + "px";
+		cc.cursor.style.top = cc.y + "px";
+	}
+
+	positionInParent(cursors[userid].cursor, x, y);
+}
+
+function loaded() {
+	socket = io.connect('http://'+document.location.hostname);
+	socket.on('connect', function () {
+		host = zigmote.host(socket);
+		host.startRoom(getRoomId(), getRoomName(), function(roomdata) {
+			roomShared = synclist.subscribe(socket, roomdata.roomsharedid);
+			roomShared.bind(document.getElementById("roomdetails"));
+
+			userslist = synclist.subscribe(socket, roomdata.userslistid);
+			userslist.bind(document.getElementById("userslist"));
+			userslist.onadd = function(userid, userdata) {
+				var newCursor = document.createElement("div");
+				newCursor.style.display = "none";
+				document.getElementById("cursorarea").appendChild(newCursor);
+
+				cursors[userid] = {
+					cursor : newCursor,
+					x : (document.getElementById("cursorarea").offsetWidth - newCursor.offsetWidth) / 2,
+					y : (document.getElementById("cursorarea").offsetHeight - newCursor.offsetHeight) / 2,
+				};
+			}
+			userslist.onremove = function(userid) {
+				cursors[userid].cursor.parentNode.removeChild(cursors[userid].cursor);
+				delete cursors[userid];
+			}
+
+			cursor = zigmotecursor.host(host);
+			cursor.oncursorlock = function(userid) { console.log("Cursor locked by userid " + userid);}
+			cursor.oncursorunlock = function(userid) { console.log("Cursor unlocked by userid " + userid);}
+			cursor.oncursorstart = function(userid) { cursors[userid].cursor.style.display = "block"; }
+			cursor.oncursorstop = function(userid) { cursors[userid].cursor.style.display = "none"; }
+			cursor.oncursor = cursorcallback;
+			cursor.onorientation = function(alpha, beta, gamma, userid) {
+				//console.log("Alpha: " + alpha + "   Beta: " + beta + "   Gamma: " + gamma);
+			}
+
+			setStatus("Connected");
+		});
+
+		host.on('colorChange', function(data, userid) {
+			cursors[userid].cursor.style.background = data;
+		});
+
+		socket.on('disconnect', function() {
+			setStatus("Disconnected");
+		});
+	});
+}
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
+
+</script>
+
+<style>
+
+#cursorarea {
+	width: 	500;
+	height: 500;
+	border:	1px solid black;
+	margin: auto auto;
+	position : relative;
+	overflow:hidden;
+}
+
+#cursorarea div {
+	width : 20;
+	height : 20;
+	display : block;
+	background-color : black;
+	position : relative;
+}
+
+</style>
+
+</head>
+<body>
+
+<div id="status">Connecting...</div>
+
+users:
+<ul id="userslist">
+</ul>
+
+roomdetails:
+<ul id="roomdetails">
+</ul>
+
+<div id="cursorarea"></div>
+
+</body>
+</html>
