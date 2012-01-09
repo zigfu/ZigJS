@@ -6,6 +6,7 @@
 <script src="/synclist-client.js"></script>
 <script src="/zigmote-client.js"></script>
 <script src="/zigmote.cursor.js"></script>
+<script type="text/javascript" src="jscolor/jscolor.js"></script>
 
 <script>
 
@@ -38,6 +39,7 @@ function loaded() {
 				controller = zigmote.controller(socket);
 				controller.joinRoom(id, getControllerName(), function(){
 					setStatus("Joined " + data.roomname);
+					document.getElementById("roomslist").style.display = "none";
 					cursor = zigmotecursor.controller(controller);
 				}, function(errormsg) {
 					setStatus("Error joining " + data.roomname);
@@ -62,7 +64,7 @@ function dounlock() {
 	controller.unlock(lockid);
 }
 
-var exclusive = true;
+var exclusive = false;
 var started = false;
 
 function togglecursor() {
@@ -84,6 +86,11 @@ function togglecursor() {
 	}
 }
 
+function colorchanged() {
+	var newColor = document.getElementById("colorpicker").value;
+	controller.sendToHost('colorChange', newColor);
+}
+
 </script>
 
 </head>
@@ -94,10 +101,10 @@ function togglecursor() {
 <ul id="roomslist">
 </ul>
 
-<input type='text' id='tolock'> <input type='button' value='Lock' onclick='dolock()'> <input type='button' value='Lock' onclick='dounlock()'>
+<input type='text' id='tolock'> <input type='button' value='Lock' onclick='dolock()'> <input type='button' value='Unlock' onclick='dounlock()'>
 
 <p>
-<input type='button' value='Start' id='cursorbutton' onclick='togglecursor()'>
+<input type='button' value='Start' id='cursorbutton' onclick='togglecursor()'> Color: <input class="color" id="colorpicker" onchange="colorchanged()">
 
 
 </body>
