@@ -131,10 +131,10 @@ var synclist = (function() {
 					};
 			},
 
-			onadd : function() {},
-			onremove : function() {},
+			onadd : function(itemid, itemdata) {},
+			onremove : function(itemid) {},
 			onclear : function() {},
-			onset : function() {}
+			onset : function(itemid, itemdata) {}
 		};
 
 		// new entry for this list we are subscribed to
