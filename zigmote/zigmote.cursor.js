@@ -88,7 +88,10 @@ var zigmotecursor = (function() {
 		function internalStart() {
 			sendingCursor = true;
 			recalibrate();
+			zigmoteController.sendToHost('cursorstart');
 		}
+
+		var locked;
 
 		// return API
 		var ret = {
@@ -121,6 +124,7 @@ var zigmotecursor = (function() {
 					zigmoteController.unlock("cursor");
 					locked = false;
 				}
+				zigmoteController.sendToHost('cursorstop');
 			},
 
 			recalibrate : recalibrate,
@@ -162,6 +166,8 @@ var zigmotecursor = (function() {
 			oncursorlock : function(userid) {},
 			oncursorunlock : function() {},
 			oncursor : function(x,y,userid) {},
+			oncursorstart : function(userid) {},
+			oncursorstop : function(userid) {},
 			onclick : function(x,y,userid) {},
 			onorientation : function(a,b,g,userid) {}
 		}
@@ -174,6 +180,14 @@ var zigmotecursor = (function() {
 
 		zigmoteHost.on("cursor", function(data, userid) {
 			ret.oncursor(data.x, data.y, data.mode == "rel", userid);
+		});
+
+		zigmoteHost.on("cursorstart", function(data, userid) {
+			ret.oncursorstart(userid);
+		});
+
+		zigmoteHost.on("cursorstop", function(data, userid) {
+			ret.oncursorstop(userid);
 		});
 
 		zigmoteHost.on("orientation", function(data, userid) {
