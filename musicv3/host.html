@@ -31,14 +31,8 @@ function getRoomId() {
 	return roomid;
 }
 
-function getRoomName() {
-	var roomname = localStorage.getItem("zigmoteHostName");
-	if (null == roomname) {
-		roomname = "[Unnamed TV]";
-		localStorage.setItem("zigmoteHostName", roomname);
-	}
-	return roomname;
-}
+var currentRoomName = localStorage.getItem("currentRoomName");
+if (null == currentRoomName) currentRoomName = "[TV Name]";	
 
 function setStatus(status) {
 	//document.getElementById('status').innerHTML = status;
@@ -149,8 +143,7 @@ function loaded() {
 	socket = io.connect('http://'+document.location.hostname);
 	socket.on('connect', function () {
 		host = zigmote.host(socket);
-		//host.startRoom(getRoomId(), getRoomName(), function(roomdata) {
-		host.startRoom("musicplayer", getRoomName(), function(roomdata) {
+		host.startRoom("musicplayer", currentRoomName, function(roomdata) {
 			// unneeded for now
 			//roomShared = synclist.subscribe(socket, roomdata.roomsharedid);
 			//roomShared.bind(document.getElementById("roomdetails"));
@@ -229,10 +222,36 @@ function loaded() {
 		});
 	});
 
+	nameChanged(currentRoomName);
+	document.getElementById("currentRoomNameInput").addEventListener('change',nameentrydone, false);
+
 	// Setup the dnd listeners.
 	var dropZone = document.getElementById('medialibrary');
 	dropZone.addEventListener('dragover', handleDragOver, false);
 	dropZone.addEventListener('drop', handleFileSelect, false);
+}
+
+function nameentry() {
+    document.getElementById("currentRoomName").style.display = "none";
+    document.getElementById("currentRoomNameInput").style.display = "block";
+    document.getElementById("currentRoomNameInput").focus();
+}
+
+function nameentrydone() {
+    var newName = document.getElementById("currentRoomNameInput").value;
+    console.log("Name changed: " + newName);
+    nameChanged(newName);
+	socket.emit('setName',{ name : newName});
+}
+
+function nameChanged(newName) {
+	if (newName == "") newName = "[NonameTV]";
+    currentRoomName = newName;
+    localStorage.setItem("currentRoomName", currentRoomName);
+    document.getElementById("currentRoomNameInput").value = currentRoomName;
+    document.getElementById("currentRoomName").innerHTML = currentRoomName;
+    document.getElementById("currentRoomName").style.display = "block";
+    document.getElementById("currentRoomNameInput").style.display = "none";
 }
 
 function parseFile(file, callback){
