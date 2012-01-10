@@ -252,6 +252,9 @@ function nameChanged(newName) {
     document.getElementById("currentRoomName").innerHTML = currentRoomName;
     document.getElementById("currentRoomName").style.display = "block";
     document.getElementById("currentRoomNameInput").style.display = "none";
+    if (undefined !== host) {
+    	host.rename(currentRoomName);
+    }
 }
 
 function parseFile(file, callback){
