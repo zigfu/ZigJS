@@ -23,9 +23,8 @@ var zigmote = (function() {
 				successcb(data);
 
 				socket.on('zigmote-sendToHost', function(data) {
-					console.log("Received command from controller: " + data.command);
 					if (commands.hasOwnProperty(data.command)) {
-						commands[data.command](data.data);
+						commands[data.command](data.data, data.userid);
 					}
 				});
 				
@@ -38,13 +37,13 @@ var zigmote = (function() {
 				
 				socket.on('zigmote-locked', function(data) {
 					if (lockCallbacks.hasOwnProperty(data.lockid)) {
-						lockCallbacks[data.lockid].locked(data);
+						lockCallbacks[data.lockid].locked(data.userid);
 					}
 				});
 				
 				socket.on('zigmote-unlocked', function(data) {
 					if (lockCallbacks.hasOwnProperty(data.lockid)) {
-						lockCallbacks[data.lockid].unlocked(data);
+						lockCallbacks[data.lockid].unlocked(data.userid);
 					}
 				})	
 			});
@@ -68,11 +67,11 @@ var zigmote = (function() {
 
 		function onLock(lockid, lockcallback, unlockcallback) {
 			if (undefined === lockcallback) {
-				lockcallback = function() {};
+				lockcallback = function(userid) {};
 			}
 
 			if (undefined === unlockcallback) {
-				unlockcallback = function() {};
+				unlockcallback = function(userid) {};
 			}
 
 			lockCallbacks[lockid] = {
@@ -106,6 +105,7 @@ var zigmote = (function() {
 			sendToHost : sendToHost,
 			lock : lock,
 			unlock : unlock,
+			pendinglocks : pendingLocks,
 
 			onjoin : function() {},
 			onjoinerror : function() {},
@@ -140,7 +140,6 @@ var zigmote = (function() {
 			});
 
 			socket.on('zigmote-lock', function(data) {
-				console.log('got a lock response ' + data.success);
 				if (pendingLocks.hasOwnProperty(data.lockid)) {
 					pendingLocks[data.lockid](data.success);
 					delete pendingLocks[data.lockid];
