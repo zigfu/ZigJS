@@ -69,6 +69,8 @@ var controller;
 var roomslist;
 var musicSyncList;
 
+var anotherRL;
+
 // name stuff
 var currentName = localStorage.getItem("currentName");
 if (null == currentName) currentName = "[Guest]";
@@ -128,24 +130,31 @@ function loaded() {
     socket = io.connect('http://'+document.location.hostname);
 
     socket.on('connect', function () {
+        controller = zigmote.controller(socket);
+
         var qs = document.location.search;
         var roomid = qs.substr(1,qs.length);
 
-        socket.emit('controllerConnected',{ id : roomid, name : currentName, location : currentLocation});
-
-        roomslist = synclist.subscribe(socket, zigmote.getRoomListId("musicplayer"));
-        roomslist.bind(document.getElementById("roomslistList"), function(id, data) {
+        function makeRoomElement(roomid, roomdata) {
             var li = document.createElement('li');
-            li.innerHTML = data.roomname;
+            li.innerHTML = roomdata.roomname;
             addClass(li, "touchable");
             li.addEventListener("click", function() { 
-                controller = zigmote.controller(socket);
-                controller.joinRoom(id, currentName, roomJoinedOK,
-                        function(){console.log('join failed for room: ' + data.name);}); 
+                controller.joinRoom(roomid, currentName, roomJoinedOK,
+                        function(){console.log('join failed for room: ' + roomdata.name);}); 
             });
             return li;
-        });
+        }
+
+        roomslist = synclist.subscribe(socket, zigmote.getRoomListId("musicplayer"));
+        roomslist.bind(document.getElementById("roomslistList"), makeRoomElement);
         roomslist.onadd = function() {
+            roomlistScroller.refresh();
+        }
+
+        anotherRL = synclist.subscribe(socket, zigmote.getRoomListId("motionosdemos"));
+        anotherRL.bind(document.getElementById("roomslistList"), makeRoomElement);
+        anotherRL.onadd = function() {
             roomlistScroller.refresh();
         }
     });
