@@ -349,7 +349,16 @@ function geturl(f) {
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
 
 </script>
+<style>
 
+#realcursor {
+	width : 28;
+	height : 35;
+	position:absolute;
+	background-image : url("i/hand-pointer.png");
+}
+
+</style>
 </head>
 
 <body>
@@ -506,7 +515,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 	</div> 
 
-
+<div id="realcursor" class="showinsession">
 </div>
 <audio id="audioPlayer">
 </body>

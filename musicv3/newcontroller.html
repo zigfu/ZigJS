@@ -12,6 +12,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script src="/synclist-client.js"></script>
 <script src="/zigmote-client.js"></script>
+<script src="/zigmote.cursor.js"></script>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
@@ -51,21 +52,19 @@ var zmoteController;
 var currentPointerMode;
 
 function setPointer(pointerType) {
-    //TODO
-    /*
     for (var pt in pointerTypes) {
         document.getElementById(pointerTypes[pt]).style.display = (pointerTypes[pt] == pointerType) ? "block" : "none";
     }
 
     if (pointerType == pointerTypes.motion) {
-        currentPointerMode = zmote.cursorModes.motion;
+        currentPointerMode = zigmotecursor.cursorModes.motion;
     }
     if (pointerType == pointerTypes.touch) {
-        currentPointerMode = zmote.cursorModes.touchpadrel;
+        currentPointerMode = zigmotecursor.cursorModes.touchpadrel;
     }
     if (undefined !== zmoteController) {
         zmoteController.cursormode = currentPointerMode;
-    }*/
+    }
 }
 var controller;
 var roomslist;
@@ -115,14 +114,14 @@ function loaded() {
 
         // start the zmote
         //TODO:!!!
-        /*
-        zmoteController = zigmote.controller(socket, data.zmoteid);
+        
+        zmoteController = zigmotecursor.controller(controller);
         zmoteController.bindtouchpad("touchpad");
         zmoteController.bindtouchpad("motion");
         zmoteController.cursormode = currentPointerMode;
         zmoteController.ondisconnected = function() {
             gotoScreen(screenTypes.chooseScreen);
-        }*/
+        }
 
         // show the welcome screen
         gotoScreen(screenTypes.homeScreen);
@@ -218,10 +217,9 @@ function addClass(ele,cls) {
 }
 
 function doPointer() {
-    zmoteController.onconnected = function() {
+    zmoteController.start(true, function() {
         gotoScreen(screenTypes.pointerScreen);
-    }
-    zmoteController.start();   
+    });   
 }
 
 function stopCursor() {
