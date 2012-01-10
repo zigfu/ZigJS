@@ -32,10 +32,16 @@
 		var cursorFovX = 60;
 		var cursorFovY = 45;
 
+		function fixAngle(angle) {
+			if (angle < 0) return 360 + angle;
+			if (angle >= 360) return angle - 360;
+			return angle;
+		}
+
 		function orientationToCursor(lastOrientation) {
 			return {
 				// this works because we assume the center (0.5,0.5) is calibrated to (0,0,0) 
-				x : clamp01((lastOrientation.alpha / -cursorFovX) + 0.5),
+				x : clamp01((fixAngle(lastOrientation.alpha) / -cursorFovX) + 0.5),
 				y : clamp01((lastOrientation.beta / -cursorFovY) + 0.5),
 				mode : "motion"
 			}
