@@ -89,7 +89,7 @@ var zigmote = (function() {
 		}
 
 		function rename(newname) {
-			socket.emit('zigmote-rename', { username : newname });
+			socket.emit('zigmote-rename', { roomname : newname });
 		}
 
 		function on(command, callback) {
