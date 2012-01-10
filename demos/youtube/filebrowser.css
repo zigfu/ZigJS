@@ -13,6 +13,10 @@ body {
 	background: radial-gradient(center 100px, ellipse cover,  #3b495b 25%,#151b23 65%); /* W3C */
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3b495b', endColorstr='#151b23',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
 }
+#sessionOverlay {
+	/* Session Indicator commented out */
+	//background-color: rgba(0,0,0,0.8);
+}
 @font-face {
 	font-family: 'Rokkitt';
 	font-style: normal;
