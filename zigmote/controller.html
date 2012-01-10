@@ -12,7 +12,6 @@
 
 var roomslist;
 var controller;
-var cursor;
 
 function getControllerName() {
 	var roomname = localStorage.getItem("zigmoteControllerName");
@@ -40,7 +39,6 @@ function loaded() {
 				controller.joinRoom(id, getControllerName(), function(){
 					setStatus("Joined " + data.roomname);
 					document.getElementById("roomslist").style.display = "none";
-					cursor = zigmotecursor.controller(controller);
 				}, function(errormsg) {
 					setStatus("Error joining " + data.roomname);
 				});
@@ -69,13 +67,13 @@ var started = false;
 
 function togglecursor() {
 	if (started) {
-		cursor.stop();
+		controller.cursor.stop();
 		document.getElementById("cursorbutton").value = 'Start';
 		started = false;
 	} else {
-		cursor.cursormode = zigmotecursor.cursorModes.motion;
-		cursor.updateorientation = true;
-		cursor.start(exclusive, function(success) {
+		controller.cursor.cursormode = zigmote.cursor.cursorModes.motion;
+		controller.cursor.updateorientation = false;
+		controller.cursor.start(exclusive, function(success) {
 			if (success) {
 				started = true;
 				document.getElementById("cursorbutton").value = 'Stop';

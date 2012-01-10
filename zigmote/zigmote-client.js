@@ -1,4 +1,6 @@
 var zigmote = (function() {
+
+	plugins = {}
 	
 	function host(socket) {
 		var location = {}; // TODO : fill me in!
@@ -113,6 +115,13 @@ var zigmote = (function() {
 			socket.emit('zigmote-unlock', { lockid : lockid });
 		}
 
+		// "install" plugins
+		for (var plugin in plugins) if (plugins.hasOwnProperty(plugin)) {
+			if (plugins[plugin].hasOwnProperty("host")) {
+				ret = plugins[plugin].host(ret);
+			}
+		}
+
 		return ret;
 	}
 
@@ -198,6 +207,13 @@ var zigmote = (function() {
 			socket.emit('zigmote-unlock', { lockid : lockid });	
 		}
 
+		// "install" plugins
+		for (var plugin in plugins) if (plugins.hasOwnProperty(plugin)) {
+			if (plugins[plugin].hasOwnProperty("controller")) {
+				ret = plugins[plugin].controller(ret);
+			}
+		}
+
 		return ret;
 	}
 
@@ -205,6 +221,7 @@ var zigmote = (function() {
 	return {
 		host : host,
 		controller : controller,
+		plugins : plugins,
 		roomslistid : "roomslist",
 	}
 }());

@@ -13,8 +13,6 @@ var host;
 var roomShared;
 var userslist;
 
-var cursor;
-
 function getRoomName() {
 	var roomname = localStorage.getItem("zigmoteHostName");
 	if (null == roomname) {
@@ -78,13 +76,12 @@ function loaded() {
 				delete cursors[userid];
 			}
 
-			cursor = zigmotecursor.host(host);
-			cursor.oncursorlock = function(userid) { console.log("Cursor locked by userid " + userid);}
-			cursor.oncursorunlock = function(userid) { console.log("Cursor unlocked by userid " + userid);}
-			cursor.oncursorstart = function(userid) { cursors[userid].cursor.style.display = "block"; }
-			cursor.oncursorstop = function(userid) { cursors[userid].cursor.style.display = "none"; }
-			cursor.oncursor = cursorcallback;
-			cursor.onorientation = function(alpha, beta, gamma, userid) {
+			host.cursor.oncursorlock = function(userid) { console.log("Cursor locked by userid " + userid);}
+			host.cursor.oncursorunlock = function(userid) { console.log("Cursor unlocked by userid " + userid);}
+			host.cursor.oncursorstart = function(userid) { cursors[userid].cursor.style.display = "block"; }
+			host.cursor.oncursorstop = function(userid) { cursors[userid].cursor.style.display = "none"; }
+			host.cursor.oncursor = cursorcallback;
+			host.cursor.onorientation = function(alpha, beta, gamma, userid) {
 				//console.log("Alpha: " + alpha + "   Beta: " + beta + "   Gamma: " + gamma);
 			}
 

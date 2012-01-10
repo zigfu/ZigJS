@@ -1,4 +1,4 @@
-var zigmotecursor = (function() {
+(function(zigmote) {
 
 	var cursorModes = {
 		off : "off",
@@ -158,7 +158,8 @@ var zigmotecursor = (function() {
 			}
 		}
 
-		return ret;
+		zigmoteController.cursor = ret;
+		return zigmoteController;
 	}
 
 	function host(zigmoteHost) {
@@ -198,14 +199,18 @@ var zigmotecursor = (function() {
 			ret.onclick(userid);
 		});
 
-		return ret;
+		zigmoteHost.cursor = ret;
+		return zigmoteHost;
 	}
-
 
 	// public api
-	return {
-		controller : controller,
-		host : host,
+	zigmote.cursor = {
 		cursorModes : cursorModes,
 	}
-}());
+
+	// register as zigmote plugin
+	zigmote.plugins.cursor = {
+		host : host,
+		controller : controller
+	}
+})(zigmote);
