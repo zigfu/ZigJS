@@ -15,15 +15,6 @@ var userslist;
 
 var cursor;
 
-function getRoomId() {
-	var roomid = localStorage.getItem("zigmoteHostId");
-	if (null == roomid) {
-		roomid = Math.floor(Math.random() * 1000000);
-		localStorage.setItem("zigmoteHostId", roomid);
-	}
-	return roomid;
-}
-
 function getRoomName() {
 	var roomname = localStorage.getItem("zigmoteHostName");
 	if (null == roomname) {
@@ -65,7 +56,7 @@ function loaded() {
 	socket = io.connect('http://'+document.location.hostname);
 	socket.on('connect', function () {
 		host = zigmote.host(socket);
-		host.startRoom(getRoomId(), getRoomName(), function(roomdata) {
+		host.startRoom(getRoomName(), function(roomdata) {
 			roomShared = synclist.subscribe(socket, roomdata.roomsharedid);
 			roomShared.bind(document.getElementById("roomdetails"));
 
