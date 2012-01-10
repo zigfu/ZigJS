@@ -9,6 +9,11 @@
 -->
 <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js' type='text/javascript'></script>
 
+<script src="http://zig.tv/socket.io/socket.io.js"></script>
+<script src="js/synclist-client.js"></script>
+<script src="js/zigmote-client.js"></script>
+<script src="js/zigmote.cursor.js"></script>
+
 <!-- ZigJS -->
 <script type="text/javascript" src="zig.js"></script>
 
@@ -41,6 +46,29 @@ images = [
 	}
 ];
 
+function getRoomName() {
+	var roomname = localStorage.getItem("zigmoteHostName");
+	if (null == roomname) {
+		roomname = "[My TV]";
+		localStorage.setItem("zigmoteHostName", roomname);
+	}
+	return roomname;
+}
+
+function roomStarted(roomData) {
+	// TODO: bind user list
+
+	// cursor stuff
+	host.cursor.oncursorlock = function(userid) { onSessionStart();}
+	host.cursor.oncursorunlock = function(userid) { onSessionEnd();}
+	host.cursor.oncursor = function(x,y,rel,userid) {
+		sliderTarget = x;
+	}
+}
+
+var socket;
+var host;
+
 $(document).ready( function () {
 	lis = $('div.butholder ul li a');
 
@@ -49,6 +77,17 @@ $(document).ready( function () {
 						 function() { hoverLeave(index, element) });
 	});
 
+	// connect to zigtv
+	socket = io.connect('http://zig.tv');
+	socket.on('connect', function () {
+		// connected
+		host = zigmote.host(socket);
+		host.startRoom("motionosdemos", getRoomName(), roomStarted);
+	});
+
+	socket.on('disconnect', function() {
+		// disconnected
+	});
 });
 
 function hoverEnter(index, element) {
@@ -106,7 +145,7 @@ function ZigPluginLoaded() {
 	Zig.SingleUser.controls.AddControl(pushDetector);
 
 	var radar = new Zig.TopDownUsersRadar(document.getElementById("usersRadar"), "user");
-	Zig.SingleUser.onUserEngaged = function(user) { onSessionStart(); radar.DoUserEngaged(user) };
+	Zig.SingleUser.onUserEngaged = function(user) { onSessionStart(); radar.DoUserEngaged(user); };
 	Zig.SingleUser.onUserDisengaged = function(user) { onSessionEnd(); radar.DoUserDisengaged(user) };
 	Zig.listeners.push(radar);
 
