@@ -119,6 +119,7 @@ function loaded() {
         controller.cursor.bindtouchpad("touchpad");
         controller.cursor.bindtouchpad("motion");
         controller.cursor.cursormode = currentPointerMode;
+
         controller.ondisconnected = function() {
             gotoScreen(screenTypes.chooseScreen);
         }

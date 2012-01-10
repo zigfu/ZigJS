@@ -33,8 +33,10 @@
 		var cursorFovY = 45;
 
 		function fixAngle(angle) {
-			if (angle < 0) return 360 + angle;
-			if (angle >= 360) return angle - 360;
+			//this function is needed for alpha because its range is [0,360)
+			// and not centered around 0 like beta and gamma ([-180,180] and [-90,90] respectively)
+			if (angle > 180) return angle - 360;
+			if (angle < -180) return angle + 360;
 			return angle;
 		}
 
@@ -101,6 +103,7 @@
 
 		// return API
 		var ret = {
+			getCalibration : function() { return calibrationOrientation; },
 			start : function(exclusive, callback) {
 				if (undefined === exclusive) {
 					exclusive = false;
