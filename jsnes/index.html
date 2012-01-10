@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>JSNES: A JavaScript NES emulator</title>
+    
+    <script src="/socket.io/socket.io.js"></script>
+<script src="/synclist-client.js"></script>
+<script src="/zigmote-client.js"></script>
+
+<script>
+
+var host;
+var roomdetails;
+var userslist;
+
+function getRoomId() {
+	var roomid = localStorage.getItem("zigmoteHostId");
+	if (null == roomid) {
+		roomid = Math.floor(Math.random() * 1000000);
+		localStorage.setItem("zigmoteHostId", roomid);
+	}
+	document.getElementById("roomid").innerHTML = roomid;
+	return roomid;
+}
+
+function getRoomName() {
+	var roomname = localStorage.getItem("zigmoteHostName");
+	if (null == roomname) {
+		roomname = "[Unnamed TV]";
+		localStorage.setItem("zigmoteHostName", roomname);
+	}
+	return roomname;
+}
+
+function setStatus(status) {
+	document.getElementById('status').innerHTML = status;
+}
+
+function loaded() {
+	socket = io.connect('http://'+document.location.hostname);
+	socket.on('connect', function () {
+		host = zigmote.host(socket);
+		host.startRoom(getRoomId(), getRoomName(), function(roomid, roomdataid) {
+			roomdetails = synclist.subscribe(socket, roomdataid);
+			roomdetails.bind(document.getElementById("roomdetails"));
+			roomdetails.onadd = function(id, data) {
+				if ("userslist" == id) {
+					userslist = synclist.subscribe(socket, roomdetails.get("userslist"));
+					userslist.bind(document.getElementById("userslist"));
+				}
+			}
+			setStatus("Connected");
+		});
+
+		socket.on('disconnect', function() {
+			setStatus("Disconnected");
+		});
+		
+		
+		
+		  //         case 88: this.state1[this.keys.KEY_A] = value; break;      // X
+          //  case 90: this.state1[this.keys.KEY_B] = value; break;      // Z
+          //  case 17: this.state1[this.keys.KEY_SELECT] = value; break; // Right Ctrl
+          //  case 13: this.state1[this.keys.KEY_START] = value; break;  // Enter
+          //  case 38: this.state1[this.keys.KEY_UP] = value; break;     // Up
+          //  case 40: this.state1[this.keys.KEY_DOWN] = value; break;   // Down
+          // case 37: this.state1[this.keys.KEY_LEFT] = value; break;   // Left
+          //  case 39: this.state1[this.keys.KEY_RIGHT] = value; break;  // Right
+		
+		host.on("ADown", function(data,uid) { nes.keyboard.setKey(88,65); console.log("ADown");});
+		host.on("AUp", function(data, uid){ nes.keyboard.setKey(88,64); console.log("AUp");});
+		
+		host.on("BDown", function(data,uid) { nes.keyboard.setKey(90,65);console.log("BDown");});
+		host.on("BUp", function(data, uid){ nes.keyboard.setKey(90,64); console.log("BUp");});
+		
+		host.on("selectDown", function(data,uid) { nes.keyboard.setKey(17,65); console.log("selectDown");});
+		host.on("selectUp", function(data, uid){ nes.keyboard.setKey(17,64); console.log("selectUp");});		
+		
+		host.on("startDown", function(data,uid) { nes.keyboard.setKey(13,65); console.log("startDown");});
+		host.on("startUp", function(data, uid){ nes.keyboard.setKey(13,64); console.log("startUp");});
+		
+		host.on("upDown", function(data,uid) { nes.keyboard.setKey(38,65); console.log("upDown");});
+		host.on("upUp", function(data, uid){ nes.keyboard.setKey(38,64); console.log("upUp");});		
+		
+		host.on("downDown", function(data,uid) { nes.keyboard.setKey(40,65); console.log("downDown");});
+		host.on("downUp", function(data, uid){ nes.keyboard.setKey(40,64); console.log("downUp");});		
+		
+		host.on("leftDown", function(data,uid) { nes.keyboard.setKey(37,65); console.log("leftDown");});
+		host.on("leftUp", function(data, uid){ nes.keyboard.setKey(37,64); console.log("leftUp");});		
+
+		host.on("rightDown", function(data,uid) { nes.keyboard.setKey(39,65); console.log("rightDown");});
+		host.on("rightUp", function(data, uid){ nes.keyboard.setKey(39,64); console.log("rightUp");});		
+	});
+	
+	
+	
+}
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
+
+</script>
+</head>
+
+<body>
+    <h1>JSNES</h1>
+    
+RoomID:<div id="roomid"></div>
+
+    <div id="emulator"></div>
+    
+    <h2>Controls</h2>
+    <table id="controls">
+        <tr>
+            <th>Button</th>
+            <th>Player 1</th>
+            <th>Player 2</th>
+        </tr>
+        <tr>
+            <td>Left</td>
+            <td>Left</td>
+            <td>Num-4</td>
+        <tr>
+            <td>Right</td>
+            <td>Right</td>
+            <td>Num-6</td>
+        </tr>
+        <tr>
+            <td>Up</td>
+            <td>Up</td>
+            <td>Num-8</td>
+        </tr>
+        <tr>
+            <td>Down</td>
+            <td>Down</td>
+            <td>Num-2</td>
+        </tr>
+        <tr>
+            <td>A</td>
+            <td>X</td>
+            <td>Num-7</td>
+        </tr>
+        <tr>
+            <td>B</td>
+            <td>Z</td>
+            <td>Num-9</td>
+        </tr>
+        <tr>
+            <td>Start</td>
+            <td>Enter</td>
+            <td>Num-1</td>
+        </tr>
+        <tr>
+            <td>Select</td>
+            <td>Ctrl</td>
+            <td>Num-3</td>
+        </tr>
+    </table>
+
+
+
+
+<div id="status">Connecting...</div>
+
+users:
+<ul id="userslist">
+</ul>
+
+roomdetails:
+<ul id="roomdetails">
+</ul>
+
+
+
+    <script src="lib/jquery-1.4.2.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="lib/dynamicaudio-min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="source/nes.js" type="text/javascript" charset="utf-8"></script>
+    <script src="source/utils.js" type="text/javascript" charset="utf-8"></script>
+    <script src="source/cpu.js" type="text/javascript" charset="utf-8"></script>
+    <script src="source/keyboard.js" type="text/javascript" charset="utf-8"></script>
+    <script src="source/mappers.js" type="text/javascript" charset="utf-8"></script>
+    <script src="source/papu.js" type="text/javascript" charset="utf-8"></script>
+    <script src="source/ppu.js" type="text/javascript" charset="utf-8"></script>
+    <script src="source/rom.js" type="text/javascript" charset="utf-8"></script>
+    <script src="source/ui.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8">
+        var nes;
+        $(function() {
+            nes = new JSNES({
+                'ui': $('#emulator').JSNESUI({
+                    "Homebrew": [
+                        ['Concentration Room', 'roms/croom/croom.nes'],
+                        ['LJ65', 'roms/lj65/lj65.nes'],
+                    ],
+                    "Working": [
+                        
+                        ['Contra', 'local-roms/Contra.nes'],
+                        ['Donkey Kong', 'local-roms/DonkeyKong.nes'],
+                        ['Dr. Mario', 'local-roms/DrMario.nes'],
+                        ['The Legend of Zelda', 'local-roms/Zelda.nes'],
+                        ['Lemmings', 'local-roms/Lemmings.nes'],
+                        ['Lifeforce', 'local-roms/Lifeforce.nes'],
+                        
+                        ['Mario Bros.', 'local-roms/MarioBros.nes'],
+                   //     ['Mega Man', 'local-roms/Mega Man (U).nes'],
+                   //     ['Pac-Man', 'local-roms/Pac-Man (U) [!].nes'],
+                        ['Super Mario Bros.', 'local-roms/SuperMario.nes'],
+                   //     ['Tennis', 'local-roms/Tennis (JU) [!].nes'],
+                   //     ['Tetris', 'local-roms/Tetris (U) [!].nes'],
+                   //     ['Tetris 2', 'local-roms/Tetris 2 (U) [!].nes'],
+                   //     ['Zelda II - The Adventure of Link', 'local-roms/Zelda II - The Adventure of Link (U).nes']
+                    ]//,
+
+                   // "Nearly Working": [
+                   //     ['Duck Hunt', 'local-roms/Duck Hunt (JUE) [!].nes'],
+                   //     ['Super Mario Bros. 3', 'local-roms/Super Mario Bros. 3 (U) (PRG1) [!].nes']
+                   // ]
+                })
+            });
+        });
+    </script>
+    <!--[if IE]>
+        <script type="text/vbscript" src="source/jsnes-ie-hacks.vbscript"></script>
+    <![endif]-->
+
+</body>
+</html>
