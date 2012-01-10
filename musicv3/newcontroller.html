@@ -133,7 +133,7 @@ function loaded() {
 
         socket.emit('controllerConnected',{ id : roomid, name : currentName, location : currentLocation});
 
-        roomslist = synclist.subscribe(socket, zigmote.roomslistid);
+        roomslist = synclist.subscribe(socket, zigmote.getRoomListId("musicplayer"));
         roomslist.bind(document.getElementById("roomslistList"), function(id, data) {
             var li = document.createElement('li');
             li.innerHTML = data.roomname;

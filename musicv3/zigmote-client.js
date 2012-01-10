@@ -2,6 +2,10 @@ var zigmote = (function() {
 
 	plugins = {}
 	
+	function getRoomListId(roomtype) {
+		return "roomslist:"+roomtype;
+	}
+
 	function host(socket) {
 		var location = {}; // TODO : fill me in!
 
@@ -38,7 +42,7 @@ var zigmote = (function() {
 			}
 		}
 		
-		function startRoom(name, successcb) {
+		function startRoom(roomtype, name, successcb) {
 
 			socket.on('zigmote-roomStarted', function(data) {
 				// save roomid in cookie
@@ -76,6 +80,7 @@ var zigmote = (function() {
 
 			socket.emit('zigmote-startRoom', {
 				roomid : roomid,
+				roomtype : roomtype,
 				roomname : name,
 				location : location,
 				pin : 0,
@@ -222,6 +227,6 @@ var zigmote = (function() {
 		host : host,
 		controller : controller,
 		plugins : plugins,
-		roomslistid : "roomslist",
+		getRoomListId : getRoomListId,
 	}
 }());

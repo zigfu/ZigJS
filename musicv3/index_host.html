@@ -150,7 +150,7 @@ function loaded() {
 	socket.on('connect', function () {
 		host = zigmote.host(socket);
 		//host.startRoom(getRoomId(), getRoomName(), function(roomdata) {
-		host.startRoom(getRoomName(), function(roomdata) {
+		host.startRoom("musicplayer", getRoomName(), function(roomdata) {
 			// unneeded for now
 			//roomShared = synclist.subscribe(socket, roomdata.roomsharedid);
 			//roomShared.bind(document.getElementById("roomdetails"));
