@@ -211,7 +211,13 @@ var synclist = (function() {
 			//TODO: find a cleaner way to update an item
 			var node = getElementByItemid(lists[listid].boundelement, itemid);
 			var newElement = lists[listid].makeelement(itemid, itemdata);
-			node.innerHTML = newElement.innerHTML;
+			if (null == node) {
+				newElement.setAttribute("data-synclistid", listid);
+				newElement.setAttribute("data-syncitemid", itemid);
+				lists[listid].boundelement.appendChild(newElement);
+			} else {
+				node.innerHTML = newElement.innerHTML;
+			}
 		}
 
 		if (undefined !== lists[listid].boundkeys[itemid]) {
