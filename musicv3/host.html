@@ -241,7 +241,6 @@ function nameentrydone() {
     var newName = document.getElementById("currentRoomNameInput").value;
     console.log("Name changed: " + newName);
     nameChanged(newName);
-	socket.emit('setName',{ name : newName});
 }
 
 function nameChanged(newName) {
