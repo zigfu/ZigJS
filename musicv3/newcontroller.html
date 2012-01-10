@@ -296,14 +296,14 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 	<div class="header">
     	<div class="name">
             <div id="currentUserName" onClick="nameentry();"></div>
-    		<input style="display:none; width: 220px; height: 30px; font-size: 20px;" type="text" placeholder="[Enter Name]" spellcheck="off" autocomplete="off" id="currentUserNameInput" name="currentUserNameInput" onchange="nameentrydone()"/>
+    		<input style="display:none; width: 220px; height: 30px; font-size: 20px;" type="text" placeholder="[Enter Name]" spellcheck="off" autocomplete="off" id="currentUserNameInput" name="currentUserNameInput" onChange="nameentrydone()"/>
 
     	</div>
     </div>
 
 	<div id="navBar" class="navBar">
     
-    <a href="/"><img src="mi/controller/home.png" /></a>
+    <a href="javascript:gotoScreen(screenType.homeScreen)"><img src="mi/controller/home.png" /></a>
     
     <ul>
     
