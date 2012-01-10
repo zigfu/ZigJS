@@ -7,7 +7,7 @@
 
 <link rel="stylesheet" type="text/css" href="controllerstyle.css" />
 
-<script type="text/javascript" src="iscroll.js"></script> 
+<script type="text/javascript" src="js/iscroll.js"></script> 
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="/synclist-client.js"></script>
@@ -31,6 +31,12 @@ function gotoScreen(screenType) {
     for (var screen in screenTypes) {
         document.getElementById(screenTypes[screen]).style.display = (screenTypes[screen] == screenType) ? "block" : "none";
     }
+
+    showNavBar(screenType != screenTypes.chooseScreen);
+}
+
+function showNavBar(show) {
+    document.getElementById("navBar").style.display = (show) ? "block" : "none";
 }
 
 var pointerTypes = {
@@ -154,6 +160,40 @@ function loaded() {
             value: 60
         });
 
+    $("#thebutton").click(function() {
+		$("#volumeSlider").toggle("slide", { direction: "up" }, 300);
+	})
+
+	$("#volumeSlider").slider({
+            orientation: "vertical",
+            range: "min",
+            min: 0,
+            max: 100,
+            value: 60,
+            start : function(event, ui) { 
+	            $("#volumeLabel")
+	            	.show("fade");
+				$(ui.handle).attr("data-updateTimer", setInterval(function() {
+						sendToTV("setVolume", {volume: ($("#volumeSlider").slider("option", "value") / 100)});
+					}, 300));
+	            },
+            slide : function(event, ui) { 
+	            $("#volumeLabel")
+	            	.text(ui.value)
+	            	.position({
+            			my : "right center",
+            			at : "left center",
+            			of : ui.handle,
+            			offset : "-10 3.5"}); 
+	        	},
+            stop : function(event, ui) { 
+				$("#volumeLabel").hide("fade");
+				$("#volumeSlider").hide("fade"); 
+				clearInterval($(ui.handle).attr("data-updateTimer"));
+				sendToTV("setVolume", {volume: (ui.value / 100)});
+				}
+        });
+
     preventScrolling("touchpad");
     preventScrolling("motion");
     //preventScrolling("sensitivitySlider");
@@ -240,18 +280,36 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 
 </script>
+
 </head>
 
 <body>
 <div id="wrapper">
 
 	<div class="header">
-	
     	<div class="name">
-            <div id="currentUserName" onclick="nameentry();"></div>
-    		<input style="display:none; width: 320px; height: 30px; font-size: 20px;" type="text" placeholder="[Enter Name]" spellcheck="off" autocomplete="off" id="currentUserNameInput" name="currentUserNameInput" onchange="nameentrydone()"/>
+            <div id="currentUserName" onClick="nameentry();"></div>
+    		<input style="display:none; width: 220px; height: 30px; font-size: 20px;" type="text" placeholder="[Enter Name]" spellcheck="off" autocomplete="off" id="currentUserNameInput" name="currentUserNameInput" onchange="nameentrydone()"/>
 
     	</div>
+    </div>
+
+	<div id="navBar" class="navBar">
+    
+    <a href="/"><img src="mi/controller/home.png" /></a>
+    
+    <ul>
+    
+    	<li><img src="mi/controller/mu_back.png" onClick="javascript:sendToTV('playPrev');" /></li>
+        
+        <li><img src="mi/controller/mu_play.png" onClick="javascript:sendToTV('togglePlayPause');" /></li>
+        
+        <li class="pp"><img src="mi/controller/mu_pause.png" /></li>
+        
+        <li><img src="mi/controller/mu_forward.png" onClick="javascript:sendToTV('playNext');" /></li>
+        
+    </ul>
+            <img id="thebutton" src="mi/controller/mu_volume.png" /><div id="volumeSlider"></div><div id="volumeLabel"></div>
     </div>
 
 	<div id="roomslist" class="invisible">
@@ -264,31 +322,20 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
         </div>
 	</div>
 
-	<div id="homescreen" class="invisible">
-        <div id="playerControls" style="width:inherit;">
-            <ul>
-                <li> <img src="musicicons/MCPrev.png" onclick="javascript:sendToTV('playPrev');">
-                </li>
-                <li> <img src="musicicons/MCPlay.png" onclick="javascript:sendToTV('togglePlayPause');">
-                </li>
-                <li> <img src="musicicons/MCNext.png" onclick="javascript:sendToTV('playNext');">
-                </li>
-            </ul>
-        </div>
-		<div class="homeScreenIcon"><a href="javascript:doPointer()"><img src="mi/cursors.png"></a>
-            <p>   Cursor</p>
-        </div>
+<div id="homescreen" class="invisible">       
+        
+		<div class="homeScreenIcon">
+        
+            <a href="javascript:doPointer()"><img width="200px" height="200px" src="mi/cursors.png" /></a>
 
-        <div class="homeScreenIcon">
-            <div onclick="javascript:sendToTV('toggleQR');"><img src="mi/qrcode.png"></div>
-            <p>QR Code</p>
-        </div>
+            <a href="javascript:sendToTV('toggleQR');"><img width="200px" height="200px" src="mi/qrcode.png" /></a>
 
-        <div class="homeScreenIcon">
-            <div onclick="javascript:(function(){gotoScreen(screenTypes.musicScreen); musiclistScroller.refresh();})()"><img src="mi/qrcode.png"></div>
-            <p>Music</p>
+            <a href="javascript:(function(){gotoScreen(screenTypes.musicScreen); musiclistScroller.refresh();})()"><img width="200px" height="200px" src="mi/music.png" /></a>
+ 
+          
         </div>
-
+		
+        
 	</div>
 
 	<div id="pointerscreen" class="invisible">
@@ -319,7 +366,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 			<div class="closebutton">
 
-                <a href="javascript:stopCursor()" class="css_button">BACK</a>
+            <a href="javascript:stopCursor()" class="css_button">BACK</a>
 
 			</div>
 
@@ -339,6 +386,11 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
             <a href="javascript:stopCursor()" class="css_button">BACK</a>
 
         </div>
+
+    </div>
+
+    <div id="footer">
+    
 
     </div>
 

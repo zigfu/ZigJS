@@ -378,7 +378,7 @@ function addToAnythingslider(toAdd, hideleft, hideright, caption) {
 </head>
 
 <body>
-
+<div id="sessionOverlay">
 <div id='wrapper'>
 	<div id='logocontainer'>
 		<img id='logo' src='logo.png' alt='' />
@@ -387,6 +387,11 @@ function addToAnythingslider(toAdd, hideleft, hideright, caption) {
 		<div id='menu'>
 			<ul id="myslider">
 			</ul>
+        <div style="height: 940px;">
+				<div class="slider showinsession" id="slider">
+					<div class="slider_nub showinsession" id="slider_nub"></div>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
@@ -400,6 +405,6 @@ function addToAnythingslider(toAdd, hideleft, hideright, caption) {
 <div id="playerContainer" style="display:none">
 	<div id="videoDiv">Loading...</div>
 </div>
-
+</div>
 </body>
 </html>

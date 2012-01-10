@@ -13,6 +13,42 @@ body {
 	background: radial-gradient(center 100px, ellipse cover,  #3b495b 25%,#151b23 65%); /* W3C */
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3b495b', endColorstr='#151b23',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
 }
+.slider {
+	width: 15px;
+	position: absolute;
+	height: 940px;
+	margin: 0px auto;
+	background-color: #9ca6ac;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	box-shadow:inset 0px 1px 5px #000;
+	-moz-box-shadow:inset 0px 1px 5px #000;
+	-webkit-box-shadow:inset 0px 1px 5px #000;
+	-o-box-shadow:inset 0px 1px 5px #000;
+}
+
+.slider_nub {
+	width: 15px;
+	height: 20px;
+	background-color: #151b23;
+	position: relative;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	box-shadow: 0px 1px 5px #000;
+	-moz-box-shadow: 0px 1px 5px #000;
+	-webkit-box-shadow: 0px 1px 5px #000;
+	-o-box-shadow: 0px 1px 8px #000;
+}
+
+.showinsession {
+	display: none
+}
+#sessionOverlay {
+	/* Session Indicator commented out */
+	//background-color: rgba(0,0,0,0.8);
+}
 @font-face {
 	font-family: 'Rokkitt';
 	font-style: normal;

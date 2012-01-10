@@ -5,12 +5,12 @@
 
 <link rel="stylesheet" type="text/css" href="style.css" />
 
-<script type="text/javascript" src="iscroll.js"></script>
+<script type="text/javascript" src="js/iscroll.js"></script>
 
 <script src="/socket.io/socket.io.js"></script> 
 <script type="text/javascript" src="./qrcode_files/qrcode.js"></script>
 <script type="text/javascript" src="./qrcode_files/qrcanvas.js"></script>
-<script type="text/javascript" src="id3v2.js"></script>
+<script type="text/javascript" src="js/id3v2.js"></script>
 
 <script src="/synclist-client.js"></script>
 <script src="/zmote-client.js"></script>
@@ -22,7 +22,7 @@ var playlistScroller;
 var userlistScroller;
 var playercontrolsScroller;
 var socket;
-
+var player;
 var medialist;
 var userlist;
 var zmoteReceiver;
@@ -67,6 +67,13 @@ function positionCursor(element, posX, posY) {
 function doClick()
 {
 	console.log("Doing the click");
+	x = parseInt(document.getElementById("realcursor").style.left);
+	y =	parseInt(document.getElementById("realcursor").style.top);
+	elt = document.elementFromPoint(x,y-1); //subtract one to get the thing cursor points to
+	var evt = document.createEvent("MouseEvents");
+    evt.initMouseEvent("click", true, true, window, 1, x, y, x, y,
+        false, false, false, false, 0, null);
+	elt.dispatchEvent(evt);
 }
 
 function clamp(val, min, max) {
@@ -112,13 +119,11 @@ function playSong(songid) {
 
 	// get the actual song
 	var song = songs[songid];
-	var player = document.getElementById("audioPlayer");
 	player.src = geturl(song);
 	player.play();
 
 }
 function togglePlayPause() {
-	var player = document.getElementById("audioPlayer");
 	if (player.paused) { 
 		player.play();
 	} else {
@@ -135,6 +140,7 @@ function playPrev() {
 function loaded() {
 	//document.documentElement.style.overflow = 'hidden';	 // firefox, chrome
 	//document.body.scroll = "no";	// ie only
+	player = document.getElementById("audioPlayer");
 
 	medialibraryScroller = new iScroll('medialibraryScroller');
 	//playlistScroller = new iScroll('playlistScroller');
@@ -225,6 +231,12 @@ function loaded() {
 	});
 	tvCommands.on('playNext', function(data) {
 		playNext();
+	});
+	tvCommands.on('setVolume', function(data) {
+		var vol = data.volume;
+		if (vol !== undefined) {
+			player.volume = vol;
+		}
 	});
 
 	socket.on('sendToTV', function(data) {
