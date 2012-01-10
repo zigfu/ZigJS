@@ -30,7 +30,7 @@ function loaded() {
 	socket = io.connect('http://'+document.location.hostname);
 	socket.on('connect', function () {
 		setStatus("Connected");
-		roomslist = synclist.subscribe(socket, zigmote.roomslistid);
+		roomslist = synclist.subscribe(socket, zigmote.getRoomListId("demo"));
 		roomslist.bind(document.getElementById("roomslist"), function(id, data) {
 			var newElem = document.createElement('li');
 			newElem.innerHTML = data.roomname;

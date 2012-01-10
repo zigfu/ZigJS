@@ -54,7 +54,7 @@ function loaded() {
 	socket = io.connect('http://'+document.location.hostname);
 	socket.on('connect', function () {
 		host = zigmote.host(socket);
-		host.startRoom(getRoomName(), function(roomdata) {
+		host.startRoom("demo", getRoomName(), function(roomdata) {
 			roomShared = synclist.subscribe(socket, roomdata.roomsharedid);
 			roomShared.bind(document.getElementById("roomdetails"));
 
