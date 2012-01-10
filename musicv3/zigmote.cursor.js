@@ -61,6 +61,7 @@
 		}
 
 		function ontouchstart(event) {
+			touchStartTime = (+new Date);
 			lastTouch.x = event.touches[0].pageX;
 			lastTouch.y = event.touches[0].pageY;
 			touchStart.x = lastTouch.x;
@@ -79,8 +80,9 @@
 		}
 
 		function ontouchend(event) {
-			var d = dist(lastTouch, touchStart);
-			if (sendingCursor && d < 10) {
+			var dx = dist(lastTouch, touchStart);
+			var dt = (+new Date) - touchStartTime;
+			if (sendingCursor && dx < 10 && dt < 1000) {
 				zigmoteController.sendToHost('click');
 			}
 		}
