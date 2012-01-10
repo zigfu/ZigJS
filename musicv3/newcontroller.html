@@ -48,7 +48,6 @@ var pointerTypes = {
 var roomlistScroller;
 var musiclistScroller;
 
-var zmoteController;
 var currentPointerMode;
 
 function setPointer(pointerType) {
@@ -57,13 +56,13 @@ function setPointer(pointerType) {
     }
 
     if (pointerType == pointerTypes.motion) {
-        currentPointerMode = zigmotecursor.cursorModes.motion;
+        currentPointerMode = zigmote.cursor.cursorModes.motion;
     }
     if (pointerType == pointerTypes.touch) {
-        currentPointerMode = zigmotecursor.cursorModes.touchpadrel;
+        currentPointerMode = zigmote.cursor.cursorModes.touchpadrel;
     }
-    if (undefined !== zmoteController) {
-        zmoteController.cursormode = currentPointerMode;
+    if (undefined !== controller) {
+        controller.cursor.cursormode = currentPointerMode;
     }
 }
 var controller;
@@ -96,8 +95,8 @@ function loaded() {
     roomlistScroller = new iScroll('roomslistContainer');
     musiclistScroller = new iScroll('musiclistContainer');
 
-    gotoScreen(screenTypes.chooseScreen);
     setPointer(pointerTypes.touch);
+    gotoScreen(screenTypes.chooseScreen);
 
     function roomJoinedOK(data) {
         // connect the music list
@@ -115,11 +114,10 @@ function loaded() {
         // start the zmote
         //TODO:!!!
         
-        zmoteController = zigmotecursor.controller(controller);
-        zmoteController.bindtouchpad("touchpad");
-        zmoteController.bindtouchpad("motion");
-        zmoteController.cursormode = currentPointerMode;
-        zmoteController.ondisconnected = function() {
+        controller.cursor.bindtouchpad("touchpad");
+        controller.cursor.bindtouchpad("motion");
+        controller.cursor.cursormode = currentPointerMode;
+        controller.ondisconnected = function() {
             gotoScreen(screenTypes.chooseScreen);
         }
 
@@ -200,6 +198,7 @@ function loaded() {
 				}
         });
 
+
     preventScrolling("touchpad");
     preventScrolling("motion");
     //preventScrolling("sensitivitySlider");
@@ -217,13 +216,13 @@ function addClass(ele,cls) {
 }
 
 function doPointer() {
-    zmoteController.start(true, function() {
+    controller.cursor.start(true, function() {
         gotoScreen(screenTypes.pointerScreen);
     });   
 }
 
 function stopCursor() {
-    zmoteController.stop();
+    controller.cursor.stop();
     gotoScreen(screenTypes.homeScreen);
 }
 
@@ -246,10 +245,6 @@ function preventDocScrolling(id) {
     document.addEventListener( 'touchmove' , stopScrolling , false );
 }
 
-
-function recalibrate() {
-    zmoteController.recalibrate();    
-}
 
 function nameentry() {
     document.getElementById("currentUserName").style.display = "none";
@@ -274,7 +269,7 @@ function nameChanged(newName) {
 }
 
 function recalibrate() {
-    zmoteController.recalibrate();    
+    controller.cursor.recalibrate();    
 }
 
 function sendToTV(command, data) {

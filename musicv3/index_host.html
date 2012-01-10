@@ -52,7 +52,6 @@ var player;
 var medialist;
 var userslist;
 
-var cursor;
 var cursor_userid;
 
 var songs = {};
@@ -150,7 +149,8 @@ function loaded() {
 	socket = io.connect('http://'+document.location.hostname);
 	socket.on('connect', function () {
 		host = zigmote.host(socket);
-		host.startRoom(getRoomId(), getRoomName(), function(roomdata) {
+		//host.startRoom(getRoomId(), getRoomName(), function(roomdata) {
+		host.startRoom(getRoomName(), function(roomdata) {
 			// unneeded for now
 			//roomShared = synclist.subscribe(socket, roomdata.roomsharedid);
 			//roomShared.bind(document.getElementById("roomdetails"));
@@ -182,16 +182,15 @@ function loaded() {
 			medialist.onclear = function() { medialibraryScroller.refresh(); }
 
 			var thecursor = document.getElementById("realcursor"); //TODO: real element
-			cursor = zigmotecursor.host(host);
-			cursor.oncursorlock = function(userid) { console.log("Cursor locked by userid " + userid); cursor_userid = userid; }
-			cursor.oncursorunlock = function(userid) { console.log("Cursor unlocked by userid " + userid); cursor_userid = undefined; }
-			cursor.oncursorstart = function(userid) { 
+			host.cursor.oncursorlock = function(userid) { console.log("Cursor locked by userid " + userid); cursor_userid = userid; }
+			host.cursor.oncursorunlock = function(userid) { console.log("Cursor unlocked by userid " + userid); cursor_userid = undefined; }
+			host.cursor.oncursorstart = function(userid) { 
 				//cursors[userid].cursor.style.display = "block"; 
 			}
-			cursor.oncursorstop = function(userid) { 
+			host.cursor.oncursorstop = function(userid) { 
 				//cursors[userid].cursor.style.display = "none"; 
 			}
-			cursor.oncursor = (function(cursorElement) { 
+			host.cursor.oncursor = (function(cursorElement) { 
 				return function(x,y, rel, userid) {
 					if (cursor_userid != userid) return; 
 					if (rel) {
