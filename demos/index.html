@@ -22,16 +22,16 @@ images = [
 		'highlit_image': 'img/youtube_buthvr.png'
 	}, 
 	{
-		'name': 'sush',
-		'description' : 'Sushi Warrior',
-		'default_image': 'img/sush_but.png',
-		'highlit_image': 'img/sush_buthvr.png'
+		'name': 'muse',
+		'description' : 'Music Player',
+		'default_image': 'img/muse_but.png',
+		'highlit_image': 'img/muse_buthvr.png'
 	}, 
 	{
-		'name': 'samp',
-		'description' : 'Sample Apps',
-		'default_image': 'img/samp_but.png',
-		'highlit_image': 'img/samp_buthvr.png'
+		'name': 'games',
+		'description' : 'Sample Games',
+		'default_image': 'img/games_but.png',
+		'highlit_image': 'img/games_buthvr.png'
 	}, 
 	{
 		'name': 'slid',
@@ -130,6 +130,18 @@ function updateSlider()
 	sliderCurrent = lerp(sliderCurrent, sliderTarget, 0.5);
 	sliderNub.style.left = (sliderCurrent * sliderNub.parentNode.offsetWidth - (sliderNub.offsetWidth / 2)) + "px";
 }
+/*---------------------------------------
+PreLoader for Icons
+---------------------------------------*/
+function preloader() 
+{
+hoverImages = new Image(); 
+hoverImages.src = "img/youtube_buthvr.png";
+hoverImages.src = "img/muse_buthvr.png";
+hoverImages.src = "img/games_buthvr.png";
+hoverImages.src = "img/slide_buthvr.png";
+}
+
 
 </script>
 
@@ -172,7 +184,7 @@ function updateSlider()
 	height: 300px;
 	border-radius: 15px;
 	margin-top: 100px;
-	margin-left: 1400px;
+	margin-left: 70%;
 	background:url('img/radar.png'); 
 	overflow:hidden;
 	position: fixed;
@@ -192,7 +204,7 @@ function updateSlider()
 </style>
 
 </head>
-<body>
+<body onLoad="javascript:preloader();">
 
 <div id='wrapper'>
 
@@ -213,8 +225,8 @@ function updateSlider()
 		<div class='butholder'>
 			<ul>
 				<li><a href="youtube/index.html"><img name='tube' src='img/youtube_but.png' alt=''/></a></li>
-				<li><a href="punchingbag/index.html"><img name='sush' src='img/sush_but.png' alt='' /></a></li>
-				<li><a href="unitysamples/index.html"><img name='samp' src='img/samp_but.png' alt=''/></a></li>
+				<li><a href="musicplayer/index.html"><img name='muse' src='img/muse_but.png' alt='' /></a></li>
+				<li><a href="unitysamples/index.html"><img name='games' src='img/games_but.png' alt=''/></a></li>
 				<li><a href="#"><img name='slid' src='img/slide_but.png' alt='' /></a></li>
 			</ul>
 			<div style="height:15px">
