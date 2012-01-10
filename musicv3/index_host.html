@@ -154,7 +154,7 @@ function loaded() {
 			// unneeded for now
 			//roomShared = synclist.subscribe(socket, roomdata.roomsharedid);
 			//roomShared.bind(document.getElementById("roomdetails"));
-
+			console.log("asdfasdf");
 			userslist = synclist.subscribe(socket, roomdata.userslistid);
 			userslist.bind(document.getElementById("userslist"));
 			userslist.onadd = function() { userslistScroller.refresh(); }
@@ -371,11 +371,11 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 		<div class="musicPlayer">
 			
-			<img src="i/mubrowser-back.png" onclick="javascript:playPrev();" />
+			<img src="i/mubrowser-back.png" onClick="javascript:playPrev();" />
 
-			<img src="i/mubrowser-play.png" onclick="javascript:togglePlayPause();"/>
+			<img src="i/mubrowser-play.png" onClick="javascript:togglePlayPause();"/>
 
-			<img src="i/mubrowser-forward.png" onclick="javascript:playNext();"/>
+			<img src="i/mubrowser-forward.png" onClick="javascript:playNext();"/>
 
 			<img src="i/mubrowser-volume.png" />
 
@@ -422,10 +422,6 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 			<div id="medialibraryScroller" class="scrollerContainer">
 
 				<div class="scroller">
-
-					<!--<ul id="medialibraryList">
-
-					</ul> -->
 					<table id="songlist" width="100%" height="25px" border="0">
 					<thead id="">
 					  <tr>
@@ -436,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 					  </tr>
 					</thead>
 					<tbody id="medialibraryList">
-
+						
 					</tbody>
 					</table>
 				</div>
@@ -518,6 +514,6 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 <div id="realcursor" class="showinsession">
 </div>
 <audio id="audioPlayer">
-</body>
+</div></body>
 
 </html>

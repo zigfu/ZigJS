@@ -128,7 +128,9 @@ body {
 }
 #medialibraryList {
 	font-family: Arial;
-	letter-spacing: -2px;
+	letter-spacing: 0px;
+	color: #FFF;
+	text-shadow: none;
 }
 #medialibraryScroller {
 	
@@ -250,12 +252,14 @@ body {
 	padding-right: 30px;
 	font-family: 'Droid Sans';
 	text-shadow: 0px 1px 1px rgba(255,255,255,0.5);
+	letter-spacing: 0px;
 }
 #songlist td {
 	padding-left: 10px;
 }
 .tablerow {
 	border-radius: 3px;
+	color: #FFF;
 	background-color: rgba(255,255,255,0.4);
 }
 #trackid {
