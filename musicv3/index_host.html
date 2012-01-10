@@ -15,6 +15,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script src="/synclist-client.js"></script>
 <script src="/zigmote-client.js"></script>
+<script src="/zigmote.cursor.js"></script>
 <script type="text/javascript">
 // zigmote boilerplate
 var host;
@@ -51,6 +52,9 @@ var player;
 var medialist;
 var userslist;
 
+var cursor;
+var cursor_userid;
+
 var songs = {};
 
 function hasClass(ele,cls) {
@@ -66,6 +70,43 @@ function removeClass(ele,cls) {
     	var reg = new RegExp('(\\s|^)'+cls+'(\\s|$)');
 		ele.className=ele.className.replace(reg,' ');
 	}
+}
+
+var lastCursor = {x : 0, y : 0};
+
+function setCursor(element, xpx, ypx) {
+	element.style.left = lastCursor.x + "px";
+	element.style.top = lastCursor.y + "px";
+}
+
+function positionCursor(element, posX, posY) {
+	lastCursor.x = (posX * element.parentNode.offsetWidth - (element.offsetWidth / 2));
+	lastCursor.y = (posY * element.parentNode.offsetHeight - (element.offsetHeight / 2));
+	setCursor(element, lastCursor.x, lastCursor.y);
+}
+
+function doClick()
+{
+	console.log("Doing the click");
+	x = parseInt(document.getElementById("realcursor").style.left);
+	y =	parseInt(document.getElementById("realcursor").style.top);
+	elt = document.elementFromPoint(x,y-1); //subtract one to get the thing cursor points to
+	var evt = document.createEvent("MouseEvents");
+    evt.initMouseEvent("click", true, true, window, 1, x, y, x, y,
+        false, false, false, false, 0, null);
+	elt.dispatchEvent(evt);
+}
+function clamp(val, min, max) {
+	if (val < min) return min;
+	if (val > max) return max;
+	return val;
+}
+
+function moveCursorBy(element, deltaX, deltaY) {
+	lastCursor.x = clamp(lastCursor.x + deltaX, 0, element.parentNode.offsetWidth);
+	lastCursor.y = clamp(lastCursor.y + deltaY, 0, element.parentNode.offsetHeight);
+
+	setCursor(element, lastCursor.x, lastCursor.y);
 }
 
 nowPlaying = undefined;
@@ -139,6 +180,27 @@ function loaded() {
 			medialist.onadd = function() { medialibraryScroller.refresh(); }
 			medialist.onremove = function() { medialibraryScroller.refresh(); }
 			medialist.onclear = function() { medialibraryScroller.refresh(); }
+
+			var thecursor = document.getElementById("realcursor"); //TODO: real element
+			cursor = zigmotecursor.host(host);
+			cursor.oncursorlock = function(userid) { console.log("Cursor locked by userid " + userid); cursor_userid = userid; }
+			cursor.oncursorunlock = function(userid) { console.log("Cursor unlocked by userid " + userid); cursor_userid = undefined; }
+			cursor.oncursorstart = function(userid) { 
+				//cursors[userid].cursor.style.display = "block"; 
+			}
+			cursor.oncursorstop = function(userid) { 
+				//cursors[userid].cursor.style.display = "none"; 
+			}
+			cursor.oncursor = (function(cursorElement) { 
+				return function(x,y, rel, userid) {
+					if (cursor_userid != userid) return; 
+					if (rel) {
+						moveCursorBy(cursorElement, x, y);
+					} else {
+						positionCursor(cursorElement, x, y); 
+					}
+				}
+			}) (thecursor) ;
 
 			setStatus("Connected");
 		});
