@@ -147,7 +147,7 @@ function loaded() {
 			// unneeded for now
 			//roomShared = synclist.subscribe(socket, roomdata.roomsharedid);
 			//roomShared.bind(document.getElementById("roomdetails"));
-			console.log("asdfasdf");
+			console.log("All your base are belong to us!");
 			userslist = synclist.subscribe(socket, roomdata.userslistid);
 			userslist.bind(document.getElementById("userslist"));
 			userslist.onadd = function() { userslistScroller.refresh(); }
