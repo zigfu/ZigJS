@@ -87,8 +87,7 @@ function roomStarted(roomData) {
 		}
 	}}) (document.getElementById("realcursor"));
 	host.cursor.onclick = function(userid) {
-		console.log('click');
-		if (rel) {
+		if (cursorrel) {
 			var x = parseInt(document.getElementById("realcursor").style.left);
 			var y =	parseInt(document.getElementById("realcursor").style.top);
 			var elt = document.elementFromPoint(x,y-1); //subtract one to get the thing cursor points to
@@ -346,7 +345,7 @@ function nameChanged(newName) {
 		<div class='butholder'>
 			<ul>
 				<li><a href="youtube/index.html"><img name='tube' src='img/youtube_but.png' alt=''/></a></li>
-				<li><a href="..\ZigJS\musicv3\index_host.html"><img name='muse' src='img/muse_but.png' alt='' /></a></li>
+				<li><a href="..\musicv3\index_host.html"><img name='muse' src='img/muse_but.png' alt='' /></a></li>
 				<li><a href="unitysamples/index.html"><img name='games' src='img/games_but.png' alt=''/></a></li>
 				<li><a href="#"><img name='slid' src='img/slide_but.png' alt='' /></a></li>
 			</ul>
