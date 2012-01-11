@@ -177,11 +177,13 @@ body {
 	margin-top: 20px;
 	margin-right: 100px;
 }
+/*
 .playing:before {
 	content : " * ";
 }
-.playing li {
-	color : red;
+*/
+tr.playing {
+	background-color : #222;
 }
 .scroller img {
 	padding-top: 20px;
