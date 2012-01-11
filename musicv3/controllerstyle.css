@@ -80,12 +80,12 @@ img {
 	-webkit-touch-callout: none;
 }
 #thebutton {
-	float:right;
 }
 #volumeSlider {
-	margin-left: 600px;
+	margin-left: 550px;
 	display: none;
 	height : 300px;
+	width: 30px;
 	z-index: 999;
 }
 
