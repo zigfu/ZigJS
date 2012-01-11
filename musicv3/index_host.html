@@ -74,8 +74,8 @@ function removeClass(ele,cls) {
 var lastCursor = {x : 0, y : 0};
 
 function setCursor(element, xpx, ypx) {
-	element.style.left = lastCursor.x + "px";
-	element.style.top = lastCursor.y + "px";
+	element.style.left = xpx + "px";
+	element.style.top = ypx + "px";
 }
 
 function positionCursor(element, posX, posY) {
