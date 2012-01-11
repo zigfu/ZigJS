@@ -32,10 +32,18 @@
 		var cursorFovX = 60;
 		var cursorFovY = 45;
 
+		function fixAngle(angle) {
+			//this function is needed for alpha because its range is [0,360)
+			// and not centered around 0 like beta and gamma ([-180,180] and [-90,90] respectively)
+			if (angle > 180) return angle - 360;
+			if (angle < -180) return angle + 360;
+			return angle;
+		}
+
 		function orientationToCursor(lastOrientation) {
 			return {
 				// this works because we assume the center (0.5,0.5) is calibrated to (0,0,0) 
-				x : clamp01((lastOrientation.alpha / -cursorFovX) + 0.5),
+				x : clamp01((fixAngle(lastOrientation.alpha) / -cursorFovX) + 0.5),
 				y : clamp01((lastOrientation.beta / -cursorFovY) + 0.5),
 				mode : "motion"
 			}
@@ -171,7 +179,7 @@
 			oncursor : function(x,y,userid) {},
 			oncursorstart : function(userid) {},
 			oncursorstop : function(userid) {},
-			onclick : function(x,y,userid) {},
+			onclick : function(userid) {},
 			onorientation : function(a,b,g,userid) {}
 		}
 
@@ -197,7 +205,7 @@
 			ret.onorientation(data.alpha, data.beta, data.gamma, userid);
 		});
 
-		socket.on('zmote-click', function(data, userid) {
+		zigmoteHost.on('click', function(data, userid) {
 			ret.onclick(userid);
 		});
 
