@@ -132,6 +132,9 @@ function loaded() {
 
     socket.on('connect', function () {
         controller = zigmote.controller(socket);
+        controller.onhostgone = function(data) {
+            gotoScreen(screenTypes.chooseScreen);
+        }
 
         var qs = document.location.search;
         var roomid = qs.substr(1,qs.length);
@@ -158,12 +161,6 @@ function loaded() {
         anotherRL.onadd = function() {
             roomlistScroller.refresh();
         }
-    });
-
-
-    //TODO: refactor to use controller.onHostGone
-    socket.on('zigmote-onHostGone', function(data) {
-        gotoScreen(screenTypes.chooseScreen);
     });
 
     $("#sensitivitySlider").slider({
