@@ -1,0 +1,28 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+         "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     height="230" width="200">
+   <title> Example showing a blue circle with 3D highlighting effect </title>
+   <desc> Picture of a blue sphere (circle with 3D highlighting) </desc>
+   <style type="text/css"><![CDATA[
+      .Border { fill: lightGray; stroke: black; stroke-width: 4; }
+      .Label { font-size:24pt; font-family:Arial; fill:black; }
+   ]]></style>
+   <defs>
+      <radialGradient id="blueSphere" gradientUnits="objectBoundingBox"
+       fx="30%" fy="30%">
+         <stop offset="0%"   style="stop-color:#FFFFFF"/>
+         <stop offset="40%"  style="stop-color:#0000AA"/>
+         <stop offset="100%" style="stop-color:#000077"/>
+      </radialGradient>
+      <circle id="blue3DCircle" cx="0" cy="0" r="80"
+       style="fill:url(#blueSphere)" />
+   </defs>
+   <g width="100%" height="100%">
+      <rect class="Border" height="230" width="200" />
+      <use xlink:href="#blue3DCircle" x="100" y="100" />
+      <text class="Label" x="30" y="215">Blue Sphere</text>
+   </g>
+</svg>

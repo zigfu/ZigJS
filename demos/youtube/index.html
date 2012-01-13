@@ -1,3 +1,4 @@
+<!-- saved from url=(0013)http://zig.tv -->
 <html>
 <head>
 		
@@ -16,6 +17,13 @@
 	<!-- ZigJS -->
 	<script type="text/javascript" src="zig.js"></script>
 	
+	<!-- zigmote -->
+	<script src="http://zig.tv/socket.io/socket.io.js"></script>
+	<!-- TODO: change links to sane format? -->
+	<script src="../js/synclist-client.js"></script>
+	<script src="../js/zigmote-client.js"></script>
+	<script src="../js/zigmote.cursor.js"></script>
+
 	<style>
 	#myslider { width: 800px; height: 450px; }
 	
@@ -67,41 +75,51 @@
 	.menu li a span {
 		line-height:40px;
 	}
+
+	#realcursor {
+		width : 28px;
+		height : 35px;
+		position:absolute;
+		z-index:100;
+		/* TODO: sane URL */
+		background-image : url("../i/hand-pointer.png");
+	}
 	
 	</style>
 
 	<script>
-		currentMenu = [];
-	
-		$(function(){
-			$('#myslider').anythingSlider({
-				resizeContents      : true,
-				autoPlay			: false,
-				buildStartStop		: false,
-				navigationFormatter : function(index, panel){
-					var c = panel.attr("caption");
-					if (undefined === c) {
-						c = index;
-					}
-					return c;
-				},
-				
-				backDoneCallback : function(slider) {
-					backDone(slider);
-				},
-				forwardDoneCallback : function(slider) {
-					if (isActivePanelTheMovie()) {
-						playVideo();
-					} else {
-						menuChanged(slider);
-					}
+	var ytplayer;
+	currentMenu = [];
+
+	$(function(){
+		$('#myslider').anythingSlider({
+			resizeContents      : true,
+			autoPlay			: false,
+			buildStartStop		: false,
+			navigationFormatter : function(index, panel){
+				var c = panel.attr("caption");
+				if (undefined === c) {
+					c = index;
 				}
-			});
+				return c;
+			},
 			
-			addMenu(menuItems, false, false, "Youtube");
-			currentMenu = menuItems;
-			loadPlayer("videoDiv", 700, 450);
+			backDoneCallback : function(slider) {
+				backDone(slider);
+			},
+			forwardDoneCallback : function(slider) {
+				if (isActivePanelTheMovie()) {
+					playVideo();
+				} else {
+					menuChanged(slider);
+				}
+			}
 		});
+		
+		addMenu(menuItems, false, false, "Youtube");
+		currentMenu = menuItems;
+		loadPlayer("videoDiv", 700, 450);
+	});
 		
 function addToAnythingslider(toAdd, hideleft, hideright, caption) {
 			var li = $("<li>").append(toAdd);
@@ -257,6 +275,128 @@ function addToAnythingslider(toAdd, hideleft, hideright, caption) {
 				pauseVideo();
 			}
 		}
+		
+
+var currentRoomName = localStorage.getItem("currentRoomName");
+if (null == currentRoomName) currentRoomName = "[ZigFu Demo]";	
+
+
+var lastCursor = {x : 0, y : 0};
+
+function clamp(val, min, max) {
+	if (val < min) return min;
+	if (val > max) return max;
+	return val;
+}
+
+
+function moveCursorBy(element, deltaX, deltaY) {
+	lastCursor.x = clamp(lastCursor.x + deltaX, 0, element.parentNode.offsetWidth);
+	lastCursor.y = clamp(lastCursor.y + deltaY, 0, element.parentNode.offsetHeight);
+
+	setCursor(element, lastCursor.x, lastCursor.y);
+}
+
+
+function setCursor(element, xpx, ypx) {
+	element.style.left = xpx + "px";
+	element.style.top = ypx + "px";
+}
+
+var cursorrel;
+
+function roomStarted(roomData) {
+	// TODO: bind user list
+
+	// cursor stuff
+	host.cursor.oncursorlock = function(userid) { onSessionStart();}
+	host.cursor.oncursorunlock = function(userid) { onSessionEnd();}
+	host.cursor.oncursor = (function(cursorElement) { return function(x,y,rel,userid) {
+		cursorrel = rel;
+		if (rel) {
+			moveCursorBy(cursorElement, x, y);
+		} else {
+			verticalFader.setValue(y);
+		}
+	}}) (document.getElementById("realcursor"));
+	host.cursor.onclick = function(userid) {
+		if (cursorrel) {
+			var x = parseInt(document.getElementById("realcursor").style.left);
+			var y =	parseInt(document.getElementById("realcursor").style.top);
+			var elt = document.elementFromPoint(x,y-1); //subtract one to get the thing cursor points to
+			var evt = document.createEvent("MouseEvents");
+    		evt.initMouseEvent("click", true, true, window, 1, x, y, x, y,
+        			false, false, false, false, 0, null);
+			elt.dispatchEvent(evt);
+		} else {
+			pushDetector.onClick();	
+			swipeDetector.onSwipeRight();
+		}
+	}
+}
+
+var socket;
+var host;
+
+$(document).ready( function () {
+
+	// connect to zigtv
+	socket = io.connect('http://zig.tv');
+	socket.on('connect', function () {
+		// connected
+		host = zigmote.host(socket);
+		host.startRoom("motionosdemos", currentRoomName, roomStarted);
+	});
+
+	socket.on('disconnect', function() {
+		// disconnected
+	});
+
+	nameChanged(currentRoomName);
+
+});
+
+var isInSession = false;
+function onSessionStart()
+{
+	isInSession = true;
+	$(".showinsession").fadeIn();
+}
+
+function onSessionEnd()
+{
+	isInSession = false;
+	$(".showinsession").fadeOut();
+	hoverLeaveAll();
+}
+function nameChanged(newName) {
+}
+//TODO
+/*
+function nameentry() {
+    document.getElementById("currentRoomName").style.display = "none";
+    document.getElementById("currentRoomNameInput").style.display = "block";
+    document.getElementById("currentRoomNameInput").focus();
+}
+
+function nameentrydone() {
+    var newName = document.getElementById("currentRoomNameInput").value;
+    nameChanged(newName);
+}
+
+function nameChanged(newName) {
+	if (newName == "") newName = "[NonameTV]";
+    currentRoomName = newName;
+    localStorage.setItem("currentRoomName", currentRoomName);
+    document.getElementById("currentRoomNameInput").value = currentRoomName;
+    document.getElementById("currentRoomName").innerHTML = currentRoomName;
+    document.getElementById("currentRoomName").style.display = "block";
+    document.getElementById("currentRoomNameInput").style.display = "none";
+    if (undefined !== host) {
+    	host.rename(currentRoomName);
+    }
+}
+*/
 
 		videoItems = [
 			{ action: function() { navigateToMovie("9JhuOicPFZY");}, text : "Family Guy - Speaking Italian" },
@@ -405,6 +545,7 @@ function addToAnythingslider(toAdd, hideleft, hideright, caption) {
 <div id="playerContainer" style="display:none">
 	<div id="videoDiv">Loading...</div>
 </div>
+<div id="realcursor" class="showinsession">
 </div>
 </body>
 </html>

@@ -119,6 +119,7 @@ function loaded() {
         controller.cursor.bindtouchpad("touchpad");
         controller.cursor.bindtouchpad("motion");
         controller.cursor.cursormode = currentPointerMode;
+
         controller.ondisconnected = function() {
             gotoScreen(screenTypes.chooseScreen);
         }
@@ -131,6 +132,9 @@ function loaded() {
 
     socket.on('connect', function () {
         controller = zigmote.controller(socket);
+        controller.onhostgone = function(data) {
+            gotoScreen(screenTypes.chooseScreen);
+        }
 
         var qs = document.location.search;
         var roomid = qs.substr(1,qs.length);
@@ -157,12 +161,6 @@ function loaded() {
         anotherRL.onadd = function() {
             roomlistScroller.refresh();
         }
-    });
-
-
-    //TODO: refactor to use controller.onHostGone
-    socket.on('zigmote-onHostGone', function(data) {
-        gotoScreen(screenTypes.chooseScreen);
     });
 
     $("#sensitivitySlider").slider({
@@ -305,20 +303,21 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 	<div id="navBar" class="navBar">
     
-    <a href="javascript:gotoScreen(screenTypes.homeScreen)"><img src="mi/controller/home.png" /></a>
+    <a href="javascript:gotoScreen(screenTypes.homeScreen)"><img src="mi/images/mu_01.png" /></a>
+    <a href=""><img src="mi/images/mu_02.png" /></a>
     
     <ul>
     
-    	<li><img src="mi/controller/mu_back.png" onClick="javascript:sendToTV('playPrev');" /></li>
+    	<li><img src="mi/images/mu_03.png" onClick="javascript:sendToTV('playPrev');" /></li>
         
-        <li><img src="mi/controller/mu_play.png" onClick="javascript:sendToTV('togglePlayPause');" /></li>
+        <li><img src="mi/images/mu_04.png" onClick="javascript:sendToTV('togglePlayPause');" /></li>
         
-        <li class="pp"><img src="mi/controller/mu_pause.png" /></li>
+        <li><img src="mi/images/mu_05.png" onClick="javascript:sendToTV('playNext');" /></li>
         
-        <li><img src="mi/controller/mu_forward.png" onClick="javascript:sendToTV('playNext');" /></li>
+        <li><img id="thebutton" src="mi/images/mu_06.png" /><div id="volumeSlider"></div><div id="volumeLabel"></div></li>
         
     </ul>
-            <img id="thebutton" src="mi/controller/mu_volume.png" /><div id="volumeSlider"></div><div id="volumeLabel"></div>
+            
     </div>
 
 	<div id="roomslist" class="invisible">
@@ -388,7 +387,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
               <ul id="musiclistList">
               </ul>
             </div>
-        </div>
+    </div>
 
         <div class="closebutton">
 

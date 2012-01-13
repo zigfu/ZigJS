@@ -215,9 +215,13 @@ function Fader(orientation, size)
 		var position = hands[0].position;
 		var distanceFromCenter = position[this.orientation] - this.center[this.orientation];
 		var ret = (distanceFromCenter / this.size) + 0.5;
-		this.value = this.clamp(ret, 0, 1);
-		if (this.flip) this.value = 1 - this.value;
+		var val = this.clamp(ret, 0, 1);
+		if (this.flip) val = 1 - val;
+		this.setValue(val);
+	}
 
+	this.setValue = function(val) {
+		this.value = this.clamp(val, 0, 1);;
 		var newSelected = this.selectedItem;
 		var minValue = (this.selectedItem * (1 / this.itemsCount)) - this.hysteresis;
 		var maxValue = (this.selectedItem + 1) * (1 / this.itemsCount) + this.hysteresis;
@@ -235,7 +239,7 @@ function Fader(orientation, size)
 			this.onItemUnselected(this.selectedItem);
 			this.selectedItem = newSelected;
 			this.onItemSelected(newSelected);
-		}
+		}		
 	}
 
 	this.onSessionEnd = function() {
