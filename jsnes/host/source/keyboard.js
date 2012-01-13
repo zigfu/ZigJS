@@ -43,7 +43,6 @@ JSNES.Keyboard = function() {
 
 JSNES.Keyboard.prototype = {
     setKey: function(key, value) {
-    	console.log("key: " + key + " value: " + value);
         switch (key) {
             case 88: this.state1[this.keys.KEY_A] = value; break;      // X
             case 90: this.state1[this.keys.KEY_B] = value; break;      // Z

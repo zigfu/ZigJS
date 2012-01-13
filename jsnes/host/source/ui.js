@@ -161,6 +161,7 @@ if (typeof jQuery !== 'undefined') {
                 /*
                  * Keyboard
                  */
+                 /*
                 $(document).
                     bind('keydown', function(evt) {
                         self.nes.keyboard.keyDown(evt); 
@@ -171,7 +172,7 @@ if (typeof jQuery !== 'undefined') {
                     bind('keypress', function(evt) {
                         self.nes.keyboard.keyPress(evt);
                     });
-            
+                */
                 /*
                  * Sound
                  */
@@ -181,11 +182,11 @@ if (typeof jQuery !== 'undefined') {
             };
         
             UI.prototype = {    
-                loadROM: function() {
+                loadROM: function(theurl) {
                     var self = this;
                     self.updateStatus("Downloading...");
                     $.ajax({
-                        url: escape(self.romSelect.val()),
+                        url: (undefined !== theurl) ? escape(theurl) : escape(self.romSelect.val()),
                         xhr: function() {
                             var xhr = $.ajaxSettings.xhr();
                             if (typeof xhr.overrideMimeType !== 'undefined') {
