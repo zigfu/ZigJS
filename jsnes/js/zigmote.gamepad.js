@@ -110,6 +110,8 @@
 					ret.ondisengage(userid);
 				}
 			);
+
+			return ret;
 		}
 
 		zigmoteHost.on('gp-down', function(data, userid) {
