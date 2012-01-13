@@ -209,7 +209,9 @@ function loaded() {
     preventScrolling("touchpad");
     preventScrolling("motion");
     //preventScrolling("sensitivitySlider");
-
+    var recalibrateButton = document.getElementById("calibrateButton");
+    // TODO: stopPropagation == massive hack
+    recalibrateButton.addEventListener("touchend", function(e) { recalibrate(); e.stopPropagation(); }, false);
     //hides address bar
     setTimeout("window.scrollTo(0, 1)", 1000); 
 }
@@ -355,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
             
             	<div id="motionContainer" class="motionContainer">
             
-                    <div class="recal"><div id="calibrateButton" ontouchend="recalibrate()"><img src="mi/recalibrate.png" /></div></div>
+                    <div class="recal"><div id="calibrateButton"><img src="mi/recalibrate.png" /></div></div>
 
 				</div>
                         
