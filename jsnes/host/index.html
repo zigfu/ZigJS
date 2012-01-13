@@ -41,9 +41,15 @@ function setCursor(element, xpx, ypx) {
 }
 
 var cursorrel;
+var userslist;
+
+var gamepad1;
+var gamepad2;
+var label1;
+var label2;
 
 function roomStarted(roomData) {
-	// TODO: bind user list
+	userslist = synclist.subscribe(socket, roomData.userslistid);
 
 	// cursor stuff
 	host.cursor.oncursorlock = function(userid) { onSessionStart();}
@@ -70,6 +76,17 @@ function roomStarted(roomData) {
 			pushDetector.onClick();			
 		}
 	}
+
+	// gamepad stuff
+	label1 = document.getElementById("player1");
+	gamepad1 = host.gamepad.register("player1");
+	gamepad1.onengage = function(userid) { label1.innerHTML = userslist.get(userid);}
+	gamepad1.ondisengage = function(userid) { label1.innerHTML = "[Waiting for Player 1]";}
+
+	label2 = document.getElementById("player2");
+	gamepad2 = host.gamepad.register("player2");
+	gamepad2.onengage = function(userid) { label2.innerHTML = userslist.get(userid);}
+	gamepad2.ondisengage = function(userid) { label2.innerHTML = "[Waiting for Player 2]";}
 }
 
 var socket;
@@ -77,11 +94,11 @@ var host;
 
 $(document).ready( function () {
 	// connect to zigtv
-	socket = io.connect('http://zig.tv');
+	socket = io.connect('http://zig.tv:80');
 	socket.on('connect', function () {
 		// connected
 		host = zigmote.host(socket);
-		host.startRoom("template", currentRoomName, roomStarted);
+		host.startRoom("jsnes", currentRoomName, roomStarted);
 	});
 
 	socket.on('disconnect', function() {
@@ -251,38 +268,10 @@ border-radius: 10px;
 	        var nes;
 	        $(function() {
 	            nes = new JSNES({
-	                'ui': $('#emulator').JSNESUI({
-	                    "Homebrew": [
-	                        ['Concentration Room', 'roms/croom/croom.nes'],
-	                        ['LJ65', 'roms/lj65/lj65.nes'],
-	                    ],
-	                    "Working": [
-	                        
-	                        ['Contra', 'local-roms/Contra.nes'],
-	                        ['Donkey Kong', 'local-roms/DonkeyKong.nes'],
-	                        ['Dr. Mario', 'local-roms/DrMario.nes'],
-	                        ['The Legend of Zelda', 'local-roms/Zelda.nes'],
-	                        ['Lemmings', 'local-roms/Lemmings.nes'],
-	                        ['Lifeforce', 'local-roms/Lifeforce.nes'],
-	                        
-	                        ['Mario Bros.', 'local-roms/MarioBros.nes'],
-	                   //     ['Mega Man', 'local-roms/Mega Man (U).nes'],
-	                   //     ['Pac-Man', 'local-roms/Pac-Man (U) [!].nes'],
-	                        ['Super Mario Bros.', 'local-roms/SuperMario.nes'],
-	                   //     ['Tennis', 'local-roms/Tennis (JU) [!].nes'],
-	                   //     ['Tetris', 'local-roms/Tetris (U) [!].nes'],
-	                   //     ['Tetris 2', 'local-roms/Tetris 2 (U) [!].nes'],
-	                   //     ['Zelda II - The Adventure of Link', 'local-roms/Zelda II - The Adventure of Link (U).nes']
-	                    ]//,
-
-	                   // "Nearly Working": [
-	                   //     ['Duck Hunt', 'local-roms/Duck Hunt (JUE) [!].nes'],
-	                   //     ['Super Mario Bros. 3', 'local-roms/Super Mario Bros. 3 (U) (PRG1) [!].nes']
-	                   // ]
-	                })
+	                'ui': $('#emulator').JSNESUI()
 	            });
 	            nes.ui.buttons.zoom.click();
-	   
+	   			nes.ui.loadROM("roms/SuperMarioBros.nes");
 	        });
 	    </script>
 
