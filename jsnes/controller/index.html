@@ -26,6 +26,11 @@ function setStatus(str) {
 
 function gamepadConnected() {
   console.log("Game pad connected!");
+  controller.gamepad.bindbutton("a", document.getElementById("a"));
+  controller.gamepad.bindbutton("b", document.getElementById("b"));
+  controller.gamepad.bindbutton("start", document.getElementById("start"));
+  controller.gamepad.bindbutton("select", document.getElementById("select"));
+  controller.gamepad.binddpad("dpad", document.getElementById("dpad"));
 }
 
 function joined() {
@@ -53,7 +58,7 @@ function loaded() {
   preventDocScrolling();
 
   var qs = document.location.search;
-  var roomid = qs.substr(1,qs.length);
+  var roomid = qs.substr(1,qs.length).replace("/","");
 	
   console.log(roomid);
 
