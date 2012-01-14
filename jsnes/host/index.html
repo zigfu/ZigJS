@@ -106,15 +106,15 @@ function roomStarted(roomData) {
 	gamepad1 = host.gamepad.register("player1");
 	gamepad1.onengage = function(userid) { label1.innerHTML = userslist.get(userid);}
 	gamepad1.ondisengage = function(userid) { label1.innerHTML = "[Waiting for Player 1]";}
-	gamepad1.onbuttondown = function(button) { nes.keyboard.setKey(buttons.player1[button], 65); }
-	gamepad1.onbuttonup = function(button) { nes.keyboard.setKey(buttons.player1[button], 64); }
+	gamepad1.onbuttondown = function(button) { console.log("[1] Button down " + button); nes.keyboard.setKey(buttons.player1[button], 65); }
+	gamepad1.onbuttonup = function(button) { console.log("[1] Button up " + button);nes.keyboard.setKey(buttons.player1[button], 64); }
 
 	label2 = document.getElementById("player2");
 	gamepad2 = host.gamepad.register("player2");
 	gamepad2.onengage = function(userid) { label2.innerHTML = userslist.get(userid);}
 	gamepad2.ondisengage = function(userid) { label2.innerHTML = "[Waiting for Player 2]";}
-	gamepad2.onbuttondown = function(button) { nes.keyboard.setKey(buttons.player2[button], 65); }
-	gamepad2.onbuttonup = function(button) { nes.keyboard.setKey(buttons.player2[button], 64); }
+	gamepad2.onbuttondown = function(button) { console.log("[2] Button down " + button); nes.keyboard.setKey(buttons.player2[button], 65); }
+	gamepad2.onbuttonup = function(button) { console.log("[2] Button up " + button); nes.keyboard.setKey(buttons.player2[button], 64); }
 }
 
 var socket;
@@ -123,7 +123,7 @@ var nes;
 
 $(document).ready( function () {
 	// connect to zigtv
-	socket = io.connect('http://zig.tv:80');
+	socket = io.connect('http://'+ window.location.host);
 	socket.on('connect', function () {
 		// connected
 		host = zigmote.host(socket);
