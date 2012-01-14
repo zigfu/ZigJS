@@ -48,6 +48,30 @@ var gamepad2;
 var label1;
 var label2;
 
+var buttons = {
+	player1 : {
+		"a" : 88,
+		"b" : 90,
+		"select" : 17,
+		"start" : 13,
+		"dpadup" : 38,
+		"dpaddown" : 40,
+		"dpadleft" : 37,
+		"dpadright" : 39,
+	},
+
+	player2 : {
+		"a" : 103,
+		"b" : 105,
+		"select" : 99,
+		"start" : 97,
+		"dpadup" : 104,
+		"dpaddown" : 98,
+		"dpadleft" : 100,
+		"dpadright" : 102,
+	}
+}
+
 function roomStarted(roomData) {
 	userslist = synclist.subscribe(socket, roomData.userslistid);
 
@@ -82,15 +106,20 @@ function roomStarted(roomData) {
 	gamepad1 = host.gamepad.register("player1");
 	gamepad1.onengage = function(userid) { label1.innerHTML = userslist.get(userid);}
 	gamepad1.ondisengage = function(userid) { label1.innerHTML = "[Waiting for Player 1]";}
+	gamepad1.onbuttondown = function(button) { nes.keyboard.setKey(buttons.player1[button], 65); }
+	gamepad1.onbuttonup = function(button) { nes.keyboard.setKey(buttons.player1[button], 64); }
 
 	label2 = document.getElementById("player2");
 	gamepad2 = host.gamepad.register("player2");
 	gamepad2.onengage = function(userid) { label2.innerHTML = userslist.get(userid);}
 	gamepad2.ondisengage = function(userid) { label2.innerHTML = "[Waiting for Player 2]";}
+	gamepad2.onbuttondown = function(button) { nes.keyboard.setKey(buttons.player2[button], 65); }
+	gamepad2.onbuttonup = function(button) { nes.keyboard.setKey(buttons.player2[button], 64); }
 }
 
 var socket;
 var host;
+var nes;
 
 $(document).ready( function () {
 	// connect to zigtv
