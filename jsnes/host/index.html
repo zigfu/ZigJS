@@ -5,9 +5,8 @@
 <link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
 <link href='css/style.css' rel='stylesheet' type='text/css' />
 
-<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js' type='text/javascript'></script>
 
-<script src="http://zig.tv/socket.io/socket.io.js"></script>
+<script src="/socket.io/socket.io.js"></script>
 <script src="../js/synclist-client.js"></script>
 <script src="../js/zigmote-client.js"></script>
 <script src="../js/zigmote.cursor.js"></script>
@@ -121,7 +120,7 @@ var socket;
 var host;
 var nes;
 
-$(document).ready( function () {
+function loaded() {
 	// connect to zigtv
 	socket = io.connect('http://'+ window.location.host);
 	socket.on('connect', function () {
@@ -135,19 +134,22 @@ $(document).ready( function () {
 	});
 
 	nameChanged(currentRoomName);
-});
+}
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
 
 isInSession = false;
 function onSessionStart()
 {
 	isInSession = true;
-	$(".showinsession").fadeIn();
+	//$(".showinsession").fadeIn();
 }
 
 function onSessionEnd()
 {
 	isInSession = false;
-	$(".showinsession").fadeOut();
+	//$(".showinsession").fadeOut();
 	hoverLeaveAll();
 } 
 
@@ -245,9 +247,6 @@ function nameChanged(newName) {
     		<center><img src="img/powered.png" /></center>		 
 	</div>
 	
-</div>
-
-<div id="realcursor" class="showinsession">
 </div>
 
 </body>
