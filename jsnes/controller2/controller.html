@@ -1,0 +1,499 @@
+<html>
+<head>
+<title>Mobile Controller</title>
+
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="viewport" content="width=device-width; initial-scale=0.5; maximum-scale=0.5; user-scalable=no">
+
+<link rel="stylesheet" type="text/css" href="controllerstyle.css" />
+
+<script type="text/javascript" src="js/iscroll.js"></script> 
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="../js/synclist-client.js"></script>
+<script src="../js/zigmote-client.js"></script>
+<script src="../js/zigmote.cursor.js"></script>
+<script src="../js/zigmote.gamepad.js"></script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script src="js/jquery.ui.touch-punch.min.js"></script>
+<link type="text/css" href="css/custom-theme/jquery-ui-1.8.16.custom.css" rel="Stylesheet" />
+
+<script>
+
+var zigmote;
+
+var screenTypes = {
+    chooseScreen : "roomslist",
+    homeScreen : "homescreen",
+    pointerScreen : "pointerscreen",
+    musicScreen : "musiclist",
+    gamepadScreen : "gamepadscreen"
+}
+
+function gotoScreen(screenType) {
+    for (var screen in screenTypes) {
+        document.getElementById(screenTypes[screen]).style.display = (screenTypes[screen] == screenType) ? "block" : "none";
+    }
+
+    //showNavBar(screenType);
+}
+
+function showNavBar(screen) {
+    var show = screen != screenTypes.chooseScreen;
+    document.getElementById("navBar").style.display = (show) ? "block" : "none";
+}
+
+var pointerTypes = {
+    motion : "motion",
+    touch : "touchpad",
+}
+
+var roomlistScroller;
+var musiclistScroller;
+
+var currentPointerMode;
+
+function setPointer(pointerType) {
+    for (var pt in pointerTypes) {
+        document.getElementById(pointerTypes[pt]).style.display = (pointerTypes[pt] == pointerType) ? "block" : "none";
+    }
+
+    if (pointerType == pointerTypes.motion) {
+        currentPointerMode = zigmote.cursor.cursorModes.motion;
+    }
+    if (pointerType == pointerTypes.touch) {
+        currentPointerMode = zigmote.cursor.cursorModes.touchpadrel;
+    }
+    if (undefined !== controller) {
+        controller.cursor.cursormode = currentPointerMode;
+    }
+}
+var controller;
+var roomslist;
+var musicSyncList;
+var roomsharedlist;
+
+var anotherRL;
+
+// name stuff
+var currentName = localStorage.getItem("currentName");
+if (null == currentName) currentName = "[Guest]";
+
+// location stuff
+var currentLocation = {};
+if (navigator.geolocation)
+{
+    navigator.geolocation.getCurrentPosition(gotLocation, noLocation);
+}
+
+function gotLocation(position) {
+    currentLocation = position;
+}
+
+function noLocation() {
+    // bummer
+}
+
+function roomJoinedOKGamepad(data) {
+    doGamepad();
+}
+
+function loaded() {
+    preventDocScrolling();
+    nameChanged(currentName);
+
+    roomlistScroller = new iScroll('roomslistContainer');
+    musiclistScroller = new iScroll('musiclistContainer');
+
+    setPointer(pointerTypes.touch);
+    gotoScreen(screenTypes.chooseScreen);
+
+    function roomJoinedOK(data) {
+        roomshareddata = synclist.subscribe(socket, data.roomsharedid);
+        roomshareddata.onset = function(itemid, itemdata) {
+            if (itemid == 'itemstoshow') {
+                // itemdata is a hashtable of the elements to show (mega-hack)
+                var toggles = document.getElementsByClass("toggleable");
+                //TODO!!!
+                for(var i = 0; i < toggles.length; i++) {
+                    item = toggles[i];
+                    var show = item.id in itemdata;
+                    item.style.display = (show) ? "block" : "none";
+                }
+            }
+        }
+        // connect the music list
+        //musicSyncList = synclist.subscribe(socket, data.medialist);
+        musicSyncList = synclist.subscribe(socket, undefined); //TODO: HACK
+        musicSyncList.bind(document.getElementById("musiclistList"), function(id, data){
+            var li = document.createElement('li');
+            li.innerHTML = data.name;
+            addClass(li, "touchable");
+            li.addEventListener("click", function() { sendToTV('playSong', {songid: id}); });
+            return li;
+        });
+        musicSyncList.onadd = function() { musiclistScroller.refresh(); }
+
+        controller.cursor.bindtouchpad("touchpad");
+        controller.cursor.bindtouchpad("motion");
+        controller.cursor.cursormode = currentPointerMode;
+
+        controller.ondisconnected = function() {
+            gotoScreen(screenTypes.chooseScreen);
+        }
+
+        // show the welcome screen
+        gotoScreen(screenTypes.homeScreen);
+    }
+
+    socket = io.connect('http://'+document.location.hostname);
+
+    socket.on('connect', function () {
+        controller = zigmote.controller(socket);
+        controller.onhostgone = function(data) {
+            gotoScreen(screenTypes.chooseScreen);
+        }
+
+        var qs = document.location.search;
+        var roomid = qs.substr(1,qs.length);
+
+        function makeRoomElement(roomid, roomdata) {
+            var li = document.createElement('li');
+            li.innerHTML = roomdata.roomname;
+            addClass(li, "touchable");
+            li.addEventListener("click", function() { 
+                controller.joinRoom(roomid, currentName, roomJoinedOKGamepad,
+                        function(){console.log('join failed for room: ' + roomdata.name);}); 
+            });
+            return li;
+        }
+
+        // HACK TO TEST GAMEPAD
+        roomslist = synclist.subscribe(socket, zigmote.getRoomListId("jsnes"));
+        roomslist.bind(document.getElementById("roomslistList"), makeRoomElement);
+        roomslist.onadd = function() {
+            roomlistScroller.refresh();
+        }
+
+        /*
+        roomslist = synclist.subscribe(socket, zigmote.getRoomListId("musicplayer"));
+        roomslist.bind(document.getElementById("roomslistList"), makeRoomElement);
+        roomslist.onadd = function() {
+            roomlistScroller.refresh();
+        }
+        
+        anotherRL = synclist.subscribe(socket, zigmote.getRoomListId("motionosdemos"));
+        anotherRL.bind(document.getElementById("roomslistList"), makeRoomElement);
+        anotherRL.onadd = function() {
+            roomlistScroller.refresh();
+        }*/
+    });
+
+    $("#sensitivitySlider").slider({
+            orientation: "vertical",
+            range: "min",
+            min: 0,
+            max: 100,
+            value: 60
+        });
+
+    $("#thebutton").click(function() {
+		$("#volumeSlider").toggle("slide", { direction: "up" }, 300);
+	})
+
+	$("#volumeSlider").slider({
+            orientation: "vertical",
+            range: "min",
+            min: 0,
+            max: 100,
+            value: 60,
+            start : function(event, ui) { 
+	            $("#volumeLabel")
+	            	.show("fade");
+				$(ui.handle).attr("data-updateTimer", setInterval(function() {
+						sendToTV("setVolume", {volume: ($("#volumeSlider").slider("option", "value") / 100)});
+					}, 300));
+	            },
+            slide : function(event, ui) { 
+	            $("#volumeLabel")
+	            	.text(ui.value)
+	            	.position({
+            			my : "left center",
+            			at : "right center",
+            			of : ui.handle,
+            			offset : "-10 3.5"}); 
+	        	},
+            stop : function(event, ui) { 
+				$("#volumeLabel").hide("fade");
+				$("#volumeSlider").hide("fade"); 
+				clearInterval($(ui.handle).attr("data-updateTimer"));
+				sendToTV("setVolume", {volume: (ui.value / 100)});
+				}
+        });
+
+
+    preventScrolling("touchpad");
+    preventScrolling("motion");
+    //preventScrolling("sensitivitySlider");
+    var recalibrateButton = document.getElementById("calibrateButton");
+    // TODO: stopPropagation == massive hack
+    recalibrateButton.addEventListener("touchend", function(e) { recalibrate(); e.stopPropagation(); }, false);
+    //hides address bar
+    setTimeout("window.scrollTo(0, 1)", 1000); 
+
+
+    function onOrientationChange() {
+  if (window.orientation % 180 == 0){
+    document.body.style.setProperty("width", "640px");
+    document.body.style.setProperty("height", "960px");
+    //document.body.style.setProperty("-webkit-transform-origin", "400px 320px");
+    //document.body.style.setProperty("-webkit-transform", "rotate(90deg)");
+    //document.getElementById('pleaserotate').style.display = "block";
+    //document.getElementById('controller').style.display = "none";
+  } else {                   
+    if ( window.orientation > 0) { //clockwise
+    document.body.style.setProperty("width", "960px");
+    document.body.style.setProperty("height", "640px");
+      //document.body.style.setProperty("-webkit-transform-origin", "-20px 20px");
+      //document.body.style.setProperty("-webkit-transform", "");
+    //document.getElementById('pleaserotate').style.display = "none";
+    //document.getElementById('controller').style.display = "block";
+      window.scrollTo(0,1);
+    }
+  }
+}
+
+  window.onorientationchange = onOrientationChange;
+  onOrientationChange();
+
+}
+
+function hasClass(ele,cls) {
+    return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
+}
+
+function addClass(ele,cls) {
+    if (!hasClass(ele,cls)) ele.className += " "+cls;
+}
+
+function doPointer() {
+    controller.cursor.start(true, function() {
+        gotoScreen(screenTypes.pointerScreen);
+    });   
+}
+
+function stopCursor() {
+    controller.cursor.stop();
+    gotoScreen(screenTypes.homeScreen);
+}
+
+function gamepadConnected() {
+    gotoScreen(screenTypes.gamepadScreen);
+    controller.gamepad.bindbutton("a", document.getElementById("a"));
+    controller.gamepad.bindbutton("b", document.getElementById("b"));
+    controller.gamepad.bindbutton("start", document.getElementById("start"));
+    controller.gamepad.bindbutton("select", document.getElementById("select"));
+    controller.gamepad.binddpad("dpad", document.getElementById("dpad"));
+}
+
+function doGamepad() {
+  // try becoming player 1
+  controller.gamepad.connect("player1", function(success) {
+    if (success) {
+      gamepadConnected();
+    } else {
+      // or player 2
+      controller.gamepad.connect("player2", function(success) {
+        if (success) {
+          gamepadConnected();
+        } else {
+          console.log("Player1 & Player2 already taken");
+        }
+      });
+    }
+  });    
+}
+
+function stopGamepad() {
+    gotoScreen(screenTypes.homeScreen);
+}
+
+function homeScreen() {
+    gotoScreen(screenTypes.homeScreen);
+}
+
+function preventScrolling(id) {
+    var elem = document.getElementById(id);
+    function stopScrolling( touchEvent ) { touchEvent.preventDefault(); }
+    elem.addEventListener( 'touchstart' , stopScrolling , false );
+    elem.addEventListener( 'touchmove' , stopScrolling , false );
+}
+
+function preventDocScrolling(id) {
+    function stopScrolling( touchEvent ) { 
+        /*if (undefined !== touchEvent.target && hasClass(touchEvent.target, "touchable")) {
+            return;
+        }*/
+        touchEvent.preventDefault(); 
+    }
+    document.addEventListener( 'touchstart' , stopScrolling , false );
+    document.addEventListener( 'touchmove' , stopScrolling , false );
+}
+
+
+function nameentry() {
+    document.getElementById("currentUserName").style.display = "none";
+    document.getElementById("currentUserNameInput").style.display = "block";
+    document.getElementById("currentUserNameInput").focus();
+}
+
+function nameentrydone() {
+    var newName = document.getElementById("currentUserNameInput").value;
+    console.log("Name changed: " + newName);
+    nameChanged(newName);
+	socket.emit('rename',{ name : newName});
+}
+
+function nameChanged(newName) {
+    currentName = newName;
+    localStorage.setItem("currentName", currentName);
+    document.getElementById("currentUserNameInput").value = currentName;
+    document.getElementById("currentUserName").innerHTML = currentName;
+    document.getElementById("currentUserName").style.display = "block";
+    document.getElementById("currentUserNameInput").style.display = "none";
+}
+
+function recalibrate() {
+    controller.cursor.recalibrate();    
+}
+
+function sendToTV(command, data) {
+    controller.sendToHost(command, data);
+}
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
+
+</script>
+
+</head>
+
+<body>
+<div id="wrapper">
+
+	<div class="header">
+    	<div class="name">
+            <div id="currentUserName" onClick="nameentry();"></div>
+    		<input style="display:none; width: 220px; height: 30px; font-size: 20px;" type="text" placeholder="[Enter Name]" spellcheck="off" autocomplete="off" id="currentUserNameInput" name="currentUserNameInput" onChange="nameentrydone()"/>
+
+    	</div>
+    </div>
+
+	<div id="roomslist" class="invisible">
+        <h2 class="coollistHeader">Host Screen List</h2>
+        <div id="roomslistContainer" class="coollist">
+            <div class="scroller">
+		      <ul id="roomslistList">
+		      </ul>
+            </div>
+        </div>
+	</div>
+
+<div id="homescreen" class="invisible">       
+        
+		<div class="homeScreenIcon">
+        
+            <a href="javascript:doPointer()"><img width="200px" height="200px" src="mi/cursors.png" /></a>
+
+            <a href="javascript:sendToTV('toggleQR');"><img width="200px" height="200px" src="mi/qrcode.png" /></a>
+
+            <a href="javascript:(function(){gotoScreen(screenTypes.musicScreen); musiclistScroller.refresh();})()"><img width="200px" height="200px" src="mi/music.png" /></a>
+ 
+            <a href="javascript:gotoScreen(screenTypes.gamepadScreen);"><img width="200px" height="200px" src="mi/music.png" /></a>
+          
+        </div>
+		
+        
+	</div>
+
+	<div id="pointerscreen" class="invisible">
+        	<div id="touchpad" class="invisible">
+            
+            </div>
+            
+            <div id="motion" class="invisible">
+            
+            	<div id="motionContainer" class="motionContainer">
+            
+                    <div class="recal"><div id="calibrateButton"><img src="mi/recalibrate.png" /></div></div>
+
+				</div>
+                        
+            </div>
+			
+            <div class="controllerOptions">
+            
+            	<a href="javascript:setPointer(pointerTypes.motion)"><div class="pointer"><h2>Motion</h2></div></a>
+                
+                <a href="javascript:setPointer(pointerTypes.touch)"><div class="touchpad"><h2>Touchpad</h2></div></a>
+            
+            
+            </div>
+            
+            <div id="sensitivitySlider"></div>
+
+			<div class="closebutton">
+
+            <a href="javascript:stopCursor()" class="css_button">BACK</a>
+
+			</div>
+
+	</div>
+
+    <div id="musiclist" class="invisible">
+        <h2 class="coollistHeader">Music</h2>
+        <div id="musiclistContainer" class="coollist">
+            <div>
+              <ul id="musiclistList">
+              </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="gamepadscreen" class="invisible">
+        <div id="pleaserotate" class="invisible">
+        Please rotate
+        </div>
+        <div id="controller">
+            <div id="controllercontainer">
+                <div id="dpad"></div>
+
+                <div id="strtslct">
+                
+                    <div id="select"></div>
+
+                    <div id="start"></div>
+
+                </div>
+
+                <div id="ab">
+
+                    <div id="b"></div>
+
+                    <div id="a"></div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="closebutton">
+            <a href="javascript:stopGamepad()" class="css_button">BACK</a>
+        </div>
+    </div>
+
+</div>
+</body>
+
+</html>
