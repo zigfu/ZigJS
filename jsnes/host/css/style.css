@@ -262,8 +262,8 @@ styles from index.html
   font-family: 'Rokkitt';
   font-size: 20pt;
   font-weight: bold;
-  color: rgba(0, 0, 0, 0.2);
-  text-shadow: 0px 1px #ffffff;
+  color: #FFF;
+  text-shadow: 1px 1px rgba(0,0,0,0.4);
   box-shadow: inset 0px 2px 1px rgba(0,0,0,0.8), 0px 1px 1px rgba(255,255,255,0.5);
   -webkit-border-radius: 10px;
   -moz-border-radius: 10px;
