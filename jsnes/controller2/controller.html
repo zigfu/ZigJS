@@ -101,7 +101,7 @@ function roomJoinedOKGamepad(data) {
 }
 
 function loaded() {
-    preventDocScrolling();
+    //preventDocScrolling();
     nameChanged(currentName);
 
     roomlistScroller = new iScroll('roomslistContainer');
@@ -236,6 +236,7 @@ function loaded() {
 
     preventScrolling("touchpad");
     preventScrolling("motion");
+    preventScrolling("gamepadscreen");
     //preventScrolling("sensitivitySlider");
     var recalibrateButton = document.getElementById("calibrateButton");
     // TODO: stopPropagation == massive hack
