@@ -26,7 +26,7 @@
 			function doDown(button) {
 				if (!dpadbuttons[button]) {
 					zigmoteController.sendToHost('gp-down', { button : prefix + button });
-					dpadbuttons[button] = false;
+					dpadbuttons[button] = true;
 				}
 			}
 
