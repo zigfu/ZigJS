@@ -202,26 +202,22 @@ styles from index.html
 .showinsession {
   display: none
 }
-
 #realcursor {
   width : 28;
   height : 35;
   position:absolute;
   background-image : url("../img/hand-pointer.png");
 }
-
 #emulator {
   margin: 0px auto;
   padding-top : 30px;
   padding-bottom : 25px;
   width : 512px;
 }
-
 .nes-screen {
   margin: 0px 0px;
   padding : 0px 0px;
   border-radius: 5px;
-
 }
 .nes-root {
   margin: 0px 0px;
@@ -238,7 +234,6 @@ styles from index.html
 .nes-roms {
   display:none;
 }
-
 #players {
   width : 100%;
   height : 50px;
@@ -247,7 +242,6 @@ styles from index.html
   display:block;
   position:relative;
 }
-
 #players ul {
   position:relative;
   width : 600px;
