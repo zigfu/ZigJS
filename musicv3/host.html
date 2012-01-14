@@ -145,7 +145,8 @@ function loaded() {
 		host = zigmote.host(socket);
 		host.startRoom("musicplayer", currentRoomName, function(roomdata) {
 			// unneeded for now
-			//roomShared = synclist.subscribe(socket, roomdata.roomsharedid);
+			roomShared = synclist.subscribe(socket, roomdata.roomsharedid);
+			roomShared.add(['playercontrolstemp','musicbutton'],'itemstoshow');
 			//roomShared.bind(document.getElementById("roomdetails"));
 			console.log("All your base are belong to us!");
 			userslist = synclist.subscribe(socket, roomdata.userslistid);
