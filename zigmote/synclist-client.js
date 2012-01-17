@@ -131,6 +131,14 @@ var synclist = (function() {
 					};
 			},
 
+			subscribekey : function(key, callback) {
+				lists[id].keycallbacks[key] = callback;
+			},
+
+			unsubscribekey : function(key) {
+				delete lists[id].keycallbacks[key];
+			}
+
 			onadd : function(itemid, itemdata) {},
 			onremove : function(itemid) {},
 			onclear : function() {},
@@ -143,6 +151,7 @@ var synclist = (function() {
 			obj : ret,
 			bound : false,
 			boundkeys : {},
+			keycallbacks : {}
 			};
 		
 		socket.emit("list-subscribe", { listid : id });
@@ -185,6 +194,10 @@ var synclist = (function() {
 			lists[listid].boundkeys[itemid].element.innerHTML = 
 				lists[listid].boundkeys[itemid].makeelement(itemid, itemdata).innerHTML;
 		}
+
+		if (lists[listid].keycallbacks.hasOwnProperty(itemid)) {
+			lists[listid].keycallbacks[itemid](itemdata);
+		}
 	}
 
 	function remove(listid, itemid) {
@@ -224,6 +237,11 @@ var synclist = (function() {
 			lists[listid].boundkeys[itemid].element.innerHTML = 
 				lists[listid].boundkeys[itemid].makeelement(itemid, itemdata).innerHTML;
 		}
+
+		if (lists[listid].keycallbacks.hasOwnProperty(itemid)) {
+			lists[listid].keycallbacks[itemid](itemdata);
+		}
+
 	}
 	
 	function listify(socket) {
