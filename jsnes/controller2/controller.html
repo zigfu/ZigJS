@@ -29,7 +29,8 @@ var screenTypes = {
     homeScreen : "homescreen",
     pointerScreen : "pointerscreen",
     musicScreen : "musiclist",
-    gamepadScreen : "gamepadscreen"
+    gamepadScreen : "gamepadscreen",
+    playerSelectionScreen : "playerselectionscreen"
 }
 
 function gotoScreen(screenType) {
@@ -73,7 +74,8 @@ function setPointer(pointerType) {
 var controller;
 var roomslist;
 var musicSyncList;
-var roomsharedlist;
+var roomshareddata;
+var userslist;
 
 var anotherRL;
 
@@ -95,9 +97,37 @@ function gotLocation(position) {
 function noLocation() {
     // bummer
 }
-
+function playerChanged(player, userid) {
+    console.log('playerChanged: ' + player + ", " + userid);
+    if (undefined !== player.userid) {userslist.unbindkey(player.userid);}
+    player.userid = userid;
+    if (undefined === userid) { updateUser(undefined,undefined); return; }
+    userslist.bindkey(userid, player1.element, updateUser);
+    player.element.innerHTML = updateUser(userid, userslist.get(userid)).innerHTML;
+}
+var player1 = {};
+var player2 = {};
 function roomJoinedOKGamepad(data) {
+    player1.element = document.getElementById("player1");
+    player2.element = document.getElementById("player2");
+    userslist = synclist.subscribe(socket, data.userslistid);
+    roomshareddata = synclist.subscribe(socket, data.roomsharedid);
+    roomshareddata.subscribekey("player1", function(userid) { playerChanged(player1, userid); });
+    roomshareddata.subscribekey("player2", function(userid) { playerChanged(player2, userid); });
+    playerChanged(player1, roomshareddata.get("player1"));
+    playerChanged(player2, roomshareddata.get("player2"));
     doGamepad();
+}
+function updateUser(id, data) {
+    console.log('got update user: ' + id + ', ' + data);
+    var li = document.createElement('li');
+    
+    if (data === undefined) {
+        li.innerHTML = "[Empty]";
+    } else {
+        li.innerHTML = userslist.get(data);
+    }
+    return li;
 }
 
 function loaded() {
@@ -111,19 +141,7 @@ function loaded() {
     gotoScreen(screenTypes.chooseScreen);
 
     function roomJoinedOK(data) {
-        roomshareddata = synclist.subscribe(socket, data.roomsharedid);
-        roomshareddata.onset = function(itemid, itemdata) {
-            if (itemid == 'itemstoshow') {
-                // itemdata is a hashtable of the elements to show (mega-hack)
-                var toggles = document.getElementsByClass("toggleable");
-                //TODO!!!
-                for(var i = 0; i < toggles.length; i++) {
-                    item = toggles[i];
-                    var show = item.id in itemdata;
-                    item.style.display = (show) ? "block" : "none";
-                }
-            }
-        }
+
         // connect the music list
         //musicSyncList = synclist.subscribe(socket, data.medialist);
         musicSyncList = synclist.subscribe(socket, undefined); //TODO: HACK
@@ -174,6 +192,9 @@ function loaded() {
         roomslist = synclist.subscribe(socket, zigmote.getRoomListId("jsnes"));
         roomslist.bind(document.getElementById("roomslistList"), makeRoomElement);
         roomslist.onadd = function() {
+            roomlistScroller.refresh();
+        }
+        roomslist.onset = function() {
             roomlistScroller.refresh();
         }
 
@@ -311,6 +332,7 @@ function doGamepad() {
           gamepadConnected();
         } else {
           console.log("Player1 & Player2 already taken");
+          gotoScreen(screenTypes.playerSelectionScreen);
         }
       });
     }
@@ -318,7 +340,7 @@ function doGamepad() {
 }
 
 function stopGamepad() {
-    gotoScreen(screenTypes.homeScreen);
+    gotoScreen(screenTypes.playerSelectionScreen);
 }
 
 function homeScreen() {
@@ -491,6 +513,20 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
         <div class="closebutton">
             <a href="javascript:stopGamepad()" class="css_button">BACK</a>
+        </div>
+    </div>
+    <div id="playerselectionscreen" class="invisible">
+        <table>
+            <tr>
+                <th>Player 1</th><th>Player 2</th>
+            </tr>
+            <tr>
+                <td id="player1">[None]</td><td id="player2">[None]</td>
+            </tr>
+        </table>
+
+        <div class="closebutton">
+            <a href="javascript:gotoScreen(screenTypes.chooseScreen)" class="css_button">BACK</a>
         </div>
     </div>
 
