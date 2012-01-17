@@ -27,7 +27,7 @@ var screenTypes = {
     pointerScreen : "pointerscreen",
     musicScreen : "musiclist",
     gamepadScreen : "gamepadscreen",
-	slideScreen : "slideshowscreen"
+	slideScreen : "slideshowscreen",
 }
 
 function gotoScreen(screenType) {
@@ -115,7 +115,7 @@ function loaded() {
     musiclistScroller = new iScroll('musiclistContainer');
 
     setPointer(pointerTypes.touch);
-    gotoScreen(screenTypes.chooseScreen);
+    gotoScreen(screenTypes.slideScreen);
 
     function roomJoinedOK(data) {
         roomshareddata = synclist.subscribe(socket, data.roomsharedid);
@@ -147,7 +147,7 @@ function loaded() {
         }
 
         // show the welcome screen
-        gotoScreen(screenTypes.homeScreen);
+        gotoScreen(screenTypes.slideScreen);
     }
 
     socket = io.connect('http://'+document.location.hostname);
@@ -323,7 +323,27 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 <body>
 <div id="wrapper">
-
+    <div id="slideshowscreen">
+    
+    	<div id="slideControls">
+        
+        	<ul>
+            
+            	<li><img src="i/slide/first.png" /></li>
+                
+                <li><img src="i/slide/back.png" /></li>
+                
+                <li><img src="i/slide/next.png" /></li>
+                
+                <li><img src="i/slide/last.png" /></li>
+            
+            </ul>
+            
+            <center><img src="i/slide/pointer.png" /></center>
+            
+        </div>
+        
+    </div>
 	<div class="header">
     	<div class="name">
             <div id="currentUserName" onClick="nameentry();"></div>
@@ -443,27 +463,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
         </div>
     </div>
 	
-    <div id="slideController" class="invisible">
-    
-    	<div id="slideControls">
-        
-        	<ul>
-            
-            	<li><img src="i/slide/first.png" /></li>
-                
-                <li><img src="i/slide/back.png" /></li>
-                
-                <li><img src="i/slide/next.png" /></li>
-                
-                <li><img src="i/slide/last.png" /></li>
-            
-            </ul>
-            
-            <center><img src="i/slide/pointer.png" /></center>
-            
-        </div>
-        
-    </div>
+
     
         <div class="closebutton">
 

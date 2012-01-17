@@ -478,12 +478,17 @@ img {
 	float: left;
 }
 #slideController {
+	margin: 0px 0px;
+	padding: 0px 0px;
 }
-#slideControlls {
+#slideControls {
+	margin: 0px 0px;
+	padding: 0px 0px;
 }
-#slideControlls ul {
+#slideControlss ul {
 	list-style-type: none;
 }
-#slideControlls li {
+#slideControls li {
 	display: inline;
+	margin-right: -3px;
 }
