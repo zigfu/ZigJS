@@ -1,0 +1,481 @@
+<html>
+<head>
+<title>Mobile Controller</title>
+
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="viewport" content="width=device-width, user-scalable=no"/>
+
+<link rel="stylesheet" type="text/css" href="controllerstyle.css" />
+
+<script type="text/javascript" src="js/iscroll.js"></script> 
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/synclist-client.js"></script>
+<script src="js/zigmote-client.js"></script>
+<script src="js/zigmote.cursor.js"></script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script src="js/jquery.ui.touch-punch.min.js"></script>
+<link type="text/css" href="css/custom-theme/jquery-ui-1.8.16.custom.css" rel="Stylesheet" />
+
+<script>
+
+var screenTypes = {
+    chooseScreen : "roomslist",
+    homeScreen : "homescreen",
+    pointerScreen : "pointerscreen",
+    musicScreen : "musiclist",
+    gamepadScreen : "gamepadscreen"
+}
+
+function gotoScreen(screenType) {
+    for (var screen in screenTypes) {
+        document.getElementById(screenTypes[screen]).style.display = (screenTypes[screen] == screenType) ? "block" : "none";
+    }
+
+    //showNavBar(screenTypes.chooseScreen);
+}
+
+function showNavBar(screen) {
+    //TODO: don't show on gamepad too
+    var show = (screen != screenTypes.chooseScreen);
+    document.getElementById("navBar").style.display = (show) ? "block" : "none";
+}
+
+var pointerTypes = {
+    motion : "motion",
+    touch : "touchpad",
+}
+
+var currentHostPage;
+var controllersForHostPages = {
+    "generic" : screenTypes.homeScreen,
+    "demos" : screenTypes.homeScreen,
+    "slides" : screenTypes.homeScreen,
+    "jsnes" : screenTypes.gamepadScreen,
+    "music" : screenTypes.musicScreen,
+    "video" : screenTypes.homeScreen,
+}
+
+var roomlistScroller;
+var musiclistScroller;
+
+var currentPointerMode;
+
+function setPointer(pointerType) {
+    for (var pt in pointerTypes) {
+        document.getElementById(pointerTypes[pt]).style.display = (pointerTypes[pt] == pointerType) ? "block" : "none";
+    }
+
+    if (pointerType == pointerTypes.motion) {
+        currentPointerMode = zigmote.cursor.cursorModes.motion;
+    }
+    if (pointerType == pointerTypes.touch) {
+        currentPointerMode = zigmote.cursor.cursorModes.touchpadrel;
+    }
+    if (undefined !== controller) {
+        controller.cursor.cursormode = currentPointerMode;
+    }
+}
+var controller;
+var roomslist;
+var musicSyncList;
+var roomsharedlist;
+
+var anotherRL;
+
+// name stuff
+var currentName = localStorage.getItem("currentName");
+if (null == currentName) currentName = "[Guest]";
+
+// location stuff
+var currentLocation = {};
+if (navigator.geolocation)
+{
+    navigator.geolocation.getCurrentPosition(gotLocation, noLocation);
+}
+
+function gotLocation(position) {
+    currentLocation = position;
+}
+
+function noLocation() {
+    // bummer
+}
+
+function updateVisibleItems(itemid, itemdata) {
+    if (itemid == 'itemstoshow') {
+        // itemdata is a hashtable of the elements to show (mega-hack)
+        var toggles = document.getElementsByClassName("toggleable");
+        for(var i = 0; i < toggles.length; i++) {
+            var item = toggles[i];
+            var show = itemdata.indexOf(item.id) != -1;
+                item.style.display = (show) ? "" : "none";
+        }
+    }
+}
+
+function loaded() {
+    //preventDocScrolling();
+    nameChanged(currentName);
+
+    roomlistScroller = new iScroll('roomslistContainer');
+    musiclistScroller = new iScroll('musiclistContainer');
+
+    setPointer(pointerTypes.touch);
+    gotoScreen(screenTypes.chooseScreen);
+
+    function roomJoinedOK(data) {
+        var roomshareddata = synclist.subscribe(socket, data.roomsharedid);
+        roomshareddata.subscribekey('itemstoshow', function(newValue) {
+            updateVisibleItems('itemstoshow', newValue);
+        });
+        roomshareddata.subscribekey('hostpage', function(newPage) {
+            console.log("Host navigated to " + newPage);
+            if (controllersForHostPages.hasOwnProperty(newPage)) {
+                gotoScreen(controllersForHostPages[newPage]);
+            }
+        });
+
+        // connect the music list
+        //musicSyncList = synclist.subscribe(socket, data.medialist);
+        musicSyncList = synclist.subscribe(socket, undefined); //TODO: HACK
+        musicSyncList.bind(document.getElementById("musiclistList"), function(id, data){
+            var li = document.createElement('li');
+            li.innerHTML = data.name;
+            addClass(li, "touchable");
+            li.addEventListener("click", function() { sendToTV('playSong', {songid: id}); });
+            return li;
+        });
+        musicSyncList.onadd = function() { musiclistScroller.refresh(); }
+
+        controller.cursor.bindtouchpad("touchpad");
+        controller.cursor.bindtouchpad("motion");
+        controller.cursor.cursormode = currentPointerMode;
+
+        controller.ondisconnected = function() {
+            gotoScreen(screenTypes.chooseScreen);
+        }
+
+        // show the welcome screen
+        gotoScreen(screenTypes.homeScreen);
+    }
+
+    socket = io.connect('http://'+document.location.hostname);
+
+    socket.on('connect', function () {
+        controller = zigmote.controller(socket);
+        controller.onhostgone = function(data) {
+            gotoScreen(screenTypes.chooseScreen);
+        }
+
+        var qs = document.location.search;
+        var roomid = qs.substr(1,qs.length);
+
+        function makeRoomElement(roomid, roomdata) {
+            var li = document.createElement('li');
+            li.innerHTML = roomdata.roomname;
+            addClass(li, "touchable");
+            li.addEventListener("click", function() { 
+                controller.joinRoom(roomid, currentName, roomJoinedOK,
+                        function(){console.log('join failed for room: ' + roomdata.name);}); 
+            });
+            return li;
+        }
+
+        roomslist = synclist.subscribe(socket, zigmote.getRoomListId("musicplayer"));
+        roomslist.bind(document.getElementById("roomslistList"), makeRoomElement);
+        roomslist.onadd = function() {
+            roomlistScroller.refresh();
+        }
+
+        anotherRL = synclist.subscribe(socket, zigmote.getRoomListId("motionosdemos"));
+        anotherRL.bind(document.getElementById("roomslistList"), makeRoomElement);
+        anotherRL.onadd = function() {
+            roomlistScroller.refresh();
+        }
+    });
+
+    $("#sensitivitySlider").slider({
+            orientation: "vertical",
+            range: "min",
+            min: 0,
+            max: 100,
+            value: 60
+        });
+
+    $("#thebutton").click(function() {
+		$("#volumeSlider").toggle("slide", { direction: "up" }, 300);
+	})
+
+	$("#volumeSlider").slider({
+            orientation: "vertical",
+            range: "min",
+            min: 0,
+            max: 100,
+            value: 60,
+            start : function(event, ui) { 
+	            $("#volumeLabel")
+	            	.show("fade");
+				$(ui.handle).attr("data-updateTimer", setInterval(function() {
+						sendToTV("setVolume", {volume: ($("#volumeSlider").slider("option", "value") / 100)});
+					}, 300));
+	            },
+            slide : function(event, ui) { 
+	            $("#volumeLabel")
+	            	.text(ui.value)
+	            	.position({
+            			my : "left center",
+            			at : "right center",
+            			of : ui.handle,
+            			offset : "-10 3.5"}); 
+	        	},
+            stop : function(event, ui) { 
+				$("#volumeLabel").hide("fade");
+				$("#volumeSlider").hide("fade"); 
+				clearInterval($(ui.handle).attr("data-updateTimer"));
+				sendToTV("setVolume", {volume: (ui.value / 100)});
+				}
+        });
+
+
+    preventScrolling("touchpad");
+    preventScrolling("motion");
+    //preventScrolling("sensitivitySlider");
+    var recalibrateButton = document.getElementById("calibrateButton");
+    // TODO: stopPropagation == massive hack
+    recalibrateButton.addEventListener("touchend", function(e) { recalibrate(); e.stopPropagation(); }, false);
+    //hides address bar
+    setTimeout("window.scrollTo(0, 1)", 1000); 
+}
+
+function hasClass(ele,cls) {
+    return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
+}
+
+function addClass(ele,cls) {
+    if (!hasClass(ele,cls)) ele.className += " "+cls;
+}
+
+function removeClass(ele,cls) {
+    if (hasClass(ele,cls)) {
+        var reg = new RegExp('(\\s|^)'+cls+'(\\s|$)');
+        ele.className=ele.className.replace(reg,' ');
+    }
+}
+
+function doPointer() {
+    controller.cursor.start(true, function() {
+        gotoScreen(screenTypes.pointerScreen);
+    });   
+}
+
+function stopCursor() {
+    controller.cursor.stop();
+    gotoScreen(screenTypes.homeScreen);
+}
+
+
+function preventScrolling(id) {
+    var elem = document.getElementById(id);
+    function stopScrolling( touchEvent ) { touchEvent.preventDefault(); }
+    elem.addEventListener( 'touchstart' , stopScrolling , false );
+    elem.addEventListener( 'touchmove' , stopScrolling , false );
+}
+
+function preventDocScrolling(id) {
+    function stopScrolling( touchEvent ) { 
+        if (undefined !== touchEvent.target && hasClass(touchEvent.target, "touchable")) {
+            return;
+        }
+        touchEvent.preventDefault(); 
+    }
+    document.addEventListener( 'touchstart' , stopScrolling , false );
+    document.addEventListener( 'touchmove' , stopScrolling , false );
+}
+
+
+function nameentry() {
+    document.getElementById("currentUserName").style.display = "none";
+    document.getElementById("currentUserNameInput").style.display = "block";
+    document.getElementById("currentUserNameInput").focus();
+}
+
+function nameentrydone() {
+    var newName = document.getElementById("currentUserNameInput").value;
+    console.log("Name changed: " + newName);
+    nameChanged(newName);
+	socket.emit('rename',{ name : newName});
+}
+
+function nameChanged(newName) {
+    currentName = newName;
+    localStorage.setItem("currentName", currentName);
+    document.getElementById("currentUserNameInput").value = currentName;
+    document.getElementById("currentUserName").innerHTML = currentName;
+    document.getElementById("currentUserName").style.display = "block";
+    document.getElementById("currentUserNameInput").style.display = "none";
+}
+
+function recalibrate() {
+    controller.cursor.recalibrate();    
+}
+
+function sendToTV(command, data) {
+    controller.sendToHost(command, data);
+}
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
+
+</script>
+
+</head>
+
+<body>
+<div id="wrapper">
+
+	<div class="header">
+    	<div class="name">
+            <div id="currentUserName" onClick="nameentry();"></div>
+    		<input style="display:none; width: 220px; height: 30px; font-size: 20px;" type="text" placeholder="[Enter Name]" spellcheck="off" autocomplete="off" id="currentUserNameInput" name="currentUserNameInput" onChange="nameentrydone()"/>
+
+    	</div>
+    </div>
+
+	<div id="navBar" class="navBar">
+    
+    <a href="javascript:gotoScreen(screenTypes.homeScreen)"><img src="mi/images/mu_01.png" /></a>
+    <a href=""><img src="mi/images/mu_02.png" /></a>
+    
+    <ul id='playercontrolstemp' class='toggleable'>
+    
+    	<li><img src="mi/images/mu_03.png" onClick="javascript:sendToTV('playPrev');" /></li>
+        
+        <li><img src="mi/images/mu_04.png" onClick="javascript:sendToTV('togglePlayPause');" /></li>
+        
+        <li><img src="mi/images/mu_05.png" onClick="javascript:sendToTV('playNext');" /></li>
+        
+        <li><img id="thebutton" src="mi/images/mu_06.png" /><div id="volumeSlider"></div><div id="volumeLabel"></div></li>
+        
+    </ul>
+            
+    </div>
+
+	<div id="roomslist" class="invisible">
+        <h2 class="coollistHeader">Host Screen List</h2>
+        <div id="roomslistContainer" class="coollist">
+            <div class="scroller">
+		      <ul id="roomslistList">
+		      </ul>
+            </div>
+        </div>
+	</div>
+
+<div id="homescreen" class="invisible">       
+        
+		<div class="homeScreenIcon">
+        
+            <a href="javascript:doPointer()"><img width="200px" height="200px" src="mi/cursors.png" /></a>
+
+            <a href="javascript:sendToTV('toggleQR');"><img width="200px" height="200px" src="mi/qrcode.png" /></a>
+
+            <a id="musicbutton" href="javascript:(function(){gotoScreen(screenTypes.musicScreen); musiclistScroller.refresh();})()" class="toggleable"><img width="200px" height="200px" src="mi/music.png" /></a>
+ 
+            <a id="gamepadbutton" href="javascript:gotoScreen(screenTypes.gamepadScreen);" class="toggleable"><img width="200px" height="200px" src="mi/music.png" /></a>
+          
+        </div>
+		
+        
+	</div>
+
+	<div id="pointerscreen" class="invisible">
+        	<div id="touchpad" class="invisible">
+            
+            </div>
+            
+            <div id="motion" class="invisible">
+            
+            	<div id="motionContainer" class="motionContainer">
+            
+                    <div class="recal"><div id="calibrateButton"><img src="mi/recalibrate.png" /></div></div>
+
+				</div>
+                        
+            </div>
+			
+            <div class="controllerOptions">
+            
+            	<a href="javascript:setPointer(pointerTypes.motion)"><div class="pointer"><h2>Motion</h2></div></a>
+                
+                <a href="javascript:setPointer(pointerTypes.touch)"><div class="touchpad"><h2>Touchpad</h2></div></a>
+            
+            
+            </div>
+            
+            <div id="sensitivitySlider"></div>
+
+			<div class="closebutton">
+
+            <a href="javascript:stopCursor()" class="css_button">BACK</a>
+
+			</div>
+
+	</div>
+
+    <div id="musiclist" class="invisible">
+        <h2 class="coollistHeader">Music</h2>
+        <div id="musiclistContainer" class="coollist">
+            <div>
+              <ul id="musiclistList">
+              </ul>
+            </div>
+        </div>
+
+        <div class="closebutton">
+
+            <a href="javascript:stopCursor()" class="css_button">BACK</a>
+
+        </div>
+
+    </div>
+
+    <div id="gamepadscreen" class="invisible">
+        <div id="controller">
+            <div id="dpad"></div>
+
+            <div id="strtslct">
+            
+                <div id="select"></div>
+
+                <div id="start"></div>
+
+            </div>
+
+            <div id="ab">
+
+                <div id="b"></div>
+
+                <div id="a"></div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="slidescontrol" class="invisible">
+
+        <div id="nextslide" class="slidecontrol">Next</div>
+
+        <div id="prevslide" class="slidecontrol">Prev</div>
+
+        <div id="firstslide" class="slidecontrol">First</div>
+
+        <div id="lastslide" class="slidecontrol">Last</div>
+
+    </div>
+
+</div>
+</body>
+
+</html>
