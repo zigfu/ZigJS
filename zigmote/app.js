@@ -10,35 +10,16 @@ app.listen(80);
 function handler (request, response) {
     var filePath = '.' + request.url;
     
-	// is this a tv? or a controller?
-	var isMobile = /mobile/i.test(request.headers['user-agent']);
-	
-	var forceTv = (request.url == "/?tv");
-	var forceController = (request.url[1] == '?' && !forceTv);
-	var isTv = !forceController && (forceTv || !isMobile);
-	
-	// default page (for tv & controller)
-		
+    // default page (for tv & controller)
+        
     if (filePath == './') {
-		if (isTv) {
-			filePath = './host.html';
-		} else {
-			filePath = './controller.html';
-		}
-	}
+        filePath = "./choose.html";
+    }
 
-	if (forceController) {
-		filePath = './controller.html';
-	}
-	
-	if (forceTv) {
-		filePath = "./host.html";
-	}
-
-	// make sure query strings dont interfere with fetching from fs
-	if (filePath.indexOf('?') > -1) {
-		filePath = filePath.substr( 0, filePath.lastIndexOf('?') );
-	}
+    // make sure query strings dont interfere with fetching from fs
+    if (filePath.indexOf('?') > -1) {
+        filePath = filePath.substr( 0, filePath.lastIndexOf('?') );
+    }
 
     var extname = path.extname(filePath);
     var contentType = 'text/html';
