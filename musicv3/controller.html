@@ -26,7 +26,8 @@ var screenTypes = {
     homeScreen : "homescreen",
     pointerScreen : "pointerscreen",
     musicScreen : "musiclist",
-    gamepadScreen : "gamepadscreen"
+    gamepadScreen : "gamepadscreen",
+	slideScreen : "slideshowscreen"
 }
 
 function gotoScreen(screenType) {
@@ -441,7 +442,29 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
             </div>
         </div>
     </div>
-
+	
+    <div id="slideController" class="invisible">
+    
+    	<div id="slideControls">
+        
+        	<ul>
+            
+            	<li><img src="i/slide/first.png" /></li>
+                
+                <li><img src="i/slide/back.png" /></li>
+                
+                <li><img src="i/slide/next.png" /></li>
+                
+                <li><img src="i/slide/last.png" /></li>
+            
+            </ul>
+            
+            <center><img src="i/slide/pointer.png" /></center>
+            
+        </div>
+        
+    </div>
+    
         <div class="closebutton">
 
             <a href="javascript:stopCursor()" class="css_button">BACK</a>
