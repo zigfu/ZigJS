@@ -26,7 +26,8 @@ var screenTypes = {
     homeScreen : "homescreen",
     pointerScreen : "pointerscreen",
     musicScreen : "musiclist",
-    gamepadScreen : "gamepadscreen"
+    gamepadScreen : "gamepadscreen",
+	slideScreen : "slideshowscreen",
 }
 
 function gotoScreen(screenType) {
@@ -50,8 +51,8 @@ var pointerTypes = {
 
 var currentHostPage;
 var controllersForHostPages = {
-    "generic" : screenTypes.homeScreen,
-    "demos" : screenTypes.homeScreen,
+    "generic" : screenTypes.slideScreen,
+    "demos" : screenTypes.slideScreen,
     "slides" : screenTypes.homeScreen,
     "jsnes" : screenTypes.gamepadScreen,
     "music" : screenTypes.musicScreen,
@@ -159,7 +160,7 @@ function loaded() {
         }
 
         // show the welcome screen
-        gotoScreen(screenTypes.homeScreen);
+        gotoScreen(screenTypes.slideScreen);
     }
 
     socket = io.connect('http://'+document.location.hostname);
@@ -463,16 +464,27 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
         </div>
     </div>
 
-    <div id="slidescontrol" class="invisible">
-
-        <div id="nextslide" class="slidecontrol">Next</div>
-
-        <div id="prevslide" class="slidecontrol">Prev</div>
-
-        <div id="firstslide" class="slidecontrol">First</div>
-
-        <div id="lastslide" class="slidecontrol">Last</div>
-
+    <div id="slideshowscreen" class="invisible">
+    
+    	<div id="slideControls">
+        
+        	<ul>
+            
+            	<li><img src="i/slide/first.png" /></li>
+                
+                <li><img src="i/slide/back.png" /></li>
+                
+                <li><img src="i/slide/next.png" /></li>
+                
+                <li><img src="i/slide/last.png" /></li>
+            
+            </ul>
+            
+            <center><img src="i/slide/pointer.png" /></center>
+            
+        </div>
+        
+    </div>
     </div>
 
 </div>

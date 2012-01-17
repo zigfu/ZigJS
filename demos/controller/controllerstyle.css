@@ -477,3 +477,15 @@ img {
 	background-repeat: no-repeat;
 	float: left;
 }
+#slideController {
+}
+#slideControls {
+	width: 100%;
+}
+#slideControls ul {
+	list-style-type: none;
+}
+#slideControls li {
+	display: inline;
+	margin : 0px auto;
+}

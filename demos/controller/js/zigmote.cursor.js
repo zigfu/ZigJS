@@ -105,7 +105,6 @@
 
 		// return API
 		var ret = {
-			getCalibration : function() { return calibrationOrientation; },
 			start : function(exclusive, callback) {
 				if (undefined === exclusive) {
 					exclusive = false;
@@ -175,18 +174,22 @@
 
 	function host(zigmoteHost) {
 		var ret = {
+			locked : undefined,
+
 			oncursorlock : function(userid) {},
 			oncursorunlock : function() {},
 			oncursor : function(x,y,userid) {},
 			oncursorstart : function(userid) {},
 			oncursorstop : function(userid) {},
-			onclick : function(x,y,userid) {},
+			onclick : function(userid) {},
 			onorientation : function(a,b,g,userid) {}
 		}
 
 		zigmoteHost.onLock("cursor", function(userid) {
+			ret.locked = userid;
 			ret.oncursorlock(userid);
 		}, function(userid) {
+			ret.locked = undefined;
 			ret.oncursorunlock(userid);
 		});
 
@@ -206,7 +209,7 @@
 			ret.onorientation(data.alpha, data.beta, data.gamma, userid);
 		});
 
-		socket.on('zmote-click', function(data, userid) {
+		zigmoteHost.on('click', function(data, userid) {
 			ret.onclick(userid);
 		});
 

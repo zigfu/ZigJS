@@ -130,6 +130,9 @@ var synclist = (function() {
 						makeelement : makeelement 
 					};
 			},
+			unbindkey : function(key) {
+				delete lists[id].boundkeys[key];
+			},
 
 			subscribekey : function(key, callback) {
 				lists[id].keycallbacks[key] = callback;
