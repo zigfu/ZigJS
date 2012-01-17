@@ -101,8 +101,8 @@ function playerChanged(player, userid) {
     console.log('playerChanged: ' + player + ", " + userid);
     if (undefined !== player.userid) {userslist.unbindkey(player.userid);}
     player.userid = userid;
-    if (undefined === userid) { updateUser(undefined,undefined); return; }
-    userslist.bindkey(userid, player1.element, updateUser);
+    if (undefined === userid) { player.element.innerHTML = updateUser(undefined,undefined).innerHTML; return; }
+    userslist.bindkey(userid, player.element, updateUser);
     player.element.innerHTML = updateUser(userid, userslist.get(userid)).innerHTML;
 }
 var player1 = {};
@@ -118,14 +118,19 @@ function roomJoinedOKGamepad(data) {
     playerChanged(player2, roomshareddata.get("player2"));
     doGamepad();
 }
+function connectGamepad(name) {
+    controller.gamepad.connect(name, function(success) {if (success) gamepadConnected();});
+}
 function updateUser(id, data) {
     console.log('got update user: ' + id + ', ' + data);
+    console.log(data);
     var li = document.createElement('li');
     
-    if (data === undefined) {
-        li.innerHTML = "[Empty]";
+    if (undefined === data) { //sorry :( 
+        console.log('user left!');
+        li.innerHTML = "<div onclick='doGamepad()'>[Empty]</div>";
     } else {
-        li.innerHTML = userslist.get(data);
+        li.innerHTML = data;
     }
     return li;
 }
