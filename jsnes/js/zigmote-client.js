@@ -11,6 +11,7 @@ var zigmote = (function() {
 
 		var commands = {};
 
+		var locks = {};
 		var lockCallbacks = {};
 		var pendingLocks = {};
 
@@ -63,6 +64,7 @@ var zigmote = (function() {
 				});
 				
 				socket.on('zigmote-locked', function(data) {
+					locks[data.lockid] = data.userid;
 					if (lockCallbacks.hasOwnProperty(data.lockid)) {
 						lockCallbacks[data.lockid].locked(data.userid);
 					}
@@ -71,6 +73,9 @@ var zigmote = (function() {
 				socket.on('zigmote-unlocked', function(data) {
 					if (lockCallbacks.hasOwnProperty(data.lockid)) {
 						lockCallbacks[data.lockid].unlocked(data.userid);
+					}
+					if (locks.hasOwnProperty(data.lockid)) {
+						delete locks[data.lockid];
 					}
 				})	
 			});
@@ -109,6 +114,11 @@ var zigmote = (function() {
 				locked : lockcallback,
 				unlocked : unlockcallback,
 			};
+
+			// if we register callbacks to a locked lock, fire callback immediately
+			if (locks.hasOwnProperty(lockid)) {
+				lockCallbacks[lockid].locked(lockCallbacks[lockid]);
+			}
 		}
 
 		function lock(lockid, callback) {
@@ -143,7 +153,8 @@ var zigmote = (function() {
 			sendToHost : sendToHost,
 			lock : lock,
 			unlock : unlock,
-			pendinglocks : pendingLocks,
+			pendinglocks : pendingLocks, // shouldn't be exposed
+			bindbutton : bindbutton,
 
 			onjoin : function() {},
 			onjoinerror : function() {},
@@ -210,6 +221,16 @@ var zigmote = (function() {
 
 		function unlock(lockid) {
 			socket.emit('zigmote-unlock', { lockid : lockid });	
+		}
+
+		function bindbutton(element, command) {
+			element.addEventListener('touchend', function(e) {
+				sendToHost(command);
+				e.preventDefault();
+			});
+			element.addEventListener('click', function(e) {
+				sendToHost(command);
+			});
 		}
 
 		// "install" plugins
