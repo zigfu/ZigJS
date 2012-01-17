@@ -354,7 +354,7 @@ function nameentrydone() {
     var newName = document.getElementById("currentUserNameInput").value;
     console.log("Name changed: " + newName);
     nameChanged(newName);
-	socket.emit('rename',{ name : newName});
+	controller.rename(newName);
 }
 
 function nameChanged(newName) {
