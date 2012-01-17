@@ -75,9 +75,16 @@ var cursorrel;
 function roomStarted(roomData) {
 	// TODO: bind user list
 
-	// cursor stuff
+	var roomshared = synclist.subscribe(socket, roomData.roomsharedid);
+	console.log("Setting hostpage");
+	roomshared.set('hostpage', 'demos');
+
+	// cursor stuff - TODO: Move boilerplate code to zigmote.cursor
 	host.cursor.oncursorlock = function(userid) { onSessionStart();}
 	host.cursor.oncursorunlock = function(userid) { onSessionEnd();}
+	if (undefined !== host.cursor.locked) {
+		host.cursor.oncursorlock(host.cursor.locked);
+	}
 	host.cursor.oncursor = (function(cursorElement) { return function(x,y,rel,userid) {
 		cursorrel = rel;
 		if (rel) {
@@ -113,7 +120,7 @@ $(document).ready( function () {
 	});
 
 	// connect to zigtv
-	socket = io.connect('http://zig.tv');
+	socket = io.connect('http://'+document.location.hostname);
 	socket.on('connect', function () {
 		// connected
 		host = zigmote.host(socket);

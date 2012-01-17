@@ -174,6 +174,8 @@
 
 	function host(zigmoteHost) {
 		var ret = {
+			locked : undefined,
+
 			oncursorlock : function(userid) {},
 			oncursorunlock : function() {},
 			oncursor : function(x,y,userid) {},
@@ -184,8 +186,10 @@
 		}
 
 		zigmoteHost.onLock("cursor", function(userid) {
+			ret.locked = userid;
 			ret.oncursorlock(userid);
 		}, function(userid) {
+			ret.locked = undefined;
 			ret.oncursorunlock(userid);
 		});
 
