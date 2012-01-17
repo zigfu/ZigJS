@@ -1,8 +1,21 @@
 (function(zigmote) {
 	function controller(zigmoteController) {
-
+		var connected = false;
+		var name;
 		function connect(gamepadname, callback) {
-			zigmoteController.lock("gamepad-" + gamepadname, callback);
+			zigmoteController.lock("gamepad-" + gamepadname, function(success) {
+				connected = success;
+				if (success) name = "gamepad-" + gamepadname;
+				callback(success);
+			});
+		}
+
+		function disconnect() {
+			if (connected) {
+				zigmoteController.unlock(name);
+				name = undefined;
+				connected = false;
+			}
 		}
 
 		function bindbutton(button, element) {
@@ -81,6 +94,7 @@
 		// return API
 		zigmoteController.gamepad = {
 			connect : connect,
+			disconnect : disconnect,
 			bindbutton : bindbutton,
 			binddpad : binddpad,
 		}
