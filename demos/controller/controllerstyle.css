@@ -478,14 +478,18 @@ img {
 	float: left;
 }
 #slideController {
+	margin: 0px 0px;
+	padding: 0px 0px;
 }
 #slideControls {
-	width: 100%;
+	margin: 0px 0px;
+	padding: 0px 0px;
+	padding-top: 100px;
 }
-#slideControls ul {
+#slideControlss ul {
 	list-style-type: none;
 }
 #slideControls li {
 	display: inline;
-	margin : 0px auto;
+	margin-right: -3px;
 }
