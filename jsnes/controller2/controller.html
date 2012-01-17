@@ -346,6 +346,7 @@ function doGamepad() {
 
 function stopGamepad() {
     gotoScreen(screenTypes.playerSelectionScreen);
+    controller.gamepad.disconnect();
 }
 
 function homeScreen() {
