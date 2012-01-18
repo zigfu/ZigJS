@@ -533,7 +533,28 @@ img {
 	color: #333;
 	text-decoration: bold;
 	padding-right: 10px;
+	padding-bottom: 100px;
 }
 #dialog a:hover {
 }
-  
+#modalRecalibrate {
+	color: #FFF;
+	text-shadow: 0px 1px 2px #333;
+	font-size: 32px;
+	font-family: Arial;
+	font-weight: bold;
+	width: 250px;
+	height: 85px;
+	margin: 0px auto;
+	margin-top: 200px;
+	border-radius: 5px;
+	-webkit-box-shadow: 0x 2px 2px #333;
+	background: #e9ea9d; /* Old browsers */
+	background: -moz-linear-gradient(top,  #e9ea9d 0%, #ffcc00 99%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e9ea9d), color-stop(99%,#ffcc00)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #e9ea9d 0%,#ffcc00 99%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #e9ea9d 0%,#ffcc00 99%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #e9ea9d 0%,#ffcc00 99%); /* IE10+ */
+	background: linear-gradient(top,  #e9ea9d 0%,#ffcc00 99%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e9ea9d', endColorstr='#ffcc00',GradientType=0 ); /* IE6-9 */
+}
