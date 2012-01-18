@@ -6,7 +6,61 @@
 <meta name="viewport" content="width=device-width, user-scalable=no"/>
 
 <link rel="stylesheet" type="text/css" href="controllerstyle.css" />
+<script type="text/javascript" src="http://code.jquery.com/jquery-latest.pack.js"></script>
+<script>
 
+$(document).ready(function() {	
+
+	//select all the a tag with name equal to modal
+	$('a[name=modal]').click(function(e) {
+		//Cancel the link behavior
+		e.preventDefault();
+		
+		//Get the A tag
+		var id = $(this).attr('href');
+	
+		//Get the screen height and width
+		var maskHeight = $(document).height();
+		var maskWidth = $(window).width();
+	
+		//Set heigth and width to mask to fill up the whole screen
+		$('#mask').css({'width':maskWidth,'height':maskHeight});
+		
+		//transition effect		
+		$('#mask').fadeIn(1000);	
+		$('#mask').fadeTo("slow",0.8);	
+	
+		//Get the window height and width
+		var winH = $(window).height();
+		var winW = $(window).width();
+              
+		//Set the popup window to center
+		$(id).css('top',  winH/2-$(id).height()/2);
+		$(id).css('left', winW/2-$(id).width()/2);
+	
+		//transition effect
+		$(id).fadeIn(2000); 
+	
+	});
+	
+	//if close button is clicked
+	$('.window .close').click(function (e) {
+		//Cancel the link behavior
+		e.preventDefault();
+		
+		$('#mask').hide();
+		$('.window').hide();
+	});		
+	
+	//if mask is clicked
+	$('#mask').click(function () {
+		$(this).hide();
+		$('.window').hide();
+	});			
+	
+});
+
+</script>
 <script type="text/javascript" src="js/iscroll.js"></script> 
 
 <script src="/socket.io/socket.io.js"></script>
@@ -476,24 +530,32 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
         
         	<ul>
             
-            	<li><div id="slideFirst"><img src="i/slide/first.png" /></div></li>
+            	<li><div id="slideFirst" class="inlineslideDiv"><img src="i/slide/first.png" /></div></li>
                 
-                <li><div id="slidePrev"><img src="i/slide/back.png" /></div></li>
+                <li><div id="slidePrev" class="inlineslideDiv"><img src="i/slide/back.png" /></div></li>
                 
-                <li><div id="slideNext"><img src="i/slide/next.png" /></div></li>
+                <li><div id="slideNext" class="inlineslideDiv"><img src="i/slide/next.png" /></div></li>
                 
-                <li><div id="slideLast"><img src="i/slide/last.png" /></div></li>
+                <li><div id="slideLast" class="inlineslideDiv"><img src="i/slide/last.png" /></div></li>
             
             </ul>
             
-            <center><img src="i/slide/pointer.png" /></center>
+            <center><a href="#dialog" name="modal"><img src="i/slide/pointer.png" /></a></center>
             
+    
         </div>
-        
+
     </div>
     </div>
 
 </div>
+                  <div id="boxes">
+            	<div id="dialog" class="window">
+                Simple Modal Window | 
+                <a href="#"class="close"/>Close it</a> 
+                </div>
+            </div>
+              <div id="mask"></div>  
 </body>
 
 </html>
