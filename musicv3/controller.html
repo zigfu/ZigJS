@@ -115,7 +115,7 @@ function loaded() {
     musiclistScroller = new iScroll('musiclistContainer');
 
     setPointer(pointerTypes.touch);
-    gotoScreen(screenTypes.slideScreen);
+    gotoScreen(screenTypes.chooseScreen);
 
     function roomJoinedOK(data) {
         roomshareddata = synclist.subscribe(socket, data.roomsharedid);
@@ -147,7 +147,7 @@ function loaded() {
         }
 
         // show the welcome screen
-        gotoScreen(screenTypes.slideScreen);
+        gotoScreen(screenTypes.homeScreen);
     }
 
     socket = io.connect('http://'+document.location.hostname);
