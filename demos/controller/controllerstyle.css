@@ -502,8 +502,8 @@ img {
   position: absolute;
   left:0;
   top:0;
-  width:440px;
-  height:200px;
+  width:500px;
+  height:500px;
   display:none;
   z-index:9999;
   padding:20px;
@@ -511,12 +511,13 @@ img {
 #boxes #dialog {
   left: 0;
   top: 0;
-  width:375px; 
-  height:203px;
+  width:500px; 
+  height:500px;
   padding:10px;
   background-color:#ffffff;
   margin: 0px auto;
   border-radius: 10px;
+  text-align: center;
 }
 #mask {
   position:absolute;
@@ -526,5 +527,13 @@ img {
   z-index:9000;
   background-color:#000;
   display:none;
+}
+#dialog a {
+	font-size: 28px;
+	color: #333;
+	text-decoration: bold;
+	padding-right: 10px;
+}
+#dialog a:hover {
 }
   
