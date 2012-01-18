@@ -125,6 +125,11 @@ $(document).ready( function () {
 		// connected
 		host = zigmote.host(socket);
 		host.startRoom("motionosdemos", currentRoomName, roomStarted);
+
+		host.on("slideNext", function(data) { console.log("Slide next"); });
+		host.on("slidePrev", function(data) { console.log("Slide prev"); });
+		host.on("slideFirst", function(data) { console.log("Slide first"); });
+		host.on("slideLast", function(data) { console.log("Slide last"); });
 	});
 
 	socket.on('disconnect', function() {

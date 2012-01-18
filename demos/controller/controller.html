@@ -196,6 +196,12 @@ function loaded() {
         anotherRL.onadd = function() {
             roomlistScroller.refresh();
         }
+
+        // slides
+        controller.bindbutton(document.getElementById("slideNext"), "slideNext");
+        controller.bindbutton(document.getElementById("slidePrev"), "slidePrev");
+        controller.bindbutton(document.getElementById("slideFirst"), "slideFirst");
+        controller.bindbutton(document.getElementById("slideLast"), "slideLast");
     });
 
     $("#sensitivitySlider").slider({
@@ -470,13 +476,13 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
         
         	<ul>
             
-            	<li><img src="i/slide/first.png" /></li>
+            	<li><div id="slideFirst"><img src="i/slide/first.png" /></div></li>
                 
-                <li><img src="i/slide/back.png" /></li>
+                <li><div id="slidePrev"><img src="i/slide/back.png" /></div></li>
                 
-                <li><img src="i/slide/next.png" /></li>
+                <li><div id="slideNext"><img src="i/slide/next.png" /></div></li>
                 
-                <li><img src="i/slide/last.png" /></li>
+                <li><div id="slideLast"><img src="i/slide/last.png" /></div></li>
             
             </ul>
             
