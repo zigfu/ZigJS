@@ -509,6 +509,8 @@ img {
   padding:20px;
 }
 #boxes #dialog {
+  left: 0;
+  top: 0;
   width:375px; 
   height:203px;
   padding:10px;
