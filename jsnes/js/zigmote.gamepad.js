@@ -1,8 +1,21 @@
 (function(zigmote) {
 	function controller(zigmoteController) {
-
+		var connected = false;
+		var name;
 		function connect(gamepadname, callback) {
-			zigmoteController.lock("gamepad-" + gamepadname, callback);
+			zigmoteController.lock("gamepad-" + gamepadname, function(success) {
+				connected = success;
+				if (success) name = "gamepad-" + gamepadname;
+				callback(success);
+			});
+		}
+
+		function disconnect() {
+			if (connected) {
+				zigmoteController.unlock(name);
+				name = undefined;
+				connected = false;
+			}
 		}
 
 		function bindbutton(button, element) {
@@ -26,7 +39,7 @@
 			function doDown(button) {
 				if (!dpadbuttons[button]) {
 					zigmoteController.sendToHost('gp-down', { button : prefix + button });
-					dpadbuttons[button] = false;
+					dpadbuttons[button] = true;
 				}
 			}
 
@@ -81,6 +94,7 @@
 		// return API
 		zigmoteController.gamepad = {
 			connect : connect,
+			disconnect : disconnect,
 			bindbutton : bindbutton,
 			binddpad : binddpad,
 		}
@@ -110,6 +124,8 @@
 					ret.ondisengage(userid);
 				}
 			);
+
+			return ret;
 		}
 
 		zigmoteHost.on('gp-down', function(data, userid) {

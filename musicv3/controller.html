@@ -26,6 +26,8 @@ var screenTypes = {
     homeScreen : "homescreen",
     pointerScreen : "pointerscreen",
     musicScreen : "musiclist",
+    gamepadScreen : "gamepadscreen",
+	slideScreen : "slideshowscreen",
 }
 
 function gotoScreen(screenType) {
@@ -33,10 +35,12 @@ function gotoScreen(screenType) {
         document.getElementById(screenTypes[screen]).style.display = (screenTypes[screen] == screenType) ? "block" : "none";
     }
 
-    showNavBar(screenType != screenTypes.chooseScreen);
+    showNavBar(screenType);
 }
 
-function showNavBar(show) {
+function showNavBar(screen) {
+    //TODO: don't show on gamepad too
+    var show = (screen != screenTypes.chooseScreen);
     document.getElementById("navBar").style.display = (show) ? "block" : "none";
 }
 
@@ -68,6 +72,7 @@ function setPointer(pointerType) {
 var controller;
 var roomslist;
 var musicSyncList;
+var roomsharedlist;
 
 var anotherRL;
 
@@ -90,6 +95,18 @@ function noLocation() {
     // bummer
 }
 
+function updateVisibleItems(itemid, itemdata) {
+    if (itemid == 'itemstoshow') {
+        // itemdata is a hashtable of the elements to show (mega-hack)
+        var toggles = document.getElementsByClassName("toggleable");
+        for(var i = 0; i < toggles.length; i++) {
+            var item = toggles[i];
+            var show = itemdata.indexOf(item.id) != -1;
+                item.style.display = (show) ? "" : "none";
+        }
+    }
+}
+
 function loaded() {
     //preventDocScrolling();
     nameChanged(currentName);
@@ -101,6 +118,14 @@ function loaded() {
     gotoScreen(screenTypes.chooseScreen);
 
     function roomJoinedOK(data) {
+        roomshareddata = synclist.subscribe(socket, data.roomsharedid);
+        roomshareddata.onset = updateVisibleItems;
+        roomshareddata.onadd = updateVisibleItems;
+        var currentData = roomshareddata.get('itemstoshow');
+        if (currentData !== undefined) {
+            updateVisibleItems('itemstoshow', currentData);
+        }
+
         // connect the music list
         //musicSyncList = synclist.subscribe(socket, data.medialist);
         musicSyncList = synclist.subscribe(socket, undefined); //TODO: HACK
@@ -113,9 +138,6 @@ function loaded() {
         });
         musicSyncList.onadd = function() { musiclistScroller.refresh(); }
 
-        // start the zmote
-        //TODO:!!!
-        
         controller.cursor.bindtouchpad("touchpad");
         controller.cursor.bindtouchpad("motion");
         controller.cursor.cursormode = currentPointerMode;
@@ -209,7 +231,9 @@ function loaded() {
     preventScrolling("touchpad");
     preventScrolling("motion");
     //preventScrolling("sensitivitySlider");
-
+    var recalibrateButton = document.getElementById("calibrateButton");
+    // TODO: stopPropagation == massive hack
+    recalibrateButton.addEventListener("touchend", function(e) { recalibrate(); e.stopPropagation(); }, false);
     //hides address bar
     setTimeout("window.scrollTo(0, 1)", 1000); 
 }
@@ -220,6 +244,13 @@ function hasClass(ele,cls) {
 
 function addClass(ele,cls) {
     if (!hasClass(ele,cls)) ele.className += " "+cls;
+}
+
+function removeClass(ele,cls) {
+    if (hasClass(ele,cls)) {
+        var reg = new RegExp('(\\s|^)'+cls+'(\\s|$)');
+        ele.className=ele.className.replace(reg,' ');
+    }
 }
 
 function doPointer() {
@@ -292,7 +323,27 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 <body>
 <div id="wrapper">
-
+    <div id="slideshowscreen">
+    
+    	<div id="slideControls">
+        
+        	<ul>
+            
+            	<li><img src="i/slide/first.png" /></li>
+                
+                <li><img src="i/slide/back.png" /></li>
+                
+                <li><img src="i/slide/next.png" /></li>
+                
+                <li><img src="i/slide/last.png" /></li>
+            
+            </ul>
+            
+            <center><img src="i/slide/pointer.png" /></center>
+            
+        </div>
+        
+    </div>
 	<div class="header">
     	<div class="name">
             <div id="currentUserName" onClick="nameentry();"></div>
@@ -306,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
     <a href="javascript:gotoScreen(screenTypes.homeScreen)"><img src="mi/images/mu_01.png" /></a>
     <a href=""><img src="mi/images/mu_02.png" /></a>
     
-    <ul>
+    <ul id='playercontrolstemp' class='toggleable'>
     
     	<li><img src="mi/images/mu_03.png" onClick="javascript:sendToTV('playPrev');" /></li>
         
@@ -338,8 +389,9 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
             <a href="javascript:sendToTV('toggleQR');"><img width="200px" height="200px" src="mi/qrcode.png" /></a>
 
-            <a href="javascript:(function(){gotoScreen(screenTypes.musicScreen); musiclistScroller.refresh();})()"><img width="200px" height="200px" src="mi/music.png" /></a>
+            <a id="musicbutton" href="javascript:(function(){gotoScreen(screenTypes.musicScreen); musiclistScroller.refresh();})()" class="toggleable"><img width="200px" height="200px" src="mi/music.png" /></a>
  
+            <a id="gamepadbutton" href="javascript:gotoScreen(screenTypes.gamepadScreen);" class="toggleable"><img width="200px" height="200px" src="mi/music.png" /></a>
           
         </div>
 		
@@ -355,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
             
             	<div id="motionContainer" class="motionContainer">
             
-                    <div class="recal"><div id="calibrateButton" ontouchend="recalibrate()"><img src="mi/recalibrate.png" /></div></div>
+                    <div class="recal"><div id="calibrateButton"><img src="mi/recalibrate.png" /></div></div>
 
 				</div>
                         
@@ -387,14 +439,45 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
               <ul id="musiclistList">
               </ul>
             </div>
-    </div>
+        </div>
 
+    <div id="gamepad" class="invisible">
+        <div id="controller">
+            <div id="dpad"></div>
+
+            <div id="strtslct">
+            
+                <div id="select"></div>
+
+                <div id="start"></div>
+
+            </div>
+
+            <div id="ab">
+
+                <div id="b"></div>
+
+                <div id="a"></div>
+
+            </div>
+        </div>
+    </div>
+	
+
+    
         <div class="closebutton">
 
             <a href="javascript:stopCursor()" class="css_button">BACK</a>
 
         </div>
 
+    </div>
+
+    <div id="gamepadscreen" class="invisible">
+        <h2 class="coollistHeader">Gamepad</h2>
+        <div class="closebutton">
+            <a href="javascript:stopCursor()" class="css_button">BACK</a>
+        </div>
     </div>
 
 </div>

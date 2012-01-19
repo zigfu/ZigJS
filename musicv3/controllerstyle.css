@@ -411,3 +411,84 @@ img {
 #navBar {
 	display : none;
 }
+
+
+#controller {
+	width: 960px;
+	height: 640px;
+	//background-image: url('i/bg.png');
+	//background-repeat: no-repeat;
+	padding-top: 365px;
+}
+#strtslct {
+	width: 265px;
+	height: 98px;
+	margin: 0px auto;
+	padding-right: 10px;
+	background-image: url('i/star-sel.png');
+	background-repeat: no-repeat;
+}
+#dpad {
+	width: 290px;
+	height: 281px;
+	position: absolute;
+	background-image: url('i/dpad.png');
+	background-repeat: no-repeat;
+	margin-left: 40px;
+	padding-bottom: 100px;
+	margin-top: -150px;
+}
+#ab {
+	width: 279px;
+	height: 172px;
+	float: right;
+	margin-right: 50px;
+	margin-top: -120px;
+}
+#b {
+	width: 138px;
+	height: 172px;
+	background-image: url('i/button_b.png');
+	background-repeat: no-repeat;
+	float: left;
+}
+#a {
+	width: 141px;
+	height: 172px;
+	background-image: url('i/button_a.png');
+	background-repeat: no-repeat;
+	float: left;
+}
+#select {
+	width: 130px;
+	height: 16px;
+	margin-top: 38px;
+	padding-bottom: 100px;
+	background-image: url('i/button_slct.png');
+	background-repeat: no-repeat;
+	float: left;
+}
+#start {
+	width: 132px;
+	height: 16px;
+	margin-top: 38px;
+	padding-bottom: 100px;
+	background-image: url('i/button_strt.png');
+	background-repeat: no-repeat;
+	float: left;
+}
+#slideController {
+	margin: 0px 0px;
+	padding: 0px 0px;
+}
+#slideControls {
+	margin: 0px 0px;
+	padding: 0px 0px;
+}
+#slideControlss ul {
+	list-style-type: none;
+}
+#slideControls li {
+	display: inline;
+	margin-right: -3px;
+}

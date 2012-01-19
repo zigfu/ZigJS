@@ -289,3 +289,6 @@ tr.playing {
 #albumArt img {
 	border-radius: 5px;
 }
+.toggleable { /* used to mark items that can be toggled from the server */
+	
+}

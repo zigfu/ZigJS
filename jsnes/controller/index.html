@@ -5,189 +5,145 @@
 <meta name = "viewport" content = "width = device-width, initial-scale = 0.33, user-scalable = no"/>
 
 <script src="http://zig.tv/socket.io/socket.io.js"></script>
-<script src="js/synclist-client.js"></script>
-<script src="js/zigmote-client.js"></script>
-<script src="js/zigmote.cursor.js"></script>
+<script src="../js/synclist-client.js"></script>
+<script src="../js/zigmote-client.js"></script>
+<script src="../js/zigmote.cursor.js"></script>
+<script src="../js/zigmote.gamepad.js"></script>
 
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 <script>
 
-var up = false, down = false, left = false, right = false, b = false, a = false, start = false, select = false;
-function getControllerName() {
-	var roomname = localStorage.getItem("zigmoteControllerName");
-	if (null == roomname) {
-		roomname = "[Guest]";
-		localStorage.setItem("zigmoteControllerName", roomname);
-	}
-	return roomname;
-}
-var socket;
-function sendToTV(command, data) {
-    socket.emit('zigmote-sendToHost', { command : command, data : data });
-}
-
-
-function upDown(){
-	sendToTV("upDown");
-	if(down){ downUp(); }
-	up = true;
-		$("#ud").text("UP");
-}
-function downDown(){
-	sendToTV("downDown");
-	down = true;
-	if(up) { upUp(); }
-	$("#ud").text("DOWN");
-}
-function leftDown(){	sendToTV("leftDown"); $("#lr").text("LEFT"); if(right) { rightUp(); } left = true; }
-function rightDown(){ sendToTV("rightDown"); $("#lr").text("RIGHT"); right = true; if (left) { leftUp(); }}
-function leftUp() { sendToTV("leftUp"); left = false; }
-function rightUp(){	sendToTV("rightUp"); right = false; }
-function upUp() { sendToTV("upUp"); up = false; }
-function downUp(){	sendToTV("downUp"); down = false; }
-
+// name stuff
+var currentName = localStorage.getItem("currentName");
+if (null == currentName) currentName = "[Guest]";
 
 var controller;
-var roomlist;
-function setStatus(status) {
-	document.getElementById('console').innerHTML = status;
+var roomslist;
+var socket;
+
+function setStatus(str) {
+  console.log("Status: " + str);
 }
-$(document).ready(function () {
+
+function gamepadConnected() {
+  console.log("Game pad connected!");
+  controller.gamepad.bindbutton("a", document.getElementById("a"));
+  controller.gamepad.bindbutton("b", document.getElementById("b"));
+  controller.gamepad.bindbutton("start", document.getElementById("start"));
+  controller.gamepad.bindbutton("select", document.getElementById("select"));
+  controller.gamepad.binddpad("dpad", document.getElementById("dpad"));
+}
+
+function joined() {
+  console.log("Joined!");
+
+  // try becoming player 1
+  controller.gamepad.connect("player1", function(success) {
+    if (success) {
+      gamepadConnected();
+    } else {
+      // or player 2
+      controller.gamepad.connect("player2", function(success) {
+        if (success) {
+          gamepadConnected();
+        } else {
+          console.log("Player1 & Player2 already taken");
+        }
+      });
+    }
+  });
+}
+
+function loaded() {
+  nameChanged(currentName);
+  //preventDocScrolling();
+
+  var qs = document.location.search;
+  var roomid = qs.substr(1,qs.length).replace("/","");
 	
-		var qs = document.location.search;
-		var roomid = qs.substr(1,qs.length);
-	socket = io.connect('http://zig.tv');
+  console.log(roomid);
+
+  socket = io.connect('http://zig.tv:80');
 	socket.on('connect', function () {
+    console.log("Connected to zigtv");
 		controller = zigmote.controller(socket);
-		controller.joinRoom(roomid, getControllerName(), function(){
-					setStatus("Joined ");
-				}, function(errormsg) {
-					setStatus("Error joining ");
-				});
+
+    if (roomid.length > 0) {
+		  controller.joinRoom(roomid, currentName, joined, function(errormsg) {
+  			setStatus("Error joining " + roomid);
+	   	});
+    }
 				
-				
-				
-		setStatus("Connected");
-		roomslist = synclist.subscribe(socket, zigmote.roomslistid);
+		roomslist = synclist.subscribe(socket, zigmote.getRoomListId("jsnes"));
 		roomslist.bind(document.getElementById("roomslist"), function(id, data) {
 			var newElem = document.createElement('li');
 			newElem.innerHTML = data.roomname;
 			newElem.addEventListener('click', function() {
 				console.log("clicked on " + data.roomname);
 				controller = zigmote.controller(socket);
-				controller.joinRoom(id, getControllerName(), function(){
-					setStatus("Joined " + data.roomname);
-				}, function(errormsg) {
+				controller.joinRoom(id, currentName, joined, function(errormsg) {
 					setStatus("Error joining " + data.roomname);
 				});
 			});
 			return newElem;
-		});		
-				
+		});				
 	});
 
-	
-     $(window)    
-          .bind('orientationchange', function(){
-              if (window.orientation % 180 == 0){
-                    $(document.body).css("-webkit-transform-origin", "400px 320px")
-                       .css("-webkit-transform",  "rotate(90deg)");   
-               } 
-               else {                   
-                   if ( window.orientation > 0) { //clockwise
-                     $(document.body).css("-webkit-transform-origin", "-20px 20px")
-                       .css("-webkit-transform", "");    
-                       window.scrollTo(0,1);
-                   }
-               }
-           })
-          .trigger('orientationchange'); 
-          
-          $("#dpad").bind("touchstart touchmove", function (e) { 
-          	y = $("#dpad").offset().top;
-          	x = $("#dpad").offset().left;
-          	  var touches = e.originalEvent.changedTouches,
-        		f = touches[0];
-        		offsetX = (f.pageX-x);
-        		offsetY = (f.pageY-y);
-        		w = $("#dpad").width();
-        		h = $("#dpad").height()
-        		
-        		if (offsetX > (2*w / 3))
-        		{
-        			if (!right){rightDown();}
-        		}
-        		else if (offsetX < (w / 3))
-        		{
-        			if (!left){leftDown();}
-        		}
-        		else
-        		{
-        			if(right){rightUp();}
-        			if(left){leftUp();}
-        		}
-        		if (offsetY > (2*h / 3))
-        		{
-        			if (!down){downDown();}	
-        		}
-        		else if (offsetY < (h / 3))
-        		{
-        			if (!up){ upDown(); }
-        		}
-        		else
-        		{
-        			if(up){upUp();}
-        			if(down){downUp();}
-        		}
-          });
-        		
-        		
-        		
-        		
-         
-          $("#dpad").bind("touchend", function (e) { 
-          	if(right){rightUp();}
-        	if(left){leftUp();}
-        	if(up){upUp();}
-        	if(down){downUp();}
-        	
-          	$("#console").text("touchend"); });
-          	
-          	
-          $("#select").bind("touchstart", function (e) {
-          	  	$("#console").text("SELECT"); sendToTV("selectDown"); });
+  window.onorientationchange = onOrientationChange;
+  onOrientationChange();
+}
 
-          $("#select").bind("touchend", function (e) {
-          	  	$("#console").text(""); sendToTV("selectUp"); });
-          	  	          	  	
-          $("#start").bind("touchstart", function (e) {
-          	  	$("#console").text("START"); sendToTV("startDown"); });
-          $("#start").bind("touchend", function (e) {
-          	  	$("#console").text(""); sendToTV("startUp"); });
-          	  	  	
-     
-          $("#a").bind("touchstart", function (e) {
-          	  	$("#console").text("A"); sendToTV("ADown"); });
-          $("#a").bind("touchend", function (e) {
-          	  	$("#console").text(""); sendToTV("AUp"); });
-          	  	
-          	  		  	
-          	  	
-          $("#b").bind("touchstart", function (e) {
-          	  	$("#console").text("B"); sendToTV("BDown"); });
-          $("#b").bind("touchend", function (e) {
-          	  	$("#console").text(""); sendToTV("BUp"); });
-          	  	          	  	
-          document.addEventListener("touchstart", function(e){ e.preventDefault(); });
-          document.addEventListener("touchmove", function(e){ e.preventDefault(); });
-          
-          
-          
-                   
-          
-});
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
+function onOrientationChange() {
+  if (window.orientation % 180 == 0){
+    document.body.style.setProperty("-webkit-transform-origin", "400px 320px");
+    document.body.style.setProperty("-webkit-transform", "rotate(90deg)");
+  } else {                   
+    if ( window.orientation > 0) { //clockwise
+      document.body.style.setProperty("-webkit-transform-origin", "-20px 20px");
+      document.body.style.setProperty("-webkit-transform", "");
+      window.scrollTo(0,1);
+    }
+  }
+}
+
+function hasClass(ele,cls) {
+    return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
+}
+
+function preventDocScrolling() {
+    function stopScrolling( touchEvent ) { 
+        if (undefined !== touchEvent.target && hasClass(touchEvent.target, "touchable")) {
+            return;
+        }
+        touchEvent.preventDefault(); 
+    }
+    document.addEventListener( 'touchstart' , stopScrolling , false );
+    document.addEventListener( 'touchmove' , stopScrolling , false );
+}
+
+function nameentry() {
+    document.getElementById("currentUserName").style.display = "none";
+    document.getElementById("currentUserNameInput").style.display = "block";
+    document.getElementById("currentUserNameInput").focus();
+}
+
+function nameentrydone() {
+    var newName = document.getElementById("currentUserNameInput").value;
+    console.log("Name changed: " + newName);
+    nameChanged(newName);
+  socket.emit('rename',{ name : newName});
+}
+
+function nameChanged(newName) {
+    currentName = newName;
+    localStorage.setItem("currentName", currentName);
+    //document.getElementById("currentUserNameInput").value = currentName;
+    //document.getElementById("currentUserName").innerHTML = currentName;
+    //document.getElementById("currentUserName").style.display = "block";
+    //document.getElementById("currentUserNameInput").style.display = "none";
+}
+
 </script>
 <title>Nintendo Controller</title>
 
@@ -229,13 +185,13 @@ $(document).ready(function () {
 			</div>
 
 	</div>
-<div id="console">FOO BAR</div>
-<div id="ud">FOO BAR</div><div id="lr">FOO BAR</div>
+
 </div>
 
-
-<ul id="roomslist">
-</ul>
+<div id="roomslistcontainer">
+  <ul id="roomslist">
+  </ul>
+</div>
 
 </body>
 

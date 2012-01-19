@@ -1,0 +1,22 @@
+<html>
+<head>
+<script>
+
+function loaded() {
+	// is this a tv? or a controller?
+	var isMobile = /mobile/i.test(navigator.userAgent);
+	
+	var forceTv = (window.location.search == "?tv");
+	var forceController = (window.location.search.length > 1 && !forceTv);
+	var isTv = !forceController && (forceTv || !isMobile);
+
+	window.location = (isTv) ? "host/index.html" : "controller/controller.html";
+}
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
+</script>
+</head>
+<body>
+</body>
+</html>
