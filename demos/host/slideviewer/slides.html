@@ -1,0 +1,159 @@
+<html>
+  <head>
+
+    <script src="http://zig.tv/socket.io/socket.io.js"></script>
+    <script src="js/synclist-client.js"></script>
+    <script src="js/zigmote-client.js"></script>
+    <script src="js/zigmote.cursor.js"></script>
+
+
+    <link href='css/style.css' rel='stylesheet' type='text/css' />
+    <link href="slide/common.css" rel="stylesheet" media="screen" />
+    <link href="slide/default.css" rel="stylesheet" class="theme" />
+    
+    <style>
+
+    #wrapper {
+      width : 100%;
+      height : 100%;
+    }
+
+    body {
+    }
+
+    </style>
+
+    <script>
+
+var currentRoomName = localStorage.getItem("currentRoomName");
+if (null == currentRoomName) currentRoomName = "[ZigFu Demo]";  
+
+function nameentry() {
+    document.getElementById("currentRoomName").style.display = "none";
+    document.getElementById("currentRoomNameInput").style.display = "block";
+    document.getElementById("currentRoomNameInput").focus();
+}
+
+function nameentrydone() {
+    var newName = document.getElementById("currentRoomNameInput").value;
+    nameChanged(newName);
+}
+
+function nameChanged(newName) {
+  if (newName == "") newName = "[NonameTV]";
+    currentRoomName = newName;
+    localStorage.setItem("currentRoomName", currentRoomName);
+    document.getElementById("currentRoomNameInput").value = currentRoomName;
+    document.getElementById("currentRoomName").innerHTML = currentRoomName;
+    document.getElementById("currentRoomName").style.display = "block";
+    document.getElementById("currentRoomNameInput").style.display = "none";
+    if (undefined !== host) {
+      host.rename(currentRoomName);
+    }
+}
+
+var socket;
+var host;
+
+function roomStarted(roomData) {
+  host.on('slideNext', function() { slideshow.next(); });
+  host.on('slidePrev', function() { slideshow.prev(); });
+  host.on('slideFirst', function() { slideshow.first(); });
+  host.on('slideLast', function() { slideshow.last(); });
+}
+
+function loaded() {
+  nameChanged(currentRoomName);
+
+  // connect to zigtv
+  socket = io.connect('http://zig.tv');
+  socket.on('connect', function () {
+    host = zigmote.host(socket);
+    host.startRoom("motionosdemos", currentRoomName, roomStarted);
+  });
+
+  socket.on('disconnect', function() {
+    console.log("Disconnected from zig.tv");
+    // disconnected
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
+
+    </script>
+
+  </head>
+
+  <body>
+
+  <div id="wrapper">
+
+<div id='header'>
+    <div class='row'>
+      <div class='left'>
+        <img src='img/logo.png' alt='' />
+      </div>
+      <div class='right'>
+        <div style='float : right'>
+          <h1 id="currentRoomName" onClick="nameentry();" class="nameentry">[Room Name]</h1>
+
+            <input class="nameentry" style="display:none; margin-top: 20px; " type="text" placeholder="[Enter TV Name]" spellcheck="off" 
+            autocomplete="off" id="currentRoomNameInput" name="currentRoomNameInput" onChange="nameentrydone()"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <div class="presentation">
+      <div id="presentation-counter">Loading...</div>
+      <div class="slides">
+
+        <div class="slide" id="landing-slide">
+          <section class="middle">
+            <h1>Landing slide</h1>
+          </section>
+        </div>
+
+        <div class="slide" id="slide1">
+          <section class="middle">
+            <h1>Slide 1</h1>
+          </section>
+        </div>
+
+        <div class="slide" id="slide2">
+          <section class="middle">
+            <h1>Slide 2</h1>
+          </section>
+        </div>
+
+        <div class="slide" id="slide3">
+          <section class="middle">
+            <h1>Slide 3</h1>
+          </section>
+        </div>
+
+        <div class="slide" id="slide4">
+          <section class="middle">
+            <h1>Slide 4</h1>
+          </section>
+        </div>
+
+        <div class="slide" id="slide5">
+          <section class="middle">
+            <h1>Slide 5</h1>
+          </section>
+        </div>
+
+
+      </div> <!-- slides -->
+      <div id="speaker-note" class="invisible" style="display: none;">
+      </div> <!-- speaker note -->
+    </div> <!-- presentation -->
+
+  </div>
+
+    <script src="slide/slide.js"></script>
+
+  </body>
+</html>

@@ -10,7 +10,7 @@ function loaded() {
 	var forceController = (window.location.search.length > 1 && !forceTv);
 	var isTv = !forceController && (forceTv || !isMobile);
 
-	window.location = (isTv) ? "host/index.html" : "controller/controller.html";
+	window.location = (isTv) ? "host/slideviewer/slides.html" : "controller/controller.html";
 }
 
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);

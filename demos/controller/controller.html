@@ -163,7 +163,8 @@ function loaded() {
         gotoScreen(screenTypes.slideScreen);
     }
 
-    socket = io.connect('http://'+document.location.hostname);
+    //socket = io.connect('http://'+document.location.hostname);
+    socket = io.connect('http://zig.tv');
 
     socket.on('connect', function () {
         controller = zigmote.controller(socket);
