@@ -61,8 +61,8 @@
 }
 
 nav#helpers {
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
+  //border-top-left-radius: 5px;
+  //border-top-right-radius: 5px;
   text-align: center;
   position: fixed;
   bottom: 0;

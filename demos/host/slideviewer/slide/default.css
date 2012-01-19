@@ -16,7 +16,7 @@ body {
   top: 0px;
   display: block;
   overflow: hidden;
-  background: #778;
+  background: #000;
 }
 
 .slides {
@@ -50,23 +50,13 @@ body {
   -o-transition: margin-left 0.25s ease-in-out;
   transition: margin 0.25s ease-in-out;
 }
-
 .slide:nth-child(even) {
-  -moz-border-radius: 20px 0;
-  -khtml-border-radius: 20px 0;
-  border-radius: 20px 0; /* includes Opera 10.5+ */
-  -webkit-border-top-left-radius: 20px;
-  -webkit-border-bottom-right-radius: 20px;
+	border-radius: 5px;
 }
 
 .slide:nth-child(odd) {
-  -moz-border-radius: 0 20px;
-  -khtml-border-radius: 0 20px;
-  border-radius: 0 20px;
-  -webkit-border-top-right-radius: 20px;
-  -webkit-border-bottom-left-radius: 20px;
+	border-radius: 5px;
 }
-
 .slide p, .slide textarea {
   font-size: 20px;
 }
@@ -269,11 +259,11 @@ header {
 }
 
 h1 {
-  font-size: 100%;
+  font-size: 40px;
   display: inline;
   font-weight: normal;
-  padding: 0;
-  margin: 0;
+  padding: 0px 0px;
+  margin: 0px 0px;
 }
 
 h2 {
