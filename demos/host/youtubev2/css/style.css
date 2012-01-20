@@ -241,6 +241,7 @@ body {
 #videolistScroller ul {
   margin: 0px 0px;
   padding: 0px 0px;
+  overflow:none;
 }
 
 #videolistScroller li {
@@ -251,6 +252,9 @@ body {
   padding-bottom: 20px;
   list-style-type:none;
   border-bottom : 1px solid black;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #mask {
