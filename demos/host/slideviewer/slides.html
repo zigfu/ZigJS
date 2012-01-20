@@ -145,8 +145,12 @@ function loaded() {
       console.log('Cursor unlocked by userid '+userid); 
       cursor_userid = undefined;
     };
-    host.cursor.oncursorstart = function(userid){};
-    host.cursor.oncursorstop = function(userid){};
+    host.cursor.oncursorstart = function(userid){
+      document.getElementById('realcursor').style.display = 'block';
+    };
+    host.cursor.oncursorstop = function(userid){
+      document.getElementById('realcursor').style.display = 'none';
+    };
     host.cursor.oncursor = (function(cursorElement){
       return function(x,y, rel, userid) {
         if (cursor_userid != userid) return;
