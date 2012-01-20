@@ -702,3 +702,7 @@ video {
 	font-weight: 200;
 	padding-left: 50px;
 }
+#realcursor {
+	position: absolute;
+	display: none;
+}
