@@ -28,6 +28,7 @@ var screenTypes = {
     musicScreen : "musiclist",
     gamepadScreen : "gamepadscreen",
 	slideScreen : "slideshowscreen",
+    youtubeScreen : "youtubescreen",
 }
 
 var lastScreen = screenTypes.homeScreen;
@@ -40,12 +41,16 @@ function gotoScreen(screenType) {
         document.getElementById(screenTypes[screen]).style.display = (screenTypes[screen] == screenType) ? "block" : "none";
     }
 
-    //showNavBar(screenTypes.chooseScreen);
+    showNavBar(screenTypes.chooseScreen);
 }
 
 function showNavBar(screen) {
-    //TODO: don't show on gamepad too
-    var show = (screen != screenTypes.chooseScreen);
+    var showOnTheseScreens = [
+        screenTypes.musicScreen,
+        screenTypes.youtubeScreen,
+    ];
+        
+    var show = (showOnTheseScreens.indexOf(screen) >= 0);
     document.getElementById("navBar").style.display = (show) ? "block" : "none";
 }
 
@@ -165,7 +170,8 @@ function loaded() {
         }
 
         // show the welcome screen
-        gotoScreen(screenTypes.slideScreen);
+        //gotoScreen(screenTypes.homeScreen);
+        gotoScreen(screenTypes.youtubeScreen);
     }
 
     //socket = io.connect('http://'+document.location.hostname);
@@ -298,7 +304,11 @@ function loaded() {
     $('#mask').click(function () {
         $(this).hide();
         $('.window').hide();
-    });         
+    });   
+    
+    $("#youtubesearchbutton").click(function(e) {
+        controller.sendToHost('doSearch', {query : $("#youtubesearch").val()});
+    })      
 
     preventScrolling("touchpad");
     preventScrolling("motion");
@@ -553,6 +563,14 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
         </div>
 
     </div>
+
+    <div id='youtubescreen' class='invisible'>
+        <div>
+            <input type='text' id='youtubesearch'><div id='youtubesearchbutton'></div>
+        </div>            
+    </div>
+
+
     </div>
 
 </div>
