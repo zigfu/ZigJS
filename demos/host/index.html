@@ -11,6 +11,7 @@
 <script src="js/synclist-client.js"></script>
 <script src="js/zigmote-client.js"></script>
 <script src="js/zigmote.cursor.js"></script>
+<script src="goto.js"></script>
 
 <!-- ZigJS -->
 <script type="text/javascript" src="zig.js"></script>
@@ -106,6 +107,8 @@ function roomStarted(roomData) {
 			pushDetector.onClick();			
 		}
 	}
+
+	userslist = synclist.subscribe(socket, roomData.userslistid);
 }
 
 var socket;
@@ -130,6 +133,7 @@ $(document).ready( function () {
 		host.on("slidePrev", function(data) { console.log("Slide prev"); });
 		host.on("slideFirst", function(data) { console.log("Slide first"); });
 		host.on("slideLast", function(data) { console.log("Slide last"); });
+		host.on('goto', function(data) { goto(data); });
 	});
 
 	socket.on('disconnect', function() {
@@ -356,10 +360,10 @@ function nameChanged(newName) {
 	<div id='gallery'>
 		<div class='butholder'>
 			<ul>
-				<li><a href="youtube/index.html"><img name='tube' src='img/youtube_but.png' alt=''/></a></li>
+				<li><a href="youtubev2/index.html"><img name='tube' src='img/youtube_but.png' alt=''/></a></li>
 				<li><a href="..\musicv3\index_host.html"><img name='muse' src='img/muse_but.png' alt='' /></a></li>
 				<li><a href="unitysamples/index.html"><img name='games' src='img/games_but.png' alt=''/></a></li>
-				<li><a href="#"><img name='slid' src='img/slide_but.png' alt='' /></a></li>
+				<li><a href="slideviewer/slides.html"><img name='slid' src='img/slide_but.png' alt='' /></a></li>
 			</ul>
 			<div style="height:15px">
 				<div class="slider showinsession" id="slider">
