@@ -22,6 +22,74 @@
     }
 
     </style>
+<script>
+
+function hysteresis(classname, pixelsize, container) {
+  var cls = classname;
+  var size = pixelsize; //TODO: separate X, Y sizes?
+  var items;
+  var currentItem = null;
+
+  if (undefined === container) {
+    container = document.body;
+  }
+
+  function refreshItems() {
+    items = document.getElementsByClassName(cls);
+  }
+  function start() {
+    currentItem = null;
+  }
+  function stop() {
+    if (currentItem) {
+      currentItem.classList.remove("hovering");
+    }
+  }
+  function inItem(item, x, y) {
+    var rect = item.getBoundingClientRect();
+    return (rect.left <= x) && (x <= rect.right) && (rect.top <= y) && (y <= rect.bottom);
+  }
+  function stillIn(item, x, y) {
+    var rect = item.getBoundingClientRect();
+    return ((rect.left-size) <= x) && (x <= (rect.right+size)) && ((rect.top-size) <= y) && (y <= (rect.bottom+size));
+  }
+  function updateNormalized(x,y) {
+    update(container.offsetWidth * x, container.offsetHeight * y);
+  }
+  function update(x,y) {
+    //TODO: something similar to jQuery .offset() instead - this can probably
+    //      break in some ways I don't know when using borders, padding and margins
+    var rect = container.getBoundingClientRect();
+    x += rect.left;
+    y += rect.top;
+    if (currentItem) {
+      if (stillIn(currentItem, x, y)) return;
+      // we left the current item
+      //TODO: not special case
+      currentItem.classList.remove("hovering");
+      currentItem = null;
+    }
+    for (var i = 0; i < items.length; i++) {
+      if (inItem(items[i], x, y)) {
+        currentItem = items[i];
+        currentItem.classList.add("hovering");
+        break;
+      }
+    }
+  }
+
+  return { refreshItems : refreshItems,
+       start : start,
+       stop : stop,
+       update : update,
+       updateNormalized : updateNormalized,
+    };
+}
+
+
+</script>
+
+
 
     <script>
 
@@ -100,6 +168,7 @@ function doyoutubeSearch(query) {
   document.body.appendChild(s); //ajax it!
   setTitle("Results for: "+query);
   hideModal();
+  videolistscroller.scrollTo(0,0);
   setMainArea(mainAreaTypes.videolist);
 }
 
@@ -113,6 +182,7 @@ var socket;
 var host;
 var videolistscroller;
 var videolist;
+var videolisthysteresis;
 
 function roomStarted(roomData) {
   videolist = synclist.subscribe(socket, roomData.roomid + ":videolist");
@@ -120,6 +190,7 @@ function roomStarted(roomData) {
   videolist.bind(document.getElementById('videolist'), function(id, data) {
     var l = document.createElement('li');
     l.innerHTML = data.title;
+    l.classList.add('hoverable');
     l.addEventListener('click', function() {
       setTitle(data.title);
       setMainArea(mainAreaTypes.videoplayer);
@@ -127,11 +198,21 @@ function roomStarted(roomData) {
     });
     return l;
   });
-  videolist.onadd = function() { videolistscroller.refresh();}
+  videolist.onadd = function() { videolistscroller.refresh(); videolisthysteresis.refreshItems(); }
 
   host.on('doSearch', function(data) {
       doyoutubeSearch(data.query);
     });
+
+  host.cursor.oncursorlock = function(userid) { videolisthysteresis.start(); }
+  host.cursor.oncursorunlock = function() { videolisthysteresis.stop(); }
+  host.cursor.oncursor = function(x,y,rel,userid) {
+    if (rel) {
+      
+    } else {
+      videolisthysteresis.updateNormalized(x,y);
+    }
+  }
 }
 
 function loaded() {
@@ -157,6 +238,8 @@ function loaded() {
     doyoutubeSearch(document.getElementById('search').value);}, false);
    document.getElementById('mask').addEventListener('click', hideModal, false);
   //document.addEventListener('click', function() { showModal('searchbox');}, false);
+
+  videolisthysteresis = hysteresis("hoverable", 20, document.getElementById('videolistScroller'));
 
   loadPlayer("videoDiv", "100%", "100%");
 }

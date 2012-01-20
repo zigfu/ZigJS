@@ -304,3 +304,10 @@ body {
   background: green;
   position:absolute;
 }
+
+.hoverable {
+}
+
+.hoverable .hovering {
+  background : red;
+}
