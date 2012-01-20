@@ -293,3 +293,14 @@ body {
 
 .modaldialogcontents {
 }
+
+#backbutton {
+  display:block;
+  width: 100px;
+  height : 100px;
+  top: 50%;
+  margin-top: -50px;
+  margin-left: -120px;
+  background: green;
+  position:absolute;
+}
