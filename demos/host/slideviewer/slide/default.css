@@ -41,10 +41,7 @@ body {
   left: 50%;
   top: 50%;
   margin-top: -250px;
-  background-color: #eee;
-  background: -webkit-gradient(linear, left bottom, left top, from(#bbd), to(#fff));
-  background: -moz-linear-gradient(bottom, #bbd, #fff);
-  background: linear-gradient(bottom, #bbd, #fff);
+  background-color: #FFF;
   -webkit-transition: margin 0.25s ease-in-out;
   -moz-transition: margin 0.25s ease-in-out;
   -o-transition: margin-left 0.25s ease-in-out;
@@ -525,4 +522,140 @@ video {
 .sidebar {
   background-color: #EEE;
   border-right: 5px solid #CCD;
+}
+#landing-slide img {
+	padding-top: 60px;
+}
+#landing-slide h2 {
+	font-family: 'Rokkitt';
+	font-size: 40px;
+	font-weight: 600;
+}
+#landing-slide h3 {
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: 25px;
+	color: #555;
+	font-style: italic; 
+}
+#founders {
+	margin-top: -50px;
+}
+#slide1 img {
+	overflow: auto;
+}
+#slide1 ul {
+	list-style-type: none;
+}
+#slide1 li {
+}
+#slide1 h2 {
+	font-family: 'Rokkitt';
+	font-size: 40px;
+	font-weight: 600;
+	text-align: center;
+}
+#slide1 .imgLeft {
+	float: left;
+	padding-left: 20px;
+}
+#slide1 .descRight {
+	float: right;
+	padding-right: 50px;
+	padding-left: 10px;
+	padding-top: 5px;
+	//padding-bottom: 80px;
+	background-color: #000;
+	color: #FFF;
+}
+#slide2 {
+}
+#slide2 h2 {
+	font-family: 'Rokkitt';
+	font-size: 40px;
+	font-weight: 600;
+	padding-left: 25px;
+}
+#slide2 p {
+	font-size: 30px;
+	padding-left: 50px;
+}
+#slide2 span {
+	background-color: #000;
+	color: #fff;
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-style: italic;
+	float: right;
+	font-size: 26px;
+}
+#3wrap {
+	margin-top: -80px;
+}
+#slide3 {
+}
+#slide3 ul {
+	list-style-type: none;
+	padding-left: 175px;
+}
+#slide3 li {
+	display: inline;
+	padding-right: 25px;
+	padding-left: 15px;
+}
+#slide3 h2 {
+	font-family: 'Rokkitt';
+	font-size: 40px;
+	font-weight: 600;
+	text-align: center;
+}
+#slide3 p {
+	margin-bottom: 10px;
+	margin-left: 80px;
+	margin-right: 50px;
+}
+.wesupport {
+	position: relative;
+	margin-top: 0px;
+}
+#slide4 {
+	background-image:url(../img/graph.jpg);
+	background-repeat: no-repeat;
+}
+#slide4 img {
+	float: left;
+}
+#slide4 span {
+	float: left;
+	font-size: 30px;
+	background-color: #000;
+	margin-top: 200px;
+	left: 0;
+	color: #FFF;
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-style: italic;
+}
+#slide5 {
+	font-size: 25px;
+}
+#slide5 h2 {
+	font-family: 'Rokkitt';
+	font-size: 40px;
+	font-weight: 600;
+	text-align: center;
+	margin-top: -25px;
+	position: relative;
+}
+#slide5 ul {
+	padding-left: 75px;
+	list-style-type: circle;
+}
+#slide6 h2 {
+	font-family: 'Rokkitt';
+	font-size: 40px;
+	font-weight: 600;
+	text-align: center;
+}
+#slide6 ul {
+	padding-left: 170px;
+}
+#slide6 li {
 }
