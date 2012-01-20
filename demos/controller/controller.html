@@ -41,7 +41,7 @@ function gotoScreen(screenType) {
         document.getElementById(screenTypes[screen]).style.display = (screenTypes[screen] == screenType) ? "block" : "none";
     }
 
-    showNavBar(screenTypes.chooseScreen);
+    showNavBar(screenType);
 }
 
 function showNavBar(screen) {
@@ -49,8 +49,7 @@ function showNavBar(screen) {
         screenTypes.musicScreen,
         screenTypes.youtubeScreen,
     ];
-    console.log("shownavbar " + screen);    
-    var show = true;//(showOnTheseScreens.indexOf(screen) >= 0);
+    var show = (showOnTheseScreens.indexOf(screen) >= 0);
     document.getElementById("navBar").style.display = (show) ? "block" : "none";
 }
 
