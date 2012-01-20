@@ -30,7 +30,12 @@ var screenTypes = {
 	slideScreen : "slideshowscreen",
 }
 
+var lastScreen = screenTypes.homeScreen;
+var currentScreen = screenTypes.homeScreen;
+
 function gotoScreen(screenType) {
+    lastScreen = currentScreen;
+    currentScreen = screenType;
     for (var screen in screenTypes) {
         document.getElementById(screenTypes[screen]).style.display = (screenTypes[screen] == screenType) ? "block" : "none";
     }
@@ -164,7 +169,7 @@ function loaded() {
     }
 
     //socket = io.connect('http://'+document.location.hostname);
-    socket = io.connect('http://zig.tv');
+    socket = io.connect();
 
     socket.on('connect', function () {
         controller = zigmote.controller(socket);
@@ -321,14 +326,22 @@ function removeClass(ele,cls) {
 }
 
 function doPointer() {
+    console.log('Doing pointer...');
     controller.cursor.start(true, function() {
         gotoScreen(screenTypes.pointerScreen);
     });   
 }
 
+function lazer() {
+    console.log('LAZER!');
+    $('#mask').hide();
+    $('.window').hide();
+    doPointer();
+}
+
 function stopCursor() {
     controller.cursor.stop();
-    gotoScreen(screenTypes.homeScreen);
+    gotoScreen(lastScreen);
 }
 
 
@@ -428,7 +441,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
         </div>
 	</div>
 
-<div id="homescreen" class="invisible">       
+    <div id="homescreen" class="invisible">       
         
 		<div class="homeScreenIcon">
         
@@ -534,7 +547,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
             
             </ul>
             
-            <center><a href="#dialog" name="modal"><img src="i/slide/pointer.png" /></a></center>
+            <center><a href="javascript:doPointer()"><img src="i/slide/pointer.png" /></a></center>
             
     
         </div>
@@ -547,7 +560,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
             
             	<div id="dialog" class="window">
             
-                <center><img src="i/slide/draw.png" /></center>
+                <center><a href='javascript:lazer()'><img src="i/slide/draw.png" /></a></center>
             
                 <a href="#" class="close">Close it</a> 
                 

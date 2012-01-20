@@ -1,7 +1,7 @@
 <html>
   <head>
 
-    <script src="http://zig.tv/socket.io/socket.io.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="js/synclist-client.js"></script>
     <script src="js/zigmote-client.js"></script>
     <script src="js/zigmote.cursor.js"></script>
@@ -20,10 +20,76 @@
 
     body {
     }
+    
+    #realcursor {
+      width : 28;
+      height : 35;
+      position:absolute;
+      background-image : url("slide/laser_pointer.png");
+    }
 
     </style>
 
     <script>
+
+var cursor_userid;
+
+function setStatus(status) {
+  //document.getElementById('status').innerHTML = status;
+  console.log("status set to: " + status);
+}
+
+function hasClass(ele,cls) {
+    return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
+}
+
+function addClass(ele,cls) {
+    if (!hasClass(ele,cls)) ele.className += " "+cls;
+}
+
+function removeClass(ele,cls) {
+  if (hasClass(ele,cls)) {
+      var reg = new RegExp('(\\s|^)'+cls+'(\\s|$)');
+    ele.className=ele.className.replace(reg,' ');
+  }
+}
+
+var lastCursor = {x : 0, y : 0};
+
+function setCursor(element, xpx, ypx) {
+  element.style.left = lastCursor.x + "px";
+  element.style.top = lastCursor.y + "px";
+}
+
+function positionCursor(element, posX, posY) {
+  lastCursor.x = (posX * element.parentNode.offsetWidth - (element.offsetWidth / 2));
+  lastCursor.y = (posY * element.parentNode.offsetHeight - (element.offsetHeight / 2));
+  setCursor(element, lastCursor.x, lastCursor.y);
+}
+
+function doClick()
+{
+  console.log("Doing the click");
+  x = parseInt(document.getElementById("realcursor").style.left);
+  y = parseInt(document.getElementById("realcursor").style.top);
+  elt = document.elementFromPoint(x,y-1); //subtract one to get the thing cursor points to
+  var evt = document.createEvent("MouseEvents");
+    evt.initMouseEvent("click", true, true, window, 1, x, y, x, y,
+        false, false, false, false, 0, null);
+  elt.dispatchEvent(evt);
+}
+function clamp(val, min, max) {
+  if (val < min) return min;
+  if (val > max) return max;
+  return val;
+}
+
+function moveCursorBy(element, deltaX, deltaY) {
+  lastCursor.x = clamp(lastCursor.x + deltaX, 0, element.parentNode.offsetWidth);
+  lastCursor.y = clamp(lastCursor.y + deltaY, 0, element.parentNode.offsetHeight);
+
+  setCursor(element, lastCursor.x, lastCursor.y);
+}
 
 var currentRoomName = localStorage.getItem("currentRoomName");
 if (null == currentRoomName) currentRoomName = "[ZigFu Demo]";  
@@ -66,10 +132,30 @@ function loaded() {
   nameChanged(currentRoomName);
 
   // connect to zigtv
-  socket = io.connect('http://zig.tv');
+  socket = io.connect();
   socket.on('connect', function () {
     host = zigmote.host(socket);
     host.startRoom("motionosdemos", currentRoomName, roomStarted);
+    var thecursor = document.getElementById('realcursor');
+    host.cursor.oncursorlock = function (userid){
+      console.log('Cursor locked by userid '+userid); 
+      cursor_userid = userid;
+    };
+    host.cursor.oncursorunlock = function (userid){
+      console.log('Cursor unlocked by userid '+userid); 
+      cursor_userid = undefined;
+    };
+    host.cursor.oncursorstart = function(userid){};
+    host.cursor.oncursorstop = function(userid){};
+    host.cursor.oncursor = (function(cursorElement){
+      return function(x,y, rel, userid) {
+        if (cursor_userid != userid) return;
+        if (rel) moveCursorBy(cursorElement,x,y);
+        else positionCursor(cursorElement,x,y);
+      };
+    })(thecursor);
+    host.cursor.onclick = doClick;
+    setStatus("Connected");
   });
 
   socket.on('disconnect', function() {
@@ -154,6 +240,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
   </div>
 
     <script src="slide/slide.js"></script>
-
+    <div id="realcursor" class="showinsession"> 
+    </div>
   </body>
 </html>
