@@ -185,7 +185,7 @@ var synclist = (function() {
 
 	function add(listid, itemid, itemdata) {
 		lists[listid].items.setItem(itemid, itemdata);
-		lists[listid].obj.onadd(itemid, itemdata);
+		
 		if (lists[listid].bound) {
 			var newElement = lists[listid].makeelement(itemid, itemdata);
 			newElement.setAttribute("data-synclistid", listid);
@@ -201,6 +201,7 @@ var synclist = (function() {
 		if (lists[listid].keycallbacks.hasOwnProperty(itemid)) {
 			lists[listid].keycallbacks[itemid](itemdata);
 		}
+                lists[listid].obj.onadd(itemid, itemdata);
 	}
 
 	function remove(listid, itemid) {
@@ -269,7 +270,7 @@ var synclist = (function() {
 		});
 		
 		socket.on("list-clear" , function(data) {
-			clear();
+			clear(data.listid);
 		});
 
 		socket.on("list-set", function(data) {
