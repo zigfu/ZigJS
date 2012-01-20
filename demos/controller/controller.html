@@ -49,8 +49,8 @@ function showNavBar(screen) {
         screenTypes.musicScreen,
         screenTypes.youtubeScreen,
     ];
-        
-    var show = (showOnTheseScreens.indexOf(screen) >= 0);
+    console.log("shownavbar " + screen);    
+    var show = true;//(showOnTheseScreens.indexOf(screen) >= 0);
     document.getElementById("navBar").style.display = (show) ? "block" : "none";
 }
 
@@ -61,12 +61,11 @@ var pointerTypes = {
 
 var currentHostPage;
 var controllersForHostPages = {
-    "generic" : screenTypes.slideScreen,
-    "demos" : screenTypes.slideScreen,
-    "slides" : screenTypes.homeScreen,
+    "demos" : screenTypes.homeScreen,
+    "slides" : screenTypes.slideScreen,
     "jsnes" : screenTypes.gamepadScreen,
     "music" : screenTypes.musicScreen,
-    "video" : screenTypes.homeScreen,
+    "video" : screenTypes.youtubeScreen,
 }
 
 var roomlistScroller;
@@ -142,6 +141,7 @@ function loaded() {
         roomshareddata.subscribekey('itemstoshow', function(newValue) {
             updateVisibleItems('itemstoshow', newValue);
         });
+        
         roomshareddata.subscribekey('hostpage', function(newPage) {
             console.log("Host navigated to " + newPage);
             if (controllersForHostPages.hasOwnProperty(newPage)) {
@@ -170,12 +170,12 @@ function loaded() {
         }
 
         // show the welcome screen
-        //gotoScreen(screenTypes.homeScreen);
-        gotoScreen(screenTypes.youtubeScreen);
+        gotoScreen(screenTypes.homeScreen);
+        //gotoScreen(screenTypes.youtubeScreen);
     }
 
-    //socket = io.connect('http://'+document.location.hostname);
-    socket = io.connect();
+    socket = io.connect('http://'+document.location.hostname);
+    //socket = io.connect('http://zig.tv');
 
     socket.on('connect', function () {
         controller = zigmote.controller(socket);
@@ -457,11 +457,15 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
         
             <a href="javascript:doPointer()"><img width="200px" height="200px" src="mi/cursors.png" /></a>
 
-            <a href="javascript:sendToTV('toggleQR');"><img width="200px" height="200px" src="mi/qrcode.png" /></a>
+            <a href="javascript:sendToTV('goto', 'home')"><img width="200px" height="200px" src="mi/cursors.png" /></a>
 
-            <a id="musicbutton" href="javascript:(function(){gotoScreen(screenTypes.musicScreen); musiclistScroller.refresh();})()" class="toggleable"><img width="200px" height="200px" src="mi/music.png" /></a>
+            <a href="javascript:sendToTV('goto', 'slides');"><img width="200px" height="200px" src="mi/qrcode.png" /></a>
+
+            <a id="musicbutton" href="javascript:(function(){gotoScreen(screenTypes.musicScreen); sendToTV('goto','music'); musiclistScroller.refresh();})()" class="toggleable"><img width="200px" height="200px" src="mi/music.png" /></a>
  
-            <a id="gamepadbutton" href="javascript:gotoScreen(screenTypes.gamepadScreen);" class="toggleable"><img width="200px" height="200px" src="mi/music.png" /></a>
+            <a id="gamepadbutton" href="javascript:gotoScreen(screenTypes.gamepadScreen);sendToTV('goto','jsnes')" class="toggleable"><img width="200px" height="200px" src="mi/music.png" /></a>
+
+            <a id="youtubebutton" href="javascript:gotoScreen(screenTypes.youtubeScreen);sendToTV('goto','youtube');"><img width="200px" height="200px" src="mi/music.png" /></a>
           
         </div>
 		
@@ -566,8 +570,9 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
     <div id='youtubescreen' class='invisible'>
         <div>
-            <input type='text' id='youtubesearch'><div id='youtubesearchbutton'></div>
-        </div>            
+            <input type='text' id='youtubesearch'><div id='youtubesearchbutton'>SEWARCH!!!</div>
+        </div> 
+        <center><a href="javascript:doPointer()" name="modal"><img src="i/slide/pointer.png" /></a></center>           
     </div>
 
 
