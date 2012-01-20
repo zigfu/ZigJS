@@ -8,6 +8,7 @@
     <script src="js/synclist-client.js"></script>
     <script src="js/zigmote-client.js"></script>
     <script src="js/zigmote.cursor.js"></script>
+    <script src="../goto.js"></script>
     <script type="text/javascript" src="js/iscroll.js"></script>
     <script src="js/swfobject.js" type="text/javascript"></script> 
 
@@ -96,7 +97,7 @@ function hysteresis(classname, pixelsize, container) {
 var mainAreaTypes = {
   videolist : "videolistScroller",
   videoplayer : "playerContainer",
-  novideos : "novideos",
+  novideos : "novideosparent",
 }
 
 function setMainArea(type) {
@@ -203,6 +204,7 @@ function roomStarted(roomData) {
   host.on('doSearch', function(data) {
       doyoutubeSearch(data.query);
     });
+  host.on('goto', function(data) { goto(data); });
 
   host.cursor.oncursorlock = function(userid) { videolisthysteresis.start(); }
   host.cursor.oncursorunlock = function() { videolisthysteresis.stop(); }
@@ -213,13 +215,17 @@ function roomStarted(roomData) {
       videolisthysteresis.updateNormalized(x,y);
     }
   }
+
+  var roomshared = synclist.subscribe(socket, roomData.roomsharedid);
+  roomshared.set('hostpage', 'video');
 }
 
 function loaded() {
   nameChanged(currentRoomName);
 
   // connect to zigtv
-  socket = io.connect('http://zig.tv');
+  //socket = io.connect('http://zig.tv');
+  socket = io.connect('http://'+document.location.hostname);
   socket.on('connect', function () {
     host = zigmote.host(socket);
     host.startRoom("motionosdemos", currentRoomName, roomStarted);
@@ -373,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
     <div id='title'>Youtube Player</div>
     <div id='mainarea'>
 
-      <div id='novideos'>Click here to search</div>
+      <div id='novideosparent'><div id='novideos'>Click here to search</div></div>
 
       <div id='videolistScroller' style="display:none">
         <ul id='videolist'></ul>
