@@ -48,6 +48,8 @@ function showNavBar(screen) {
     var showOnTheseScreens = [
         screenTypes.musicScreen,
         screenTypes.youtubeScreen,
+        screenTypes.slideScreen,
+        screenTypes.gamepadScreen,
     ];
     var show = (showOnTheseScreens.indexOf(screen) >= 0);
     document.getElementById("navBar").style.display = (show) ? "block" : "none";
@@ -60,6 +62,7 @@ var pointerTypes = {
 
 var currentHostPage;
 var controllersForHostPages = {
+    "generic" : screenTypes.homeScreen,
     "demos" : screenTypes.homeScreen,
     "slides" : screenTypes.slideScreen,
     "jsnes" : screenTypes.gamepadScreen,
@@ -137,12 +140,11 @@ function loaded() {
 
     function roomJoinedOK(data) {
         var roomshareddata = synclist.subscribe(socket, data.roomsharedid);
-        roomshareddata.subscribekey('itemstoshow', function(newValue) {
+        /*roomshareddata.subscribekey('itemstoshow', function(newValue) {
             updateVisibleItems('itemstoshow', newValue);
-        });
+        });*/
         
         roomshareddata.subscribekey('hostpage', function(newPage) {
-            console.log("Host navigated to " + newPage);
             if (controllersForHostPages.hasOwnProperty(newPage)) {
                 gotoScreen(controllersForHostPages[newPage]);
             }
@@ -411,6 +413,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 </head>
 
 <body>
+
 <div id="wrapper">
 
 	<div class="header">
@@ -423,20 +426,20 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 	<div id="navBar" class="navBar">
     
-    <a href="javascript:gotoScreen(screenTypes.homeScreen)"><img src="mi/images/mu_01.png" /></a>
-    <a href=""><img src="mi/images/mu_02.png" /></a>
+        <a href="javascript:gotoScreen(screenTypes.homeScreen)"><img src="mi/images/mu_01.png" /></a>
+        <a href=""><img src="mi/images/mu_02.png" /></a>
     
-    <ul id='playercontrolstemp' class='toggleable'>
-    
-    	<li><img src="mi/images/mu_03.png" onClick="javascript:sendToTV('playPrev');" /></li>
+        <ul id='playercontrolstemp' class='toggleable'>
         
-        <li><img src="mi/images/mu_04.png" onClick="javascript:sendToTV('togglePlayPause');" /></li>
-        
-        <li><img src="mi/images/mu_05.png" onClick="javascript:sendToTV('playNext');" /></li>
-        
-        <li><img id="thebutton" src="mi/images/mu_06.png" /><div id="volumeSlider"></div><div id="volumeLabel"></div></li>
-        
-    </ul>
+        	<li><img src="mi/images/mu_03.png" onClick="javascript:sendToTV('playPrev');" /></li>
+            
+            <li><img src="mi/images/mu_04.png" onClick="javascript:sendToTV('togglePlayPause');" /></li>
+            
+            <li><img src="mi/images/mu_05.png" onClick="javascript:sendToTV('playNext');" /></li>
+            
+            <li><img id="thebutton" src="mi/images/mu_06.png" /><div id="volumeSlider"></div><div id="volumeLabel"></div></li>
+            
+        </ul>
             
     </div>
 
@@ -454,17 +457,15 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
         
 		<div class="homeScreenIcon">
         
-            <a href="javascript:doPointer()"><img width="200px" height="200px" src="mi/cursors.png" /></a>
+            <a href="javascript:sendToTV('goto', 'home')"><img width="200px" height="200px" src="mi/qrcode.png" /></a>
 
-            <a href="javascript:sendToTV('goto', 'home')"><img width="200px" height="200px" src="mi/cursors.png" /></a>
+            <a href="javascript:sendToTV('goto', 'music')"><img width="200px" height="200px" src="mi/music.png" /></a>
+
+            <a href="javascript:sendToTV('goto', 'jsnes')"><img width="200px" height="200px" src="mi/cursors.png" /></a>
+
+            <a href="javascript:sendToTV('goto', 'youtube')"><img width="200px" height="200px" src="mi/cursors.png" /></a>
 
             <a href="javascript:sendToTV('goto', 'slides');"><img width="200px" height="200px" src="mi/qrcode.png" /></a>
-
-            <a id="musicbutton" href="javascript:(function(){gotoScreen(screenTypes.musicScreen); sendToTV('goto','music'); musiclistScroller.refresh();})()" class="toggleable"><img width="200px" height="200px" src="mi/music.png" /></a>
- 
-            <a id="gamepadbutton" href="javascript:gotoScreen(screenTypes.gamepadScreen);sendToTV('goto','jsnes')" class="toggleable"><img width="200px" height="200px" src="mi/music.png" /></a>
-
-            <a id="youtubebutton" href="javascript:gotoScreen(screenTypes.youtubeScreen);sendToTV('goto','youtube');"><img width="200px" height="200px" src="mi/music.png" /></a>
           
         </div>
 		
