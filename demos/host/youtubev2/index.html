@@ -5,9 +5,9 @@
   <link href='css/style.css' rel='stylesheet' type='text/css' />
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="js/synclist-client.js"></script>
-    <script src="js/zigmote-client.js"></script>
-    <script src="js/zigmote.cursor.js"></script>
+    <script src="../js/synclist-client.js"></script>
+    <script src="../js/zigmote-client.js"></script>
+    <script src="../js/zigmote.cursor.js"></script>
     <script src="../goto.js"></script>
     <script type="text/javascript" src="js/iscroll.js"></script>
     <script src="js/swfobject.js" type="text/javascript"></script> 
@@ -17,6 +17,13 @@
     #wrapper {
       width : 100%;
       height : 100%;
+    }
+
+    #cursor {
+      width : 28px;
+      height : 35px;
+      position:absolute;
+      background-image : url("img/hand-pointer.png");
     }
 
     body {
@@ -90,6 +97,81 @@ function hysteresis(classname, pixelsize, container) {
 
 </script>
 
+<script>
+
+var lastCursor = {x : 0, y : 0};
+
+var cursorElement;
+
+var pushed = false;
+
+function setCursor(element, xpx, ypx) {
+  element.style.left = xpx + "px";
+  element.style.top = ypx + "px";
+  videolisthysteresis.update(xpx, ypx);
+  if (pushed) {
+    iscrollMouseMove(videolistscroller, xpx, ypx);
+  }
+}
+
+
+function positionCursor(element, posX, posY) {
+  lastCursor.x = (posX * element.parentNode.offsetWidth - (element.offsetWidth / 2));
+  lastCursor.y = (posY * element.parentNode.offsetHeight - (element.offsetHeight / 2));
+  setCursor(element, lastCursor.x, lastCursor.y);
+}
+
+function doClick()
+{
+  console.log("Doing the click");
+  x = parseInt(document.getElementById("realcursor").style.left);
+  y = parseInt(document.getElementById("realcursor").style.top);
+  elt = document.elementFromPoint(x,y-1); //subtract one to get the thing cursor points to
+  var evt = document.createEvent("MouseEvents");
+    evt.initMouseEvent("click", true, true, window, 1, x, y, x, y,
+        false, false, false, false, 0, null);
+  elt.dispatchEvent(evt);
+}
+function clamp(val, min, max) {
+  if (val < min) return min;
+  if (val > max) return max;
+  return val;
+}
+
+function moveCursorBy(element, deltaX, deltaY) {
+  lastCursor.x = clamp(lastCursor.x + deltaX, 0, element.parentNode.offsetWidth);
+  lastCursor.y = clamp(lastCursor.y + deltaY, 0, element.parentNode.offsetHeight);
+
+  setCursor(element, lastCursor.x, lastCursor.y);
+}
+
+function iscrollMouseMove(iscroll, x,y) {
+  iscroll.handleEvent({
+      type:"mousemove", 
+      pageX : x, 
+      pageY : y,
+      });
+}
+
+function iscrollMouseDown(iscroll, x,y) {
+  iscroll.handleEvent({
+      type:"mousedown", 
+      pageX : x, 
+      pageY : y,
+      button : 0,
+      preventDefault : function() {} });
+}
+
+function iscrollMouseUp(iscroll, x,y) {
+  iscroll.handleEvent({
+      type:"mouseup", 
+      pageX : x, 
+      pageY : y,
+      button : 0});
+}
+
+
+</script>
 
 
     <script>
@@ -206,13 +288,28 @@ function roomStarted(roomData) {
     });
   host.on('goto', function(data) { goto(data); });
 
-  host.cursor.oncursorlock = function(userid) { videolisthysteresis.start(); }
-  host.cursor.oncursorunlock = function() { videolisthysteresis.stop(); }
+  host.cursor.oncursorlock = function(userid) { 
+    videolisthysteresis.start();
+    cursorElement.style.display = 'block';
+  }
+  host.cursor.oncursorunlock = function() { 
+    videolisthysteresis.stop(); 
+    cursorElement.style.display = 'none';
+  }
+  host.cursor.onpushstart = function(userid) {
+    pushed = true;
+    iscrollMouseDown(videolistscroller, lastCursor.x, lastCursor.y);
+  }
+  host.cursor.onpushstop = function(userid) {
+    pushed = false;
+    iscrollMouseUp(videolistscroller, lastCursor.x, lastCursor.y);
+  }
   host.cursor.oncursor = function(x,y,rel,userid) {
+    //if (cursor_userid != userid) return;
     if (rel) {
-      
+      moveCursorBy(cursorElement,x,y);
     } else {
-      videolisthysteresis.updateNormalized(x,y);
+      positionCursor(cursorElement,x,y);
     }
   }
 
@@ -245,9 +342,11 @@ function loaded() {
    document.getElementById('mask').addEventListener('click', hideModal, false);
   //document.addEventListener('click', function() { showModal('searchbox');}, false);
 
+  cursorElement = document.getElementById('cursor');
   videolisthysteresis = hysteresis("hoverable", 20, document.getElementById('videolistScroller'));
 
   loadPlayer("videoDiv", "100%", "100%");
+  
 }
 
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
@@ -384,6 +483,8 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
       <div id='videolistScroller' style="display:none">
         <ul id='videolist'></ul>
       </div>
+
+      <div id='cursor' style='display:none'></div>
       
       <div id="playerContainer" style="display:none">
         <div id="videoDiv">Loading...</div>
