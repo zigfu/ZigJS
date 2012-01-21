@@ -77,7 +77,6 @@ function roomStarted(roomData) {
 	// TODO: bind user list
 
 	var roomshared = synclist.subscribe(socket, roomData.roomsharedid);
-	console.log("Setting hostpage");
 	roomshared.set('hostpage', 'demos');
 
 	// cursor stuff - TODO: Move boilerplate code to zigmote.cursor
@@ -361,8 +360,8 @@ function nameChanged(newName) {
 		<div class='butholder'>
 			<ul>
 				<li><a href="youtubev2/index.html"><img name='tube' src='img/youtube_but.png' alt=''/></a></li>
-				<li><a href="..\musicv3\index_host.html"><img name='muse' src='img/muse_but.png' alt='' /></a></li>
-				<li><a href="unitysamples/index.html"><img name='games' src='img/games_but.png' alt=''/></a></li>
+				<li><a href="musicv3/host.html"><img name='muse' src='img/muse_but.png' alt='' /></a></li>
+				<li><a href="jsnes/index.html"><img name='games' src='img/games_but.png' alt=''/></a></li>
 				<li><a href="slideviewer/slides.html"><img name='slid' src='img/slide_but.png' alt='' /></a></li>
 			</ul>
 			<div style="height:15px">
