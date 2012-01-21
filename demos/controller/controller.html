@@ -45,13 +45,14 @@ function gotoScreen(screenType) {
 }
 
 function showNavBar(screen) {
-    var showOnTheseScreens = [
+    /*var showOnTheseScreens = [
         screenTypes.musicScreen,
         screenTypes.youtubeScreen,
         screenTypes.slideScreen,
         screenTypes.gamepadScreen,
     ];
-    var show = (showOnTheseScreens.indexOf(screen) >= 0);
+    var show = (showOnTheseScreens.indexOf(screen) >= 0);*/
+    var show = (screen != screenTypes.chooseScreen);
     document.getElementById("navBar").style.display = (show) ? "block" : "none";
 }
 
@@ -337,7 +338,6 @@ function removeClass(ele,cls) {
 }
 
 function doPointer() {
-    console.log('Doing pointer...');
     controller.cursor.start(true, function() {
         gotoScreen(screenTypes.pointerScreen);
     });   
@@ -426,9 +426,11 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 	<div id="navBar" class="navBar">
     
-        <a href="javascript:gotoScreen(screenTypes.homeScreen)"><img src="mi/images/mu_01.png" /></a>
-        <a href=""><img src="mi/images/mu_02.png" /></a>
+        <a style='float:left' href="javascript:gotoScreen(screenTypes.homeScreen)"><img src="mi/images/mu_01.png" /></a>
+
+        <a style='float:right' href="javascript:doPointer()"><img src="mi/images/mu_02.png" /></a>
     
+        <!--
         <ul id='playercontrolstemp' class='toggleable'>
         
         	<li><img src="mi/images/mu_03.png" onClick="javascript:sendToTV('playPrev');" /></li>
@@ -439,7 +441,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
             
             <li><img id="thebutton" src="mi/images/mu_06.png" /><div id="volumeSlider"></div><div id="volumeLabel"></div></li>
             
-        </ul>
+        </ul>-->
             
     </div>
 
