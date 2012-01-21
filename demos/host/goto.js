@@ -3,7 +3,7 @@ var goto = (function() {
 
 	paths = {
 		home : "index.html",
-		music : "musicv3/index.html",
+		music : "musicv3/host.html",
 		jsnes : "jsnes/index.html",
 		youtube : "youtubev2/index.html",
 		slides : "slideviewer/slides.html"
