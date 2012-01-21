@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
+<link href='css/style.css' rel='stylesheet' type='text/css' />
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="../js/synclist-client.js"></script>
+<script src="../js/zigmote-client.js"></script>
+<script src="../js/zigmote.cursor.js"></script>
+<script src="../js/zigmote.gamepad.js"></script>
+<script src="../goto.js"></script>
+
+
+<script type='text/javascript'>
+
+var currentRoomName = localStorage.getItem("currentRoomName");
+if (null == currentRoomName) currentRoomName = "[JSNES]";	
+
+
+var lastCursor = {x : 0, y : 0};
+
+function clamp(val, min, max) {
+	if (val < min) return min;
+	if (val > max) return max;
+	return val;
+}
+
+function moveCursorBy(element, deltaX, deltaY) {
+	lastCursor.x = clamp(lastCursor.x + deltaX, 0, element.parentNode.offsetWidth);
+	lastCursor.y = clamp(lastCursor.y + deltaY, 0, element.parentNode.offsetHeight);
+
+	setCursor(element, lastCursor.x, lastCursor.y);
+}
+
+function setCursor(element, xpx, ypx) {
+	element.style.left = xpx + "px";
+	element.style.top = ypx + "px";
+}
+
+var cursorrel;
+var userslist;
+
+var gamepad1;
+var gamepad2;
+var label1;
+var label2;
+
+var buttons = {
+	player1 : {
+		"a" : 88,
+		"b" : 90,
+		"select" : 17,
+		"start" : 13,
+		"dpadup" : 38,
+		"dpaddown" : 40,
+		"dpadleft" : 37,
+		"dpadright" : 39,
+	},
+
+	player2 : {
+		"a" : 103,
+		"b" : 105,
+		"select" : 99,
+		"start" : 97,
+		"dpadup" : 104,
+		"dpaddown" : 98,
+		"dpadleft" : 100,
+		"dpadright" : 102,
+	}
+}
+
+var roomshareddata;
+
+function roomStarted(roomData) {
+	userslist = synclist.subscribe(socket, roomData.userslistid);
+	roomshareddata = synclist.subscribe(socket, roomData.roomsharedid);
+	roomshareddata.set('hostpage', 'jsnes');
+
+
+	// cursor stuff
+	host.cursor.oncursorlock = function(userid) { onSessionStart();}
+	host.cursor.oncursorunlock = function(userid) { onSessionEnd();}
+	host.cursor.oncursor = (function(cursorElement) { return function(x,y,rel,userid) {
+		cursorrel = rel;
+		if (rel) {
+			moveCursorBy(cursorElement, x, y);
+		} else {
+			horizontalFader.setValue(x);
+		}
+	}}) (document.getElementById("realcursor"));
+	host.cursor.onclick = function(userid) {
+		console.log('click');
+		if (rel) {
+			var x = parseInt(document.getElementById("realcursor").style.left);
+			var y =	parseInt(document.getElementById("realcursor").style.top);
+			var elt = document.elementFromPoint(x,y-1); //subtract one to get the thing cursor points to
+			var evt = document.createEvent("MouseEvents");
+    		evt.initMouseEvent("click", true, true, window, 1, x, y, x, y,
+        			false, false, false, false, 0, null);
+			elt.dispatchEvent(evt);
+		} else {
+			pushDetector.onClick();			
+		}
+	}
+
+	host.on('goto', function(data) { goto(data); });
+
+	// gamepad stuff
+	label1 = document.getElementById("player1");
+	gamepad1 = host.gamepad.register("player1");
+	gamepad1.onengage = function(userid) { label1.innerHTML = userslist.get(userid); userslist.bindkey(userid, label1); console.log("asd");roomshareddata.set("player1", userid); }
+	gamepad1.ondisengage = function(userid) { userslist.unbindkey(userid); label1.innerHTML = "[Waiting for Player 1]"; roomshareddata.set("player1", undefined);}
+	gamepad1.onbuttondown = function(button) { console.log("[1] Button down " + button); nes.keyboard.setKey(buttons.player1[button], 65); }
+	gamepad1.onbuttonup = function(button) { console.log("[1] Button up " + button);nes.keyboard.setKey(buttons.player1[button], 64); }
+
+	label2 = document.getElementById("player2");
+	gamepad2 = host.gamepad.register("player2");
+	gamepad2.onengage = function(userid) { label2.innerHTML = userslist.get(userid); userslist.bindkey(userid, label1); console.log("asd2");roomshareddata.set("player2", userid); }
+	gamepad2.ondisengage = function(userid) { userslist.unbindkey(userid); label2.innerHTML = "[Waiting for Player 2]"; roomshareddata.set("player2", undefined);}
+	gamepad2.onbuttondown = function(button) { console.log("[2] Button down " + button); nes.keyboard.setKey(buttons.player2[button], 65); }
+	gamepad2.onbuttonup = function(button) { console.log("[2] Button up " + button); nes.keyboard.setKey(buttons.player2[button], 64); }
+}
+
+var socket;
+var host;
+var nes;
+
+function loaded() {
+	// connect to zigtv
+	socket = io.connect('http://'+ window.location.host);
+	socket.on('connect', function () {
+		// connected
+		host = zigmote.host(socket);
+		host.startRoom("jsnes", currentRoomName, roomStarted);
+	});
+
+	socket.on('disconnect', function() {
+		// disconnected
+	});
+
+	nameChanged(currentRoomName);
+}
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
+
+isInSession = false;
+function onSessionStart()
+{
+	isInSession = true;
+	//$(".showinsession").fadeIn();
+}
+
+function onSessionEnd()
+{
+	isInSession = false;
+	//$(".showinsession").fadeOut();
+	hoverLeaveAll();
+} 
+
+function nameentry() {
+    document.getElementById("currentRoomName").style.display = "none";
+    document.getElementById("currentRoomNameInput").style.display = "block";
+    document.getElementById("currentRoomNameInput").focus();
+}
+
+function nameentrydone() {
+    var newName = document.getElementById("currentRoomNameInput").value;
+    nameChanged(newName);
+}
+
+function nameChanged(newName) {
+	if (newName == "") newName = "[NonameTV]";
+    currentRoomName = newName;
+    localStorage.setItem("currentRoomName", currentRoomName);
+    document.getElementById("currentRoomNameInput").value = currentRoomName;
+    document.getElementById("currentRoomName").innerHTML = currentRoomName;
+    document.getElementById("currentRoomName").style.display = "block";
+    document.getElementById("currentRoomNameInput").style.display = "none";
+    if (undefined !== host) {
+    	host.rename(currentRoomName);
+    }
+}
+
+
+
+</script>
+
+</head>
+
+<body>
+
+<div id='wrapper'>
+
+	<div id='header'>
+		<div class='row'>
+			<div class='left'>
+				<img src='img/logo.png' alt='' />
+			</div>
+			<div class='right'>
+				<div style='float : right'>
+					<h1 id="currentRoomName" onClick="nameentry();" class="nameentry">[Room Name]</h1>
+
+    				<input class="nameentry" style="display:none; margin-top: 20px; " type="text" placeholder="[Enter TV Name]" spellcheck="off" 
+    				autocomplete="off" id="currentRoomNameInput" name="currentRoomNameInput" onChange="nameentrydone()"/>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div id='gallery'>
+		
+		<!-- NES STUFF -->
+		<div id="emulator"></div>
+	
+		<script src="lib/jquery-1.4.2.min.js" type="text/javascript" charset="utf-8"></script>
+	    <script src="lib/dynamicaudio-min.js" type="text/javascript" charset="utf-8"></script>
+	    <script src="source/nes.js" type="text/javascript" charset="utf-8"></script>
+	    <script src="source/utils.js" type="text/javascript" charset="utf-8"></script>
+	    <script src="source/cpu.js" type="text/javascript" charset="utf-8"></script>
+	    <script src="source/keyboard.js" type="text/javascript" charset="utf-8"></script>
+	    <script src="source/mappers.js" type="text/javascript" charset="utf-8"></script>
+	    <script src="source/papu.js" type="text/javascript" charset="utf-8"></script>
+	    <script src="source/ppu.js" type="text/javascript" charset="utf-8"></script>
+	    <script src="source/rom.js" type="text/javascript" charset="utf-8"></script>
+	    <script src="source/ui.js" type="text/javascript" charset="utf-8"></script>
+	    <script type="text/javascript" charset="utf-8">
+	        var nes;
+	        $(function() {
+	            nes = new JSNES({
+	                'ui': $('#emulator').JSNESUI()
+	            });
+	            nes.ui.buttons.zoom.click();
+	            //nes.ui.buttons.sound.click();
+	   			nes.ui.loadROM("roms/SuperMarioBros.nes");
+	        });
+	    </script>
+
+	    <!-- END NES STUFF -->
+	</div>
+	
+	<div id='content'>
+		<div id='players'>
+			<ul>
+				<li id="player1">[Waiting for Player 1]</li>
+				<li id="player2">[Waiting for Player 2]</li>
+			</ul>
+		</div>
+	</div>
+	
+	<div id='footer'>
+    		<center><img src="img/powered.png" /></center>		 
+	</div>
+	
+</div>
+
+</body>
+</html>
