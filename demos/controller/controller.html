@@ -13,6 +13,7 @@
 <script src="js/synclist-client.js"></script>
 <script src="js/zigmote-client.js"></script>
 <script src="js/zigmote.cursor.js"></script>
+<script src="js/zigmote.gamepad.js"></script>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
@@ -29,14 +30,31 @@ var screenTypes = {
     gamepadScreen : "gamepadscreen",
 	slideScreen : "slideshowscreen",
     youtubeScreen : "youtubescreen",
-}
+};
+
+var gotoScreenHooks = {};
+gotoScreenHooks[screenTypes.gamepadScreen] = {
+        before: doGamepad,
+        after: stopGamepad,
+    };
 
 var lastScreen = screenTypes.homeScreen;
 var currentScreen = screenTypes.homeScreen;
 
 function gotoScreen(screenType) {
     lastScreen = currentScreen;
+    if (gotoScreenHooks.hasOwnProperty(lastScreen)) {
+        if (gotoScreenHooks[lastScreen].after) {
+            gotoScreenHooks[lastScreen].after();
+        }
+    }
     currentScreen = screenType;
+    if (gotoScreenHooks.hasOwnProperty(screenType)) {
+        if (gotoScreenHooks[screenType].before) {
+            gotoScreenHooks[screenType].before();
+        }
+    }
+
     for (var screen in screenTypes) {
         document.getElementById(screenTypes[screen]).style.display = (screenTypes[screen] == screenType) ? "block" : "none";
     }
@@ -94,7 +112,8 @@ function setPointer(pointerType) {
 var controller;
 var roomslist;
 var musicSyncList;
-var roomsharedlist;
+var roomshareddata;
+var userslist;
 
 var anotherRL;
 
@@ -129,6 +148,30 @@ function updateVisibleItems(itemid, itemdata) {
     }
 }
 
+function playerChanged(player, userid) {
+    if (undefined !== player.userid) {userslist.unbindkey(player.userid);}
+    player.userid = userid;
+    if (undefined === userid) { player.element.innerHTML = updateUser(undefined,undefined).innerHTML; return; }
+    userslist.bindkey(userid, player.element, updateUser);
+    player.element.innerHTML = updateUser(userid, userslist.get(userid)).innerHTML;
+}
+function updateUser(id, data) {
+    console.log('got update user: ' + id + ', ' + data);
+    console.log(data);
+    var li = document.createElement('li');
+    
+    if (undefined === data) { //sorry :( 
+        console.log('user left!');
+        li.innerHTML = "<div onclick='doGamepad()'>[Touch Me]</div>";
+    } else {
+        li.innerHTML = data;
+    }
+    return li;
+}
+
+var player1 = {};
+var player2 = {};
+
 function loaded() {
     //preventDocScrolling();
     nameChanged(currentName);
@@ -139,8 +182,13 @@ function loaded() {
     setPointer(pointerTypes.touch);
     gotoScreen(screenTypes.chooseScreen);
 
+    player1.element = document.getElementById("player1");
+    player2.element = document.getElementById("player2");
+
+
     function roomJoinedOK(data) {
-        var roomshareddata = synclist.subscribe(socket, data.roomsharedid);
+        userslist = synclist.subscribe(socket, data.userslistid);
+        roomshareddata = synclist.subscribe(socket, data.roomsharedid);
         /*roomshareddata.subscribekey('itemstoshow', function(newValue) {
             updateVisibleItems('itemstoshow', newValue);
         });*/
@@ -150,6 +198,12 @@ function loaded() {
                 gotoScreen(controllersForHostPages[newPage]);
             }
         });
+        // gamepad users notification
+        roomshareddata.subscribekey("player1", function(userid) { playerChanged(player1, userid); });
+        roomshareddata.subscribekey("player2", function(userid) { playerChanged(player2, userid); });
+        playerChanged(player1, roomshareddata.get("player1"));
+        playerChanged(player2, roomshareddata.get("player2"));
+
 
         // connect the music list
         //musicSyncList = synclist.subscribe(socket, data.medialist);
@@ -405,6 +459,44 @@ function sendToTV(command, data) {
     controller.sendToHost(command, data);
 }
 
+function gamepadConnected() {
+    //gotoScreen(screenTypes.gamepadScreen);
+    $("#playerselection").hide();
+    $("#gamepad").show();
+    controller.gamepad.bindbutton("a", document.getElementById("a"));
+    controller.gamepad.bindbutton("b", document.getElementById("b"));
+    controller.gamepad.bindbutton("start", document.getElementById("start"));
+    controller.gamepad.bindbutton("select", document.getElementById("select"));
+    controller.gamepad.binddpad("dpad", document.getElementById("dpad"));
+}
+
+function doGamepad() {
+  // try becoming player 1
+  controller.gamepad.connect("player1", function(success) {
+    if (success) {
+      gamepadConnected();
+    } else {
+      // or player 2
+      controller.gamepad.connect("player2", function(success) {
+        if (success) {
+          gamepadConnected();
+        } else {
+          console.log("Player1 & Player2 already taken");
+          $("#gamepad").hide();
+          $("#playerselection").show();
+
+        }
+      });
+    }
+  });    
+}
+
+function stopGamepad() {
+    controller.gamepad.disconnect();
+    $("#gamepad").hide();
+    $("#playerselection").show();
+}
+
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
 
 
@@ -526,7 +618,17 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
     </div>
 
     <div id="gamepadscreen" class="invisible">
-        <div id="controller">
+        <div id="playerselection">
+            <table>
+                <tr>
+                    <th>Player 1</th><th>Player 2</th>
+                </tr>
+                <tr>
+                    <td id="player1">[None]</td><td id="player2">[None]</td>
+                </tr>
+            </table>
+        </div>
+        <div id="gamepad" style="display:none">
             <div id="dpad"></div>
 
             <div id="strtslct">
