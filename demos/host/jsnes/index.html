@@ -134,7 +134,7 @@ function loaded() {
 	socket.on('connect', function () {
 		// connected
 		host = zigmote.host(socket);
-		host.startRoom("jsnes", currentRoomName, roomStarted);
+		host.startRoom("motionosdemos", currentRoomName, roomStarted);
 	});
 
 	socket.on('disconnect', function() {
