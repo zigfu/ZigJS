@@ -129,7 +129,6 @@ function roomStarted(roomData) {
   host.on('goto', function(data) { goto(data); });
 
   var roomshared = synclist.subscribe(socket, roomData.roomsharedid);
-  console.log("LDSKFJLSDFJLDSKJF");
   roomshared.set('hostpage', 'slides');
 }
 
@@ -144,11 +143,9 @@ function loaded() {
     host.startRoom("motionosdemos", currentRoomName, roomStarted);
     var thecursor = document.getElementById('realcursor');
     host.cursor.oncursorlock = function (userid){
-      console.log('Cursor locked by userid '+userid); 
       cursor_userid = userid;
     };
     host.cursor.oncursorunlock = function (userid){
-      console.log('Cursor unlocked by userid '+userid); 
       cursor_userid = undefined;
     };
     host.cursor.oncursorstart = function(userid){
@@ -189,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 <div id='header'>
     <div class='row'>
       <div class='left'>
-        <img src='img/logo.png' alt='' />
+        <a href="../index.html"><img src='img/logo.png' alt='' /></a>
       </div>
       <div class='right'>
         <div style='float : right'>
