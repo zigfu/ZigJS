@@ -12,6 +12,7 @@ var goto = (function() {
 	function goto(page) {
 		if (!paths.hasOwnProperty(page)) return;
 		var url = prefix + paths[page];
+		document.location.href="";
 		document.location.pathname = url;
 	}
 
