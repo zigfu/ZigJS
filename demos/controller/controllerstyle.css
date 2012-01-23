@@ -558,3 +558,24 @@ img {
 	background: linear-gradient(top,  #e9ea9d 0%,#ffcc00 99%); /* W3C */
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e9ea9d', endColorstr='#ffcc00',GradientType=0 ); /* IE6-9 */
 }
+.playerTable {
+	border: 0;
+	margin-top: 30px;
+	font-family: Arial;
+	font-size: 55px;
+	color: #FFF;
+	background-color: rgba(0,0,0,0.1);
+	border-radius: 5px;
+	box-shadow: inset 0px 2px 1px rgba(0,0,0,0.5), 0px 2px 1px rgba(255,255,255,0.2);
+}
+.playerTable th {
+	padding: 15px;
+	font-family: Verdana, Geneva, sans-serif;
+	border-left: 1px solid rgba(255,255,255,0.3);
+}
+.playerTable td {
+	padding: 15px;
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-style: italic;
+	border-left: 1px solid rgba(255,255,255,0.3);
+}

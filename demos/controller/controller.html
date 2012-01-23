@@ -533,7 +533,8 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
             
             <li><img id="thebutton" src="mi/images/mu_06.png" /><div id="volumeSlider"></div><div id="volumeLabel"></div></li>
             
-        </ul>-->
+        </ul>
+        -->
             
     </div>
 
@@ -619,16 +620,18 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
     <div id="gamepadscreen" class="invisible">
         <div id="playerselection">
-            <table>
+        <center>
+            <table class="playerTable">
                 <tr>
-                    <th>Player 1</th><th>Player 2</th>
+                    <th style="border: 0;">Player 1</th><th>Player 2</th>
                 </tr>
                 <tr>
-                    <td id="player1">[None]</td><td id="player2">[None]</td>
+                    <td id="player1" style="border: 0;">[None]</td><td id="player2">[None]</td>
                 </tr>
             </table>
+        </center>
         </div>
-        <div id="gamepad" style="display:none">
+        <div id="gamepad" class="invisible">
             <div id="dpad"></div>
 
             <div id="strtslct">
@@ -674,7 +677,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
     <div id='youtubescreen' class='invisible'>
         <div>
-            <input type='text' id='youtubesearch'><div id='youtubesearchbutton'>SEWARCH!!!</div>
+            <input type='text' id='youtubesearch' /><div id='youtubesearchbutton'>SEARCH!!!</div>
         </div> 
         <center><a href="javascript:doPointer()" name="modal"><img src="i/slide/pointer.png" /></a></center>           
     </div>
