@@ -452,8 +452,8 @@ Nintendo Gamepad Mobile Controller
 -----------------------------------*/
 
 #gamepad {
-	width: 960px;
-	height: 640px;
+	width: 640px;
+	height: 960px;
 	//background-image: url('i/bg.png');
 	//background-repeat: no-repeat;
 	padding-top: 365px;

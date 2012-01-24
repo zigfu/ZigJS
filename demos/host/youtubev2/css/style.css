@@ -226,7 +226,10 @@ body {
   margin-left: auto;
   margin-right: auto;
   position:relative;
+  border-radius: 10px;
   -moz-box-shadow: 0px 10px 40px 15px #112735;
+  -o--moz-box-shadow: 0px 10px 40px 15px #112735;
+  -khtml--moz-box-shadow: 0px 10px 40px 15px #112735; /* if ie */
   -webkit-box-shadow: 0px 10px 40px 15px #112735;
   box-shadow: 0px 10px 40px 15px #112735;
 
@@ -293,11 +296,10 @@ body {
   position:absolute;
   display:none;
 }
-
 .modaldialog {
   width : 40%;
   height : 10%;
-  top : 20%;
+  top : 40%;
   left: 30%;  
   position: absolute;
   background-color: #a5c77f;
@@ -306,16 +308,13 @@ body {
   margin : auto auto;
   display:none;
 }
-
 //.modaldialog div {
   margin : auto auto;
   text-align:center;
   margin-top : 30px;
 }
-
 .modaldialogcontents {
 }
-
 #backbutton {
   display:block;
   width: 100px;
