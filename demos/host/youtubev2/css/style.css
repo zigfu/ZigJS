@@ -19,6 +19,12 @@ fonts
   font-weight: 700;
   src: local('Rokkitt Bold'), local('Rokkitt-Bold'), url('http://themes.googleusercontent.com/static/fonts/rokkitt/v4/Mef17w3J4CtS0lw4Wa_8r73hpw3pgy2gAi-Ip7WPMi0.woff') format('woff');
 }
+@font-face {
+  font-family: 'Abel';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Abel'), local('Abel-Regular'), url('http://themes.googleusercontent.com/static/fonts/abel/v3/EAqh528fFdbUek8UOky4sA.woff') format('woff');
+}
 /*---------------------------------------------------------
 utility functions
 ---------------------------------------------------------*/
@@ -264,8 +270,12 @@ body {
 
 #novideos {
   text-align: center;
+  font-family: 'Rokkitt';
+  font-weight: normal;
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.3);
   display: table-cell;
   height:100%;
+  cursor: pointer; 
   position:relative;
   vertical-align: middle;
   font-size:50pt;
@@ -290,10 +300,8 @@ body {
   top : 20%;
   left: 30%;  
   position: absolute;
-  background : white;
-  -moz-border-radius: 20px;
-  -khtml-border-radius: 20px;
-  border-radius: 20px;
+  background-color: #a5c77f;
+  border-radius: 5px;
   margin : auto auto;
   display:none;
 }
@@ -313,12 +321,33 @@ body {
   width: 100px;
   height : 100px;
   top: 50%;
+  background-image: url(../img/back-arrow.png);
+  background-repeat: no-repeat;
   margin-top: -50px;
   margin-left: -120px;
-  background: green;
   position:absolute;
+  cursor: pointer;
 }
-
+#backbutton p {
+	color: #FFF;
+	font-family: 'Abel';
+	letter-spacing: 2px;
+}
+#searchbutton {
+	font-family: 'Rokkitt';
+	text-shadow: 2px 2px 0px rgba(0,0,0,0.3);
+}
+#search {
+	border: 1px solid rgba(0,0,0,0.2);
+	font-size: 30px;
+	border-radius: 5px;
+	font-family: 'Abel';
+	font-weight: normal;
+	letter-spacing: 3px;
+	box-shadow: inset 0px 3px 0px rgba(0,0,0,0.2);
+	width: 400px;
+	height: 50px;
+}
 .hoverable {
 }
 
