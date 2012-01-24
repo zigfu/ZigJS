@@ -523,7 +523,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
     
         <a style='float:left' href="javascript:gotoScreen(screenTypes.homeScreen)"><img src="mi/controller/home.png" /></a>
 
-        <a style='float:right' href="javascript:doPointer()"><img src="mi/images/mu_02.png" /></a>
+        <a style='float:right' href="javascript:doPointer()"><img src="mi/controller/cursor_button.png" /></a>
     
         <!--
         <ul id='playercontrolstemp' class='toggleable'>
@@ -542,13 +542,14 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
     </div>
 
 	<div id="roomslist" class="invisible">
-        <h2 class="coollistHeader">Host Screen List</h2>
+        <h2 class="coollistHeader">HOST SCREEN LIST</h2>
         <div id="roomslistContainer" class="coollist">
             <div class="scroller">
 		      <ul id="roomslistList">
 		      </ul>
             </div>
         </div>
+        <p>Please choose a TV from the above list to get going!</p>
 	</div>
 
     <div id="homescreen" class="invisible">       
@@ -679,10 +680,9 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
     </div>
 
     <div id='youtubescreen' class='invisible'>
-        <div>
-            <input type='text' id='youtubesearch' /><div id='youtubesearchbutton'>SEARCH!!!</div>
-        </div> 
-        <center><a href="javascript:doPointer()" name="modal"><img src="i/slide/pointer.png" /></a></center>           
+        <div id="youtubeContainer">
+            <input type='text' id='youtubesearch' placeholder="Search YouTube!" /><div id='youtubesearchbutton'><p>SEARCH!!!</p></div>
+        </div>          
     </div>
 
 

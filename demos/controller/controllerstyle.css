@@ -6,6 +6,30 @@ h1, h2, h3, h4, h5, h6, p, ul {
 	margin: 0px 0px;
 	padding: 0px 0px;
 }
+/*-------------------------------
+WEB FONTS provided by GOOGLE
+-------------------------------*/
+@font-face {
+  font-family: 'Abel';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Abel'), local('Abel-Regular'), url('http://themes.googleusercontent.com/static/fonts/abel/v3/EAqh528fFdbUek8UOky4sA.woff') format('woff');
+}
+@font-face {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: bold;
+  src: local('Ubuntu Bold'), local('Ubuntu-Bold'), url('http://themes.googleusercontent.com/static/fonts/ubuntu/v4/0ihfXUL2emPh0ROJezvraD8E0i7KZn-EPnyo3HZu7kw.woff') format('woff');
+}
+@font-face {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Ubuntu'), url('http://themes.googleusercontent.com/static/fonts/ubuntu/v4/_xyN3apAT_yRRDeqB3sPRg.woff') format('woff');
+}
+/*------------------------------
+Body Styles
+------------------------------*/
 body {
 
 }
@@ -61,20 +85,20 @@ body {
 	background-color: rgba(255,255,255,0.3);
 	background-image: url(mi/header-bg.png);
 	background-repeat: no-repeat;
-	-webkit-box-shadow: 0px 2px 5px rgba(255,255,255,0.3); 
+	box-shadow: 0px 2px 5px rgba(0,0,0,0.3); 
 }
 .name {
 	width: 240px;
-	margin-left: 400px;
+	float: right;
 	padding-top: 10px;
 }
 .name div {
 	color: #231f20;
-	font-family: Arial;
-	letter-spacing: -2px;
+	font-family: 'Ubuntu';
+	font-weight: bold;
+	letter-spacing: 2px;
 	font-size: 46px;
 	text-shadow: 0x -1px 1px #FFF;
-	-webkit-text-shadow: 0px -1px 1px #FFF;
 }
 img {
 	-webkit-touch-callout: none;
@@ -88,7 +112,16 @@ img {
 	width: 30px;
 	z-index: 999;
 }
-
+#roomslist p {
+	width: 500px;
+	margin: 0px auto;
+	font-family: 'Georgia';
+	font-style: italic;
+	font-size: 26px;
+	color: #FFF;
+	margin-top: 15px;
+	text-align: center;
+}
 #volumeLabel {
 	width : 80px;
 	height : 30px;
@@ -108,10 +141,9 @@ img {
 	height: 500px;
 	margin: 0px auto;
 	margin-top: 20px;
-	background-color: #666;
+	background-color: rgba(0,0,0,0.2);
 	border-radius: 10px;
-	box-shadow:  0px 5px 10px #333;
-	-webkit-box-shadow:  0px 5px 10px #333;
+	box-shadow: inset 0px 3px 5px rgba(0,0,0,0.5), 0px 2px 1px rgba(255,255,255,0.2);
 	z-index: 1;
 }
 .coollist ul {
@@ -120,7 +152,8 @@ img {
 	//padding-left: 75px;
 }
 .coollist li {
-	font-family: Arial;
+	font-family: 'Georgia';
+	font-style: italic;
 	color: #FFF;
 	list-style-type: none;
 	padding-top: 20px;
@@ -128,13 +161,16 @@ img {
 	border-bottom: 1px solid #ccc;
 	margin : 0px auto;
 	text-align:center;
-	text-shadow: 1px 2px 0px #333;
+	text-shadow: 2px 3px 0px rgba(0,0,0,1.0);
 	//width: 300px;
 }
 .coollistHeader {
-	font-family: Arial;
-	font-size: 30px;
-	color: #ccc;
+	font-family: 'Abel';
+	font-size: 35px;
+	font-weight: 300;
+	letter-spacing: 2px;
+	color: #FFF;
+	text-shadow: 1px 2px 0px rgba(0,0,0,1.0);
 	text-align:center;
 	padding-top : 20px;
 	margin-bottom: 20px;
@@ -580,4 +616,42 @@ Nintendo Gamepad Mobile Controller
 	font-family: Georgia, "Times New Roman", Times, serif;
 	font-style: italic;
 	border-left: 1px solid rgba(255,255,255,0.3);
+}
+#youtubeContainer {
+	width: 550px;
+	height: 100px;
+	margin: 0px auto;
+	margin-top: 50px;
+	background-color: #a5c77f;
+	border-radius: 5px;
+	box-shadow: 0px 8px 0px #42826c;
+}
+#youtubesearch {
+	width: 325px;
+	height: 50px;
+	margin-top: 25px;
+	margin-left: 25px;
+	font-size: 28px;
+	font-family: 'Abel';
+	font-weight: 300;
+	letter-spacing: 3px;
+	box-shadow: inset 0px 5px 0px rgba(0,0,0,0.8);
+	border: 0;
+}
+#youtubesearchbutton {
+	width: 100px;
+	height: 50px;
+	background-color: #42826c;
+	margin-top: 25px;
+	margin-right: 50px;
+	font-family: 'Abel';
+	float: right;
+	border-radius: 5px;
+	box-shadow: 0px 5px 0px #2f5c4c;
+}
+#youtubesearchbutton p {
+	color: #FFF;
+	font-family: ;
+	text-align: center;
+	margin-top: 15px;
 }
