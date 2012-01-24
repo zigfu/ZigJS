@@ -509,6 +509,9 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 <div id="wrapper">
 
 	<div class="header">
+    
+    	<a href="javascript:sendToTV('goto', 'home')"><img style="float: left;" src="mi/header-bg.png" /></a>
+    
     	<div class="name">
             <div id="currentUserName" onClick="nameentry();"></div>
     		<input style="display:none; width: 220px; height: 30px; font-size: 20px;" type="text" placeholder="[Enter Name]" spellcheck="off" autocomplete="off" id="currentUserNameInput" name="currentUserNameInput" onChange="nameentrydone()"/>
@@ -518,7 +521,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 	<div id="navBar" class="navBar">
     
-        <a style='float:left' href="javascript:gotoScreen(screenTypes.homeScreen)"><img src="mi/images/mu_01.png" /></a>
+        <a style='float:left' href="javascript:gotoScreen(screenTypes.homeScreen)"><img src="mi/controller/home.png" /></a>
 
         <a style='float:right' href="javascript:doPointer()"><img src="mi/images/mu_02.png" /></a>
     
