@@ -67,6 +67,9 @@
 			touchStart.x = lastTouch.x;
 			touchStart.y = lastTouch.y;
 			ontouchmove(event);
+			if (sendingCursor) {
+				zigmoteController.sendToHost('pushstart');
+			}
 		}
 		
 		function ontouchmove(event) {
@@ -82,6 +85,9 @@
 		function ontouchend(event) {
 			var dx = dist(lastTouch, touchStart);
 			var dt = (+new Date) - touchStartTime;
+			if (sendingCursor) {
+				zigmoteController.sendToHost('pushstop');
+			}
 			if (sendingCursor && dx < 10 && dt < 1000) {
 				zigmoteController.sendToHost('click');
 			}
@@ -178,9 +184,11 @@
 
 			oncursorlock : function(userid) {},
 			oncursorunlock : function() {},
-			oncursor : function(x,y,userid) {},
+			oncursor : function(x,y,rel,userid) {},
 			oncursorstart : function(userid) {},
 			oncursorstop : function(userid) {},
+			onpushstart : function(userid) {},
+			onpushstop : function(userid) {},
 			onclick : function(userid) {},
 			onorientation : function(a,b,g,userid) {}
 		}
@@ -212,6 +220,15 @@
 		zigmoteHost.on('click', function(data, userid) {
 			ret.onclick(userid);
 		});
+
+		zigmoteHost.on('pushstart', function(data, userid) {
+			ret.onpushstart(userid);
+		});
+
+		zigmoteHost.on('pushstop', function(data, userid) {
+			ret.onpushstop(userid);
+		});
+
 
 		zigmoteHost.cursor = ret;
 		return zigmoteHost;
