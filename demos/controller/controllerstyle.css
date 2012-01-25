@@ -31,7 +31,6 @@ WEB FONTS provided by GOOGLE
 Body Styles
 ------------------------------*/
 body {
-
 }
 .invisible {
 	display: none;
@@ -457,7 +456,13 @@ Nintendo Gamepad Mobile Controller
 	//background-image: url('i/bg.png');
 	//background-repeat: no-repeat;
 	-webkit-touch-callout: none;
+	-webkit-user-select: none;
 }
+#gamepad div {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+}
+
 #strtslct {
 	width: 265px;
 	height: 98px;
