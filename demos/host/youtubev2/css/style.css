@@ -147,11 +147,11 @@ body {
   padding-top: 35px;
 }
 .right h1 {
-  font-family: 'Rokkitt';
+  font-family: 'Istok Web';
   font-size: 31pt;
   font-weight: bold;
-  color: rgba(0, 0, 0, 0.2);
-  text-shadow: 0px 1px #ffffff;
+  color: #db4648;
+  text-shadow: 0px 1px #782728;
 }
 #header {
   width: 100%;
@@ -160,9 +160,7 @@ body {
   border-width: 0 0 12 0;
   margin: 0;
   padding: 0;
-  box-shadow: 0px -5px 5px -2px rgba(255, 255, 255, 0.1) inset;
-  -moz-box-shadow: 0px -5px 5px -2px rgba(255, 255, 255, 0.1) inset;
-  -webkit-box-shadow: 0px -5px 5px -2px rgba(255, 255, 255, 0.1) inset;
+  box-shadow: 0px -5px 5px -2px rgba(255, 255, 255, 0.1) inset, inset -2px 3px 20px rgba(0,0,0,0.8);
 }
 #gallery {
   width: 100%;
@@ -217,7 +215,9 @@ body {
   position:relative;
   padding:20px 20px;
 }
-
+/*---------------------------------------
+Where the video plays
+---------------------------------------*/
 #mainarea {
   height: 70%;
   width: 50%;
@@ -226,13 +226,9 @@ body {
   margin-right: auto;
   position:relative;
   border-radius: 10px;
-  -moz-box-shadow: 0px 10px 40px 15px #112735;
-  -o--moz-box-shadow: 0px 10px 40px 15px #112735;
-  -khtml--moz-box-shadow: 0px 10px 40px 15px #112735; /* if ie */
-  -webkit-box-shadow: 0px 10px 40px 15px #112735;
-  box-shadow: 0px 10px 40px 15px #112735;
-
-  background: #dce8f0;
+  //box-shadow: 0px 10px 40px 15px #112735;
+  background: rgba(0,0,0,0.2);
+  box-shadow: inset 0px 2px 5px rgba(0,0,0,0.5), 0px 1px 1px rgba(255,255,255,0.2);
 }
 
 #videolistScroller {
@@ -244,21 +240,24 @@ body {
   padding:0px;
   margin:0px;
 }
-
 #videolistScroller ul {
   margin: 0px 0px;
   padding: 0px 0px;
   overflow:none;
 }
-
 #videolistScroller li {
   font-size: 30pt;
+  color: #FFF;
+  font-family: 'Abel';
+  letter-spacing: 2px;
   padding:0px;
   margin:0px;
+  padding-left: 10px;
+  padding-right: 10px;
   padding-top: 20px;
   padding-bottom: 20px;
   list-style-type:none;
-  border-bottom : 1px solid black;
+  border-bottom : 1px solid rgba(255,255,255,0.3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -276,6 +275,7 @@ body {
   font-weight: normal;
   text-shadow: 2px 2px 0px rgba(0,0,0,0.3);
   display: table-cell;
+  color: #FFF;
   height:100%;
   cursor: pointer; 
   position:relative;
@@ -315,7 +315,7 @@ body {
 .modaldialogcontents {
 }
 #backbutton {
-  display:block;
+  display: block;
   width: 100px;
   height : 100px;
   top: 50%;
@@ -341,7 +341,7 @@ body {
 	background-color: #42826c;
 	border-radius: 5px;
 	box-shadow: 0px 3px 0px #2f5c4c;
-	width: 100;
+	width: 100px;
 	height: 55px;
 	cursor: pointer;
 }
@@ -367,7 +367,6 @@ body {
 }
 .hoverable {
 }
-
 .hoverable .hovering {
   background : red;
 }

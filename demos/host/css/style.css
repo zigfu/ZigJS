@@ -136,11 +136,11 @@ body {
   padding-top: 35px;
 }
 .right h1 {
-  font-family: 'Rokkitt';
+  font-family: 'Istok Web';
   font-size: 31pt;
   font-weight: bold;
-  color: rgba(0, 0, 0, 0.2);
-  text-shadow: 0px 1px #ffffff;
+  color: #db4648;
+  text-shadow: 0px 1px #782728;
 }
 #header {
   width: 100%;
@@ -149,13 +149,13 @@ body {
   border-width: 0 0 12 0;
   margin: 0;
   padding: 0;
-  box-shadow: 0px -5px 5px -2px rgba(255, 255, 255, 0.1) inset;
-  -moz-box-shadow: 0px -5px 5px -2px rgba(255, 255, 255, 0.1) inset;
-  -webkit-box-shadow: 0px -5px 5px -2px rgba(255, 255, 255, 0.1) inset;
+  box-shadow: inset 0px -5px 5px rgba(255, 255, 255, 0.1), inset -2px 3px 20px rgba(0,0,0,0.8);
 }
 #gallery {
-  width: 100%;
-  background-color: rgba(0,0,0,0.5);
+	width: 100%;
+	background-color: rgba(0,0,0,0.5);
+	box-shadow: 0px 5px 5px rgba(255,255,255,0.1);
+
 }
 #gallery .butholder {
   width: 1100px;
@@ -192,5 +192,22 @@ body {
 	font-family: Georgia, "Times New Roman", Times, serif;
 	font-size: 12px;
 	font-style: italic;	
-	padding-top: 20px;
+}
+#footer h3 {
+	font-family: 'Abel';
+	color: #FFF;
+	letter-spacing: 3px;
+	font-weight: 300;
+}
+#footer .footerType {
+	color: #db4648;
+}
+#footer .footP {
+	color: #db4648;
+	margin: 0px 0px;
+	padding: 0px 0px;
+}
+#footer img {
+	margin: 0px 0px;
+	padding: 0px 0px;
 }

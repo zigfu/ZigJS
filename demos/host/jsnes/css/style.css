@@ -111,9 +111,9 @@ h1, h2, h3, h4, h5, h6, p {
 	padding: 0px 0px;
 }
 body {
-	background-color: #161a23; /* Old browsers */
-	background-image:url(http://zigfu.com/i/bg.jpg);
-	background-repeat: repeat-x;
+	background-color: #2f1c3a; /* Old browsers */
+	background-image:url(http://brycetucker.com/zigfurebrand/i/background-gradient.jpg);
+	background-repeat: no-repeat;
 	background-position: top;
 } 
 
@@ -155,7 +155,7 @@ body {
 }
 #gallery {
   width: 100%;
-  background-color: #16181a;
+  background-color: rgba(0,0,0,0.5);
 
 }
 #gallery .butholder {
@@ -179,14 +179,11 @@ body {
   width: 100%;
   height: 150px;
   padding: 0px 0px;
-  box-shadow: 0px 5px 5px -2px rgba(255, 255, 255, 0.1) inset, 0px -10px 10px -2px rgba(0, 0, 0, 0.2) inset;
-  -moz-box-shadow: 0px 5px 5px -2px rgba(255, 255, 255, 0.1) inset, 0px -10px 10px -2px rgba(0, 0, 0, 0.2) inset;
-  -webkit-box-shadow: 0px 5px 5px -2px rgba(255, 255, 255, 0.1) inset, 0px -10px 10px -2px rgba(0, 0, 0, 0.2) inset;
+  box-shadow: 0px 5px 5px -2px rgba(255, 255, 255, 0.1) inset;
 }
 #footer {
   width: 100%;
   height: 300px;
-  background-color: #0b0b0b;
 }
 #footer p {
 	text-align: center;
@@ -194,7 +191,24 @@ body {
 	font-family: Georgia, "Times New Roman", Times, serif;
 	font-size: 12px;
 	font-style: italic;	
-	padding-top: 20px;
+}
+#footer h3 {
+	font-family: 'Abel';
+	color: #FFF;
+	letter-spacing: 3px;
+	font-weight: 300;
+}
+#footer .footerType {
+	color: #db4648;
+}
+#footer .footP {
+	color: #db4648;
+	margin: 0px 0px;
+	padding: 0px 0px;
+}
+#footer img {
+	margin: 0px 0px;
+	padding: 0px 0px;
 }
 /*---------------------------------------------------------
 styles from index.html
