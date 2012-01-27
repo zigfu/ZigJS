@@ -21,9 +21,11 @@
 		function bindbutton(button, element) {
 			element.addEventListener("touchstart", function(e) {
 				zigmoteController.sendToHost("gp-down", { button : button });
+				e.preventDefault();
 			}, false);
 			element.addEventListener("touchend", function(e) {
 				zigmoteController.sendToHost("gp-up", { button : button });
+				e.preventDefault();
 			}, false);
 		}
 
@@ -77,6 +79,8 @@
         			doUp("down");
         			doUp("up");
         		}
+
+        		e.preventDefault();
 			}
 
 			function dpadtouchend(e) {
@@ -84,6 +88,7 @@
 				doUp("right");
 				doUp("up");
 				doUp("down");
+				e.preventDefault();
 			}
 
 			element.addEventListener("touchstart", dpadtouch, false);
