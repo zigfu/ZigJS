@@ -134,6 +134,7 @@ body {
 .left {
   float: left;
   width: 460px;
+  border: 0;
 }
 .right {
   float: right;

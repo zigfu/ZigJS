@@ -136,11 +136,11 @@ body {
   padding-top: 35px;
 }
 .right h1 {
-  font-family: 'Rokkitt';
+  font-family: 'Istok Web';
   font-size: 31pt;
   font-weight: bold;
-  color: rgba(0, 0, 0, 0.2);
-  text-shadow: 0px 1px #ffffff;
+  color: #db4648;
+  text-shadow: 0px 1px #782728;
 }
 #header {
   width: 100%;
