@@ -15,16 +15,16 @@ body {
 	background-position: top;
 }
 @font-face {
-  font-family: 'Rokkitt';
-  font-style: normal;
-  font-weight: 700;
-  src: local('Rokkitt Bold'), local('Rokkitt-Bold'), url('http://themes.googleusercontent.com/static/fonts/rokkitt/v5/Mef17w3J4CtS0lw4Wa_8rxsxEYwM7FgeyaSgU71cLG0.woff') format('woff');
+	font-family: 'Rokkitt';
+	font-style: normal;
+	font-weight: 700;
+	src: local('Rokkitt Bold'), local('Rokkitt-Bold'), url('http://themes.googleusercontent.com/static/fonts/rokkitt/v5/Mef17w3J4CtS0lw4Wa_8rxsxEYwM7FgeyaSgU71cLG0.woff') format('woff');
 }
 @font-face {
-  font-family: 'Droid Sans';
-  font-style: normal;
-  font-weight: normal;
-  src: local('Droid Sans'), local('DroidSans'), url('http://themes.googleusercontent.com/static/fonts/droidsans/v3/s-BiyweUPV0v-yRb-cjciBsxEYwM7FgeyaSgU71cLG0.woff') format('woff');
+	font-family: 'Droid Sans';
+	font-style: normal;
+	font-weight: normal;
+	src: local('Droid Sans'), local('DroidSans'), url('http://themes.googleusercontent.com/static/fonts/droidsans/v3/s-BiyweUPV0v-yRb-cjciBsxEYwM7FgeyaSgU71cLG0.woff') format('woff');
 }
 #wrapper {
 	margin: 0px 0px;
@@ -34,7 +34,6 @@ body {
 	min-width: 100%;
 }
 .header {
-	//width: 100%;
 	height: 100px;
 	box-shadow: inset -2px 3px 20px rgba(0,0,0,0.8);
 	margin: 0px 0px;
@@ -56,7 +55,7 @@ body {
 	margin-left: 100px;
 }
 .name {
-	
+/* ? */
 }
 #enterName {
 	font-family: Georgia;
@@ -131,17 +130,8 @@ body {
 	color: #FFF;
 	text-shadow: none;
 }
-#medialibraryScroller {
-	
-}
-#cursor {
-	
-}
 .headerColor {
 	color: #27AAE1;
-}
-#cursorCenter {
-	
 }
 .scrollerContainer {
 	width: 100%;
@@ -149,7 +139,6 @@ body {
 	margin: auto;
 	overflow:hidden;
 	position:relative;
-	//background-color: #231f20;
 }
 .scroller ul {
 	list-style:none;
@@ -162,12 +151,8 @@ body {
 	padding: 0px 10px;
 	height: 52px;
 	line-height: 52px;
-	//border-bottom:1px solid #ccc;
-	//border-top:1px solid #fff;
-	//background-color:#fafafa;
 	font-size:32px;
 	font-family: Arial;
-	//letter-spacing: -2px;
 	color : #ccc;
 }
 #currentRoomName {
