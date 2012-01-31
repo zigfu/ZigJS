@@ -9,7 +9,7 @@ h1, h2, h3, h4, h5, h6, p {
 	padding: 0px 0px;
 }
 body {
-	background-color: #2f1c3a; /* Old browsers */
+	background-color: #2f1c3a;
 	background-image:url(http://brycetucker.com/zigfurebrand/i/background-gradient.jpg);
 	background-repeat: no-repeat;
 	background-position: top;
@@ -233,7 +233,7 @@ tr.playing {
 	margin: 0px auto;
 }
 #mediaPlaylistTable {
-	
+	/* ? */
 }
 #songlist {
 	color: #FFF;
@@ -277,6 +277,6 @@ tr.playing {
 #albumArt img {
 	border-radius: 5px;
 }
-.toggleable { /* used to mark items that can be toggled from the server */
-	
+.toggleable {
+	/* used to mark items that can be toggled from the server */
 }
