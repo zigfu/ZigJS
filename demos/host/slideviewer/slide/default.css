@@ -472,25 +472,25 @@ video {
 #founders {
 	margin-top: -50px;
 }
-#slide1 img {
+.slide1 img {
 	overflow: auto;
 }
-#slide1 ul {
+.slide1 ul {
 	list-style-type: none;
 }
-#slide1 li {
+.slide1 li {
 }
-#slide1 h2 {
+.slide1 h2 {
 	font-family: 'Rokkitt';
 	font-size: 40px;
 	font-weight: 600;
 	text-align: center;
 }
-#slide1 .imgLeft {
+.slide1 .imgLeft {
 	float: left;
 	padding-left: 20px;
 }
-#slide1 .descRight {
+.slide1 .descRight {
 	float: right;
 	padding-right: 50px;
 	padding-left: 10px;
@@ -499,19 +499,19 @@ video {
 	background-color: #000;
 	color: #FFF;
 }
-#slide2 {
+.slide2 {
 }
-#slide2 h2 {
+.slide2 h2 {
 	font-family: 'Rokkitt';
 	font-size: 40px;
 	font-weight: 600;
 	padding-left: 25px;
 }
-#slide2 p {
+.slide2 p {
 	font-size: 30px;
 	padding-left: 50px;
 }
-#slide2 span {
+.slide2 span {
 	background-color: #000;
 	color: #fff;
 	font-family: Georgia, "Times New Roman", Times, serif;
@@ -522,24 +522,24 @@ video {
 #3wrap {
 	margin-top: -80px;
 }
-#slide3 {
+.slide3 {
 }
-#slide3 ul {
+.slide3 ul {
 	list-style-type: none;
 	padding-left: 175px;
 }
-#slide3 li {
+.slide3 li {
 	display: inline;
 	padding-right: 25px;
 	padding-left: 15px;
 }
-#slide3 h2 {
+.slide3 h2 {
 	font-family: 'Rokkitt';
 	font-size: 40px;
 	font-weight: 600;
 	text-align: center;
 }
-#slide3 p {
+.slide3 p {
 	padding: 25px;
 	font-size: 30px;
 	text-align: center;
@@ -550,14 +550,14 @@ video {
 	position: relative;
 	margin-top: 0px;
 }
-#slide4 {
+.slide4 {
 	background-image:url(../img/graph.jpg);
 	background-repeat: no-repeat;
 }
-#slide4 img {
+.slide4 img {
 	float: left;
 }
-#slide4 span {
+.slide4 span {
 	float: left;
 	font-size: 30px;
 	background-color: #000;
