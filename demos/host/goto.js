@@ -7,6 +7,7 @@ var goto = (function() {
 		jsnes : "jsnes/index.html",
 		youtube : "youtubev2/index.html",
 		slides : "slideviewer/slides.html"
+		punchingbag : "punchingbag/index.html"
 	}
 
 	function goto(page) {

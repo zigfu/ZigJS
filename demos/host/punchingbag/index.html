@@ -18,6 +18,8 @@
 	
 	<!-- ZigJS -->
 	<script type="text/javascript" src="zig.js"></script>
+
+	<script src="../goto.js"></script>
 	
 	<style>
 	#myslider { width: 800px; height: 450px; }
@@ -76,6 +78,14 @@
 	<script>
 		currentMenu = [];
 	
+
+		var socket;
+		var host;
+
+		function roomStarted(roomData) {
+			host.on('goto', function(data) { goto(data); });
+		}
+
 		$(function(){
 			$('#myslider').anythingSlider({
 				resizeContents      : true,
@@ -109,6 +119,12 @@
 			//addMenu(unity3dItems, false, false, "Unity Samples");
 			//currentMenu = menuItems;
 			//loadPlayer("videoDiv", 700, 450);
+
+			socket = io.connect('http://'+document.location.hostname);
+  			socket.on('connect', function () {
+    			host = zigmote.host(socket);
+    			host.startRoom("motionosdemos", currentRoomName, roomStarted);
+    		});
 		});
 		
 function addToAnythingslider(toAdd, hideleft, hideright, caption) {
