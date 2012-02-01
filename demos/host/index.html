@@ -120,6 +120,10 @@ $(document).ready( function () {
 						 function() { hoverLeave(index, element) });
 	});
 
+	nameChanged(currentRoomName);
+	sliderNub = document.getElementById("slider_nub");
+	renderInterval = setInterval(updateSlider, 1/60 * 1000)
+
 	// connect to zigtv
 	socket = io.connect('http://'+document.location.hostname);
 	socket.on('connect', function () {
@@ -137,11 +141,6 @@ $(document).ready( function () {
 	socket.on('disconnect', function() {
 		// disconnected
 	});
-
-	nameChanged(currentRoomName);
-	sliderNub = document.getElementById("slider_nub");
-	renderInterval = setInterval(updateSlider, 1/60 * 1000)
-
 });
 
 function hoverEnter(index, element) {
@@ -350,6 +349,27 @@ function MM_swapImage() { //v3.0
 }
 </style>
 
+<script>
+
+var session = (function() {
+	
+	var isInSession;
+
+	function lerp(from, to, amount) 
+	{
+		return from + ((to - from) * amount);
+	}
+
+	return {
+		//start : start,
+		//stop : stop,
+		//select : select,
+		isInSession : isInSession,
+	}
+})()
+
+</script>
+
 </head>
 
 <body onLoad="javascript:preloader();MM_preloadImages('img/youtube_buthvr.png')">
@@ -408,7 +428,7 @@ function MM_swapImage() { //v3.0
     		<center>
             
             <h3>POWERED <span class="footerType">BY</span></h3>
-            <a href="http://zigfu.com"><img src="http://brycetucker.com/zigfurebrand/i/logo.png" height="57px" width="120px" /></a>
+            <a href="http://zigfu.com"><img src="img/zigfulogo.png" height="57px" width="120px" /></a>
             <p>Copyright &copy;2012 Motion Arcade Inc.</p> 
             <p class="footP">All Rights Reserved</p>            
             
