@@ -19,17 +19,17 @@
 <script type='text/javascript'>
 images = [
 	{
-		'name': 'tube',
-		'description' : 'Youtube Player',
-		'default_image': 'img/youtube_but.png',
-		'highlit_image': 'img/youtube_buthvr.png'
-	}, 
+		'name': 'show',
+		'description' : 'HTML5 Showcase',
+		'default_image': 'img/showcase_but.png',
+		'highlit_image': 'img/showcase_buthvr.png'
+	},
 	{
-		'name': 'muse',
-		'description' : 'Music Player',
-		'default_image': 'img/muse_but.png',
-		'highlit_image': 'img/muse_buthvr.png'
-	}, 
+		'name': 'punch',
+		'description' : 'Punching Bag Game',
+		'default_image': 'img/punch_but.png',
+		'highlit_image': 'img/punch_buthvr.png'
+	},
 	{
 		'name': 'games',
 		'description' : 'Sample Games',
@@ -372,7 +372,7 @@ var session = (function() {
 
 </head>
 
-<body onLoad="javascript:preloader();MM_preloadImages('img/youtube_buthvr.png')">
+<body onLoad="javascript:MM_preloadImages('img/youtube_buthvr.png','img/muse_buthvr.png','img/','')">
 
 
 <div id="wrapper">
@@ -396,8 +396,8 @@ var session = (function() {
 	<div id="gallery">
 		<div class="butholder">
 			<ul>
-				<li><a href="youtubev2/index.html" onMouseOut="MM_swapImgRestore()" onMouseOver="MM_swapImage('youtube','','img/youtube_buthvr.png',1)"><img src="img/youtube_but.png" alt="Youtube Icon" name="youtube" width="240" height="249" border="0"></a></li>
-				<li><a href="musicv3/host.html"><img name='muse' src='img/muse_but.png' alt='' /></a></li>
+				<li><a href="#"><img name="show" src="img/showcase_but.png" /></a></li>
+				<li><a href="musicv3/host.html"><img name='punch' src='img/punch_but.png' alt='' /></a></li>
 				<li><a href="jsnes/index.html"><img name='games' src='img/games_but.png' alt=''/></a></li>
 				<li><a href="slideviewer/slides.html"><img name='slid' src='img/slide_but.png' alt='' /></a></li>
 			</ul>
