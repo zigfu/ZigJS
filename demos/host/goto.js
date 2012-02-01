@@ -6,8 +6,9 @@ var goto = (function() {
 		music : "musicv3/host.html",
 		jsnes : "jsnes/index.html",
 		youtube : "youtubev2/index.html",
-		slides : "slideviewer/slides.html"
-		punchingbag : "punchingbag/index.html"
+		slides : "slideviewer/slides.html",
+		punchingbag : "punchingbag/index.html",
+		infinibot : "infinibot/index.html",
 	}
 
 	function goto(page) {
