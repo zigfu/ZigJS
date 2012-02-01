@@ -201,3 +201,21 @@ body {
 	font-style: italic;	
 	padding-top: 20px;
 }
+#userConnected {
+	width: 100px;
+	height: 45px;
+	color: #FFF;
+	float: right;
+	padding: 25px;
+	margin-right: 20px;
+	font-family: Arial;
+	text-align: center;
+	border-radius: 10px;
+	box-shadow: inset 0px 2px 5px rgba(0,0,0,0.5), 0px 2px 1px rgba(255,255,255,0.1);
+	background-color: rgba(0,0,0,0.2);
+}
+.userConnectionName {
+}
+.userConnectionName p {
+	padding-top: 20px;
+}

@@ -21,6 +21,37 @@
 	position:absolute;
 	background-image : url("slide/laser_pointer.png");
 }
+.slider {
+	width: 940px;
+	height: 15px;
+	margin: 0px auto;
+	background-color: #9ca6ac;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	box-shadow:inset 0px 1px 5px #000;
+	-moz-box-shadow:inset 0px 1px 5px #000;
+	-webkit-box-shadow:inset 0px 1px 5px #000;
+	-o-box-shadow:inset 0px 1px 5px #000;
+}
+
+.slider_nub {
+	width: 20px;
+	height: 15px;
+	background-color: #151b23;
+	position: relative;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	box-shadow: 0px 1px 5px #000;
+	-moz-box-shadow: 0px 1px 5px #000;
+	-webkit-box-shadow: 0px 1px 5px #000;
+	-o-box-shadow: 0px 1px 5px #000;
+}
+
+.showinsession {
+	display: none
+}
 </style>
 
     <script>
@@ -380,9 +411,30 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
         -->
       </div> <!-- slides -->
       <div id="speaker-note" class="invisible" style="display: none;">
-      </div> <!-- speaker note -->
+      </div>
+         <div style="height: 15px;">
+			
+            	<div class="slider showinsession" id="slider">
+			
+            		<div class="slider_nub showinsession" id="slider_nub"></div>
+			
+            	</div>
+			
+            </div>
+            
+         <!-- THIS IS THE BOX THAT WILL POP UP WHEN A USER IS CONNECTED TO THE WEBPAGE -->   
+            
+         <div id="userConnected" style="display: none;">
+         
+             <p><span class="userConnectionName">[USER]</span>
+             
+             is connected...</p>
+         
+         </div>           
+            
     </div> <!-- presentation -->
-
+			
+         
   </div>
 
     <script src="slide/slide.js"></script>
