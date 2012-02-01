@@ -9,6 +9,12 @@
 	<link href='http://fonts.googleapis.com/css?family=Istok+Web:400,400italic,700,700italic|Abel|Yellowtail' rel='stylesheet' type='text/css' />
     <link href='css/style.css' rel='stylesheet' type='text/css' />
     <link href="slide/default.css" rel="stylesheet" class="theme" />
+
+<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js' type='text/javascript'></script>
+
+<!-- ZigJS -->
+<script type="text/javascript" src="js/zig.js"></script>
+
     
 <style type="text/css" rel="stylesheet">
 #wrapper {
@@ -22,9 +28,14 @@
 	background-image : url("slide/laser_pointer.png");
 }
 .slider {
+  position:absolute;
 	width: 940px;
 	height: 15px;
 	margin: 0px auto;
+  top:50%;
+  margin-top: 290px;
+  left: 50%;
+  margin-left:-470;
 	background-color: #9ca6ac;
 	border-radius: 3px;
 	-moz-border-radius: 3px;
@@ -159,6 +170,10 @@ function roomStarted(roomData) {
 function loaded() {
   nameChanged(currentRoomName);
 
+
+  sliderNub = document.getElementById("slider_nub");
+  renderInterval = setInterval(updateSlider, 1/60 * 1000)
+
   // connect to zigtv
   //socket = io.connect('http://zig.tv');
   socket = io.connect('http://'+document.location.hostname);
@@ -168,9 +183,11 @@ function loaded() {
     var thecursor = document.getElementById('realcursor');
     host.cursor.oncursorlock = function (userid){
       cursor_userid = userid;
+      onSessionStart();
     };
     host.cursor.oncursorunlock = function (userid){
       cursor_userid = undefined;
+      onSessionEnd();
     };
     host.cursor.oncursorstart = function(userid){
       document.getElementById('realcursor').style.display = 'block';
@@ -178,6 +195,7 @@ function loaded() {
     host.cursor.oncursorstop = function(userid){
       document.getElementById('realcursor').style.display = 'none';
     };
+
     host.cursor.oncursor = (function(cursorElement){
       return function(x,y, rel, userid) {
         if (cursor_userid != userid) return;
@@ -196,6 +214,54 @@ function loaded() {
 }
 
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
+
+var horizontalSD = new Zig.HorizontalSwipeDetector();
+horizontalSD.onValueChange = function(value) {
+  sliderTarget = value;
+}
+horizontalSD.onSwipeLeft = function() {
+  slideshow.prev();
+}
+horizontalSD.onSwipeRight = function() {
+  slideshow.next();
+}
+
+isInSession = false;
+function onSessionStart()
+{
+  isInSession = true;
+  $(".showinsession").fadeIn();
+}
+
+function onSessionEnd()
+{
+  isInSession = false;
+  $(".showinsession").fadeOut();
+} 
+
+sliderTarget = 0.5;
+sliderCurrent = 0.5;
+
+function lerp(from, to, amount) 
+{
+  return from + ((to - from) * amount);
+}
+
+function updateSlider()
+{
+  if (!isInSession) return;
+  
+  sliderCurrent = lerp(sliderCurrent, sliderTarget, 0.5);
+  sliderNub.style.left = (sliderCurrent * sliderNub.parentNode.offsetWidth - (sliderNub.offsetWidth / 2)) + "px";
+}
+
+function ZigPluginLoaded() {
+  Zig.init(document.getElementById("ZigPlugin"));
+  Zig.SingleUser.controls.AddControl(horizontalSD);
+  Zig.SingleUser.onUserEngaged = function(user) { console.log("Yes"); onSessionStart(); };
+  Zig.SingleUser.onUserDisengaged = function(user) { onSessionEnd(); };
+}
 
 
     </script>
@@ -319,25 +385,22 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
       </div> <!-- slides -->
       <div id="speaker-note" class="invisible" style="display: none;">
       </div>
-         <div style="height: 15px;">
-			
-            	<div class="slider showinsession" id="slider">
-			
-            		<div class="slider_nub showinsession" id="slider_nub"></div>
-			
-            	</div>
-			
+      
+      
+          <div style="height: 15px;">
+      
+              <div class="slider showinsession" id="slider">
+      
+                <div class="slider_nub showinsession" id="slider_nub"></div>
+      
+              </div>
+      
             </div>
             
-         <!-- THIS IS THE BOX THAT WILL POP UP WHEN A USER IS CONNECTED TO THE WEBPAGE -->   
-            
-         <div id="userConnected" style="display: none;">
-         
-             <p><span class="userConnectionName">[USER]</span>
-             
-             is connected...</p>
-         
-         </div>           
+        <div id="userConnected" style="display:none">
+          <p><span class="userConnectionName">Waiting for connection</span></p>
+        </div>
+
             
     </div> <!-- presentation -->
 			
@@ -345,7 +408,13 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
   </div>
 
     <script src="slide/slide.js"></script>
-    <div id="realcursor" class="showinsession"> 
+    <div id="realcursor" style="display:none">
     </div>
+         <div id="pluginContainer">
+  <object id="ZigPlugin" type="application/x-zig" width="0" height="0">
+    <param name="onload" value="ZigPluginLoaded" />
+  </object>
+</div>
+
   </body>
 </html>
