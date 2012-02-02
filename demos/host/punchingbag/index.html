@@ -20,6 +20,10 @@
 	<script type="text/javascript" src="zig.js"></script>
 
 	<script src="../goto.js"></script>
+<script src="js/synclist-client.js"></script>
+<script src="js/zigmote-client.js"></script>
+<script src="js/zigmote.cursor.js"></script>
+
 	
 	<style>
 	#myslider { width: 800px; height: 450px; }
@@ -81,6 +85,10 @@
 
 		var socket;
 		var host;
+
+var currentRoomName = localStorage.getItem("currentRoomName");
+if (null == currentRoomName) currentRoomName = "[ZigFu Demo]";  
+
 
 		function roomStarted(roomData) {
 			host.on('goto', function(data) { goto(data); });

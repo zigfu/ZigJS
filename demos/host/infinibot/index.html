@@ -19,6 +19,10 @@
 	<!-- ZigJS -->
 	<script type="text/javascript" src="zig.js"></script>
 
+<script src="js/synclist-client.js"></script>
+<script src="js/zigmote-client.js"></script>
+<script src="js/zigmote.cursor.js"></script>
+
 	<script src="../goto.js"></script>
 	
 	<style>
@@ -420,6 +424,29 @@ function addToAnythingslider(toAdd, hideleft, hideright, caption) {
 			PauseInterval = window.setInterval(function() { window.clearInterval(PauseInterval); Zig.Resume(); }, 1000);
 		}
 	}
+
+
+var socket;
+var host;
+
+var currentRoomName = localStorage.getItem("currentRoomName");
+if (null == currentRoomName) currentRoomName = "[ZigFu Demo]";  
+
+function roomStarted(roomData) {
+  host.on('goto', function(data) { goto(data); });
+}
+
+function loaded() {
+    // connect to zigtv
+  //socket = io.connect('http://zig.tv');
+  socket = io.connect('http://'+document.location.hostname);
+  socket.on('connect', function () {
+    host = zigmote.host(socket);
+    host.startRoom("motionosdemos", currentRoomName, roomStarted);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
 
 	</script> 
 </head>

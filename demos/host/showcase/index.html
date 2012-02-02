@@ -10,11 +10,83 @@
 
 <link rel="stylesheet" type="text/css" href="../css/style.css" />
 
-<style>
+<script src="../goto.js"></script>
+<script src="js/synclist-client.js"></script>
+<script src="js/zigmote-client.js"></script>
+<script src="js/zigmote.cursor.js"></script>
 
 
-</style>
+<script>
+function ZigPluginLoaded() {
+    /*Zig.init(document.getElementById("ZigPlugin"));
+    
+    horizFader = new Zig.Fader(Zig.OrientationX);
+    
+    vertFader = new Zig.Fader(Zig.OrientationY);
+    
+    Zig.SingleUser.controls.AddControl(horizFader);
+    Zig.SingleUser.controls.AddControl(vertFader);*/
+    var pluginObj = document.getElementById("ZigPlugin");
+    i = 0;
+    pluginObj.addEventListener("NewFrame", function(u) { i++; drawDM(pluginObj);drawIM(pluginObj); }, false);
+    pluginObj.requestStreams(true, true, false);
+    //setInterval(function() { pluginObj.update(); }, 30);
+  }
+function drawDM(plugin) {
+    var dm = plugin.depthMap;
+    if (dm.length == 0) return;
+    var canv = document.getElementById('depth');
+    var ctx = canv.getContext('2d');
+    var pix = ctx.createImageData(160,120);
+    var data = pix.data;
+    for(var i = 0; i < 160*120; i++) {
+      var pixel = dm.charCodeAt(i*2) +
+            (dm.charCodeAt(i*2 + 1) << 8);
+      data[i*4] = ((pixel ) & 7) << 4;
+      data[i*4 + 3] = 255;
+    }
+    ctx.putImageData(pix, 0, 0);
+  }
+  function drawIM(plugin) {
+    var im = plugin.imageMap;
+    if (im.length == 0) return;
+    var canv = document.getElementById('image');
+    var ctx = canv.getContext('2d');
+    var pix = ctx.createImageData(160,120);
+    var data = pix.data;
 
+    for(var i = 0; i < 160*120; i++) {
+      data[i*4] = im.charCodeAt(i*3) & 255;
+      data[i*4 + 1] = (im.charCodeAt(i*3 + 1)) & 255;
+      data[i*4 + 2] = (im.charCodeAt(i*3 + 2)) & 255;
+      data[i*4 + 3] = 255;
+    }
+    ctx.putImageData(pix, 0, 0);
+  }
+
+var socket;
+var host;
+
+var currentRoomName = localStorage.getItem("currentRoomName");
+if (null == currentRoomName) currentRoomName = "[ZigFu Demo]";  
+
+function roomStarted(roomData) {
+  host.on('goto', function(data) { goto(data); });
+}
+
+function loaded() {
+    // connect to zigtv
+  //socket = io.connect('http://zig.tv');
+  socket = io.connect('http://'+document.location.hostname);
+  socket.on('connect', function () {
+    host = zigmote.host(socket);
+    host.startRoom("motionosdemos", currentRoomName, roomStarted);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
+
+</script>
 </head>
 
 <body>
@@ -28,7 +100,7 @@
       </div>
       <div class='right'>
         <div style='float : right'>
-          <h1 id="currentRoomName" onClick="nameentry();" class="nameentry">[Room Name]</h1>
+          <h1 id="currentRoomName" onClick="nameentry();" class="nameentry">HTML Showcase</h1>
 
             <input class="nameentry" style="display:none; margin-top: 20px; " type="text" placeholder="[Enter TV Name]" spellcheck="off" 
             autocomplete="off" id="currentRoomNameInput" name="currentRoomNameInput" onChange="nameentrydone()"/>
@@ -41,9 +113,11 @@
 
 	<div id="canvasCont">
     	
-        <div id="depthCan"></div> 
+        <div id="depthCan"><canvas style="zoom: 200%" id='depth' width='160' height='120'></canvas>
+</div> 
     	
-        <div id="imageCan"></div>
+        <div id="imageCan"><canvas style="zoom: 200%" id='image' width='160' height='120'></canvas>
+</div>
     
     </div>
 	
@@ -52,6 +126,10 @@
 </div>
 		
 </div>
-
+<div id="pluginContainer">
+  <object id="ZigPlugin" type="application/x-zig" width="0" height="0">
+    <param name="onload" value="ZigPluginLoaded" />
+  </object>
+</div> 
 </body>
 </html>
