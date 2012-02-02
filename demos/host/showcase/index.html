@@ -10,6 +10,7 @@
 
 <link rel="stylesheet" type="text/css" href="../css/style.css" />
 
+<script src="zig.js"></script>
 <script src="../goto.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="js/synclist-client.js"></script>
@@ -31,6 +32,7 @@ function ZigPluginLoaded() {
     i = 0;
     pluginObj.addEventListener("NewFrame", function(u) { i++; drawDM(pluginObj);drawIM(pluginObj); }, false);
     pluginObj.requestStreams(true, true, false);
+
     //setInterval(function() { pluginObj.update(); }, 30);
   }
 function drawDM(plugin) {
@@ -122,8 +124,6 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
     
     </div>
 	
-    <div id="usersRadar"></div>
-
 </div>
 		
 </div>
