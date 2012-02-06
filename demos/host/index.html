@@ -52,6 +52,7 @@ if (null == currentRoomName) currentRoomName = "[ZigFu Demo]";
 
 
 var lastCursor = {x : 0, y : 0};
+var target = [0,0];
 
 function clamp(val, min, max) {
 	if (val < min) return min;
@@ -59,14 +60,29 @@ function clamp(val, min, max) {
 	return val;
 }
 
-
+function vlerp(p1,p2,r)
+{
+	out = [];
+	for (i=0;i<p1.length;i++)
+	{	
+		out.push(p2[i]*r+p1[i]*(1-r));
+	}
+	return out;
+}
 function moveCursorBy(element, deltaX, deltaY) {
-	lastCursor.x = clamp(lastCursor.x + deltaX, 0, element.parentNode.offsetWidth);
-	lastCursor.y = clamp(lastCursor.y + deltaY, 0, element.parentNode.offsetHeight);
-
-	setCursor(element, lastCursor.x, lastCursor.y);
+	target[0] = clamp(target[0] + deltaX, 0, element.parentNode.offsetWidth);
+	target[1] = clamp(target[1] + deltaY, 0, element.parentNode.offsetHeight);
 }
 
+function moveCursor()
+{
+	last = [lastCursor.x,lastCursor.y];
+	out = vlerp(last,target,.1);
+	lastCursor.x = out[0];
+	lastCursor.y = out[1];
+	setCursor(document.getElementById("realcursor"), lastCursor.x, lastCursor.y);
+}
+window.setInterval(moveCursor,20);
 
 function setCursor(element, xpx, ypx) {
 	element.style.left = xpx + "px";
