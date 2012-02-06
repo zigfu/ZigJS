@@ -1,12 +1,16 @@
-var app = require('http').createServer(handler)
+//var app = require('http').createServer(handler)
+var express = require('express')
+  , app = express.createServer()
   , io = require('socket.io').listen(app, {origins: '*:*'}) // TODO: Origins
   , fs = require('fs')
   , path = require('path')
   , net = require('net')
   , zigmote = require('zigmote').listen(io);
-  
+ 
 app.listen(80);
-
+app.use(app.router);
+app.use(express.static(__dirname));
+app.get('/',handler);
 function handler (request, response) {
     var filePath = '.' + request.url;
     

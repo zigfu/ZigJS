@@ -216,7 +216,7 @@ function loaded() {
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false);
 
 
-var horizontalSD = new Zig.HorizontalSwipeDetector();
+var horizontalSD = new Zig.HorizontalSwipeDetector(150); //150 mm wide slider
 horizontalSD.onValueChange = function(value) {
   sliderTarget = value;
 }
@@ -252,7 +252,7 @@ function updateSlider()
 {
   if (!isInSession) return;
   
-  sliderCurrent = lerp(sliderCurrent, sliderTarget, 0.5);
+  sliderCurrent = lerp(sliderCurrent, sliderTarget, 0.2);
   sliderNub.style.left = (sliderCurrent * sliderNub.parentNode.offsetWidth - (sliderNub.offsetWidth / 2)) + "px";
 }
 
