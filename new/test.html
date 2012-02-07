@@ -5,17 +5,65 @@
 
 <script>
 
-function loaded() {
+var radar;
 
+function loaded() {
+	radar = (function(parent, userClass) {
+		var parentElement = parent;
+		var users = [];
+
+		function onnewuser(newUser) {
+			var el = document.createElement('div');
+			el.classList.add(userClass);
+			users[newUser.id] = el;
+			parentElement.appendChild(el);
+		}
+
+		function onlostuser(lostUser) {
+			parentElement.removeChild(users[lostUser.id]);
+			delete users[lostUser.id];
+		}
+
+		function ondataupdate(trackedUsers) {
+			for (var userid in trackedUsers) {
+				var currUser = trackedUsers[userid];
+				var el = users[currUser.id];
+				var pos = currUser.position;
+				el.style.left = (((pos[0] / 4000) + 0.5) * parentElement.offsetWidth - (el.offsetWidth / 2)) + "px";
+				el.style.top = ((pos[2] / 4000.0) * parentElement.offsetHeight - (el.offsetHeight / 2)) + "px";
+			}				
+		}
+
+		return {
+			onnewuser : onnewuser,
+			onlostuser : onlostuser, 
+			ondataupdate : ondataupdate,
+		}
+	}(document.getElementById("radar"), "user"));
 }
 
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false); 
+
+function ZigPluginLoaded() {
+	zig.init(document.getElementById("ZigPlugin"));
+	zig.addListener(radar);
+}
 
 </script>
 
 
 </head>
 <body>
+
+
+<div id="radar"></div>
+
+<div id="pluginContainer">
+	<object id="ZigPlugin" type="application/x-zig" width="0" height="0">
+		<param name="onload" value="ZigPluginLoaded" />
+	</object>
+</div> 
+
 
 </body>
 </html>
