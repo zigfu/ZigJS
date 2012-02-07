@@ -46,7 +46,31 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 
 function ZigPluginLoaded() {
 	zig.init(document.getElementById("ZigPlugin"));
-	zig.addListener(radar);
+
+	var crap = zig.EngageFirstUserInSession();
+
+	crap.addEventListener('userengaged', function(user) {
+		console.log("User engaged: ");
+		console.log(user);
+	});
+	crap.addEventListener('userdisengaged', function(user) {
+		console.log('User disengaged');
+	});
+	crap.addEventListener('sessionstart', function(fp) {
+		console.log("Session start");
+	});
+	crap.addEventListener('sessionupdate', function(p) {
+		console.log("Update: " + p);
+	})
+	crap.addEventListener('sessionend', function() {
+		console.log("Session end");
+	});
+
+	zig.addListener(crap);
+
+	//zig.addListener(radar);
+
+	//zig.addEventListener('newuser', function(newUser) {})
 }
 
 </script>
