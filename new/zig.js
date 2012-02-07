@@ -247,6 +247,7 @@ function HandSessionDetector(user) {
 	var events = Events();
 	var api = {
 		onlostuser : onlostuser,
+		onuserupdate : onuserupdate,
 		startSession : startSession,
 		stopSession : stopSession,
 	}
