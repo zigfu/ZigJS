@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 function ZigPluginLoaded() {
 	zig.init(document.getElementById("ZigPlugin"));
 
-	var crap = zig.EngageFirstUserInSession();
+	var crap = zig.EngageUsersWithSkeleton(2);
 
 	crap.addEventListener('userengaged', function(user) {
 		console.log("User engaged: ");
@@ -56,6 +56,10 @@ function ZigPluginLoaded() {
 	crap.addEventListener('userdisengaged', function(user) {
 		console.log('User disengaged');
 	});
+	crap.addEventListener('allusersengaged', function(allUsers) {
+		console.log('All users engaged: ' + allUsers.length);
+	});
+
 	crap.addEventListener('sessionstart', function(fp) {
 		console.log("Session start");
 	});

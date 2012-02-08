@@ -13,7 +13,7 @@ function include(file)
 include("sylvester.js");
 
 //-----------------------------------------------------------------------------
-// Event stuff
+// Helper objects
 //-----------------------------------------------------------------------------
 
 function Events() {
@@ -80,6 +80,53 @@ function Events() {
 		removeListener : removeListener,
 		fireEvent : fireEvent,
 		eventify : eventify,
+	}
+}
+
+function BoundingBox(size, center) {
+
+	if (undefined === center) {
+		center = [0,0,0];
+	}
+	if (undefined === size) {
+		size = [0,0,0];
+	}
+
+	var center = $V(center);
+	var size = $V(size);
+	var extents = size.multiply(0.5);
+	var min = center.subtract(extents);
+	var max = center.add(extents);
+
+	function contains(point) {
+		point = $V(point);
+		return (point.e(1) >= min.e(1) && point.e(1) <= max.e(1) && 
+				point.e(2) >= min.e(2) && point.e(2) <= max.e(2) &&
+				point.e(3) >= min.e(3) && point.e(3) <= max.e(3));
+	}
+
+	function recenter(newCenter) {
+		center = $V(newCenter);
+		min = center.subtract(extents);
+		max = center.add(extents);
+	}
+
+	function resize(newSize) {
+		size = $V(size);
+		extents = size.multiply(0.5);
+		min = center.subtract(extents);
+		max = center.add(extents);
+	}
+
+	function inspect() {
+		console.log({center: center, size: size, min : min, max : max});
+	}
+
+	return {
+		contains : contains,
+		resize : resize,
+		recenter : recenter,
+		inspect : inspect
 	}
 }
 
@@ -253,9 +300,14 @@ function HandSessionDetector(user) {
 	}
 	events.eventify(api);
 
+	var bboxOffset = $V([0, 250, -300]);
+	var bbox = BoundingBox([1000, 500, 500]);
 
+	var shouldRotateHand = true;
 	var inSession = false;
 	var jointToUse;
+	var framesNotInBbox = 0;
+	var maxFramesNotInBbox = 15;
 
 	var leftSteady = zig.SteadyDetector(zig.Joints.LeftHand);
 	var rightSteady = zig.SteadyDetector(zig.Joints.RightHand);
@@ -271,15 +323,36 @@ function HandSessionDetector(user) {
 	user.addListener(rightSteady);
 	user.addListener(api);
 	
+	function rotatedPoint(point) {
+		return (shouldRotateHand) ? rotatePoint(point, user.position) : point;
+	}
+
+	function inBbox(point) {
+		var userPosition = rotatedPoint(user.position);
+		bbox.recenter($V(userPosition).add(bboxOffset));
+		return bbox.contains(rotatedPoint(point));
+	}
+
 	function steadyDetected(joint) {
 		if (inSession) return;
-		// TODO: Check bounding box
-		startSession(joint);
+		
+		if (inBbox(user.skeleton[joint].position)) {
+			startSession(joint);
+		}
 	}
 
 	function onuserupdate(userData) {
 		if (inSession) {
-			events.fireEvent('sessionupdate', userData.skeleton[jointToUse].position);
+			if (!inBbox(userData.skeleton[jointToUse].position)) {
+				framesNotInBbox++;
+				if (framesNotInBbox >= maxFramesNotInBbox) {
+					framesNotInBbox = 0;
+					stopSession();
+				}
+			} else {
+				framesNotInBbox = 0;
+				events.fireEvent('sessionupdate', rotatedPoint(userData.skeleton[jointToUse].position));
+			}
 		}
 	}
 
@@ -295,6 +368,28 @@ function HandSessionDetector(user) {
 			inSession = false;
 			events.fireEvent('sessionend');
 		}
+	}
+
+	function rotatePoint(handPos, comPos)
+	{
+		// change the forward vector to be u = (CoM - (0,0,0))
+		// instead of (0,0,1)
+		var cx = comPos[0];
+		var cy = comPos[1];
+		var cz = comPos[2];
+		
+		var len = Math.sqrt(cx*cx + cy*cy + cz*cz);
+		// project the vector to XZ plane, so it's actually (cx,0,cz). let's call it v
+		// so cos(angle) = v . u / (|u|*|v|)
+		var lenProjected = Math.sqrt(cx*cx + cz*cz);
+		var cosXrotation = (cx*cx + cz*cz) / (lenProjected * len); // this can be slightly simplified
+		var xRot = Math.acos(cosXrotation);
+		if (cy < 0) xRot = -xRot; // set the sign which we lose in 
+		// now for the angle between v and the (0,0,1) vector for Y-axis rotation
+		var cosYrotation = cz / lenProjected;
+		var yRot = Math.acos(cosYrotation);
+		if (cx > 0) yRot = -yRot;
+		return (Matrix.RotationX(xRot).x(Matrix.RotationY(yRot))).x($V(handPos)).elements;
 	}
 
 	// HACK - this ensures we get notified if our user was lost during a session.
@@ -354,13 +449,13 @@ function EngageFirstUserInSession() {
 		var sessionDetector = HandSessionDetector(newUser);
 		sessionDetector.addEventListener('sessionstart', function(focusPosition) {
 			onsessionstart(newUser, focusPosition);
-		})
+		});
 		sessionDetector.addEventListener('sessionupdate', function(position) {
 			onsessionupdate(newUser, position);
-		})
+		});
 		sessionDetector.addEventListener('sessionend', function() {
 			onsessionend(newUser);
-		})
+		});
 	}
 
 	function onlostuser(lostUser) {
@@ -373,17 +468,76 @@ function EngageFirstUserInSession() {
 }
 
 
+function EngageUsersWithSkeleton(count) {
+	if (undefined === count) {
+		count = 1;
+	}
+
+	var events = Events();
+	var api = {
+		onlostuser : onlostuser,
+		ondataupdate : ondataupdate,
+	}
+	events.eventify(api);
+
+	var engagedUsers = [];
+
+	function ondataupdate(zigObject) {
+		// if we're looking for more users to engage
+		if (engagedUsers.length < count) {
+			for (var userid in zigObject.users) if (zigObject.users.hasOwnProperty(userid)) {
+				var user = zigObject.users[userid];
+				if (user.skeletonTracked && (-1 == engagedUsers.indexOf(user))) {
+					if (engagedUsers.length < count) {
+						engagedUsers.push(user);
+						events.fireEvent('userengaged', user);
+					}
+				}
+			}
+
+			if (engagedUsers.length == count) {
+				events.fireEvent('allusersengaged', engagedUsers);
+			}
+		}
+	}
+
+	function onlostuser(lostUser) {
+		var i = engagedUsers.indexOf(lostUser);
+		if (-1 != i) {
+			engagedUsers.splice(i, 1);
+			events.fireEvent('userdisengaged', lostUser);
+		}
+	}
+
+	return api;
+}
+
 //-----------------------------------------------------------------------------
 // Main 'zig' object
 //-----------------------------------------------------------------------------
 
 var zig = (function() {
 	var plugin;
-	var events = Events();
 
 	// both of these will hold data per user (indexed by userid)
 	var trackedUsers = {};
 	var userCallbacks = {};
+
+	var publicApi = {
+		init : init,
+		verbose : verbose,
+		users : trackedUsers,
+
+		Joints : Joints,
+
+		SteadyDetector : SteadyDetector,
+		EngageFirstUserInSession : EngageFirstUserInSession,
+		EngageUsersWithSkeleton : EngageUsersWithSkeleton,
+	}
+
+	// Make sure our public API supports events
+	var events = Events();
+	events.eventify(publicApi);
 
 	var isVerbose = true;
 	function verbose(v) {
@@ -479,7 +633,7 @@ var zig = (function() {
 		toAdd.forEach(function(user) { log('New user: ' + user.id); events.fireEvent('newuser', user); });
 
 		// fire all update events (dataupdate for all users and userupdate for each user)
-		events.fireEvent('dataupdate', trackedUsers);
+		events.fireEvent('dataupdate', publicApi);
 		for (var userid in trackedUsers) if (trackedUsers.hasOwnProperty(userid)) {
 			userCallbacks[userid].fireEvent('userupdate', trackedUsers[userid]);
 		}
@@ -500,21 +654,6 @@ var zig = (function() {
 		 }}());
 		log("inited");
 	}
-
-	// return public API
-	var publicApi = {
-		init : init,
-		verbose : verbose,
-		trackedUsers : trackedUsers,
-
-		Joints : Joints,
-
-		SteadyDetector : SteadyDetector,
-		EngageFirstUserInSession : EngageFirstUserInSession,
-	}
-
-	// Make sure our public API supports events
-	events.eventify(publicApi);
 
 	return publicApi;
 
