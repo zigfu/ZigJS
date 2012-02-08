@@ -26,6 +26,7 @@ function Events() {
 			events[eventName] = [];
 		}
 		events[eventName].push(callback);
+		return callback;
 	}
 
 	function removeEventListener(eventName, callback) {
@@ -37,17 +38,24 @@ function Events() {
 
 	function addListener(listener) {
 		listeners.push(listener);
+		return listener;
 	}
 
 	function removeListener(listener) {
+		if (undefined === listener) {
+			listeners = [];
+			return;
+		}
 		var i = listeners.indexOf(listener);
 		if (i>=0) listeners.splice(i,1);
 	}
 
-	function fireEvent(eventName, arg) {
+	function fireEvent(eventName, arg, specificListener) {
 		eventName = "on" + eventName;
 		// first listeners
-		listeners.forEach(function(listener) { 
+		listeners.forEach(function(listener) {
+			if (undefined !== specificListener && specificListener != listener) return;
+
 			if (listener.hasOwnProperty(eventName)) {
 				try {
 					listener[eventName].call(listener, arg);
@@ -130,6 +138,29 @@ function BoundingBox(size, center) {
 	}
 }
 
+function clamp(x, min, max)
+{
+	if (x < min) return min;
+	if (x > max) return max;
+	return x;
+}
+
+function lerp(from, to, amount) 
+{
+	return from + ((to - from) * amount);
+}
+
+function vlerp(p1,p2,r)
+{
+	out = [];
+	for (i=0;i<p1.length;i++)
+	{	
+		out.push(p2[i]*r+p1[i]*(1-r));
+	}
+	return out;
+}
+
+
 //-----------------------------------------------------------------------------
 // Consts
 //-----------------------------------------------------------------------------
@@ -166,8 +197,7 @@ var Joints = {
 // UI session controls
 //-----------------------------------------------------------------------------
 
-function SteadyDetector(jointId, maxVariance)
-{
+function SteadyDetector(jointId, maxVariance) {
 	if (undefined === maxVariance) {
 		maxVariance = 50;
 	}
@@ -286,15 +316,109 @@ function SteadyDetector(jointId, maxVariance)
 	return publicApi;
 }
 
+// Fader
+function Fader(orientation, size) {
+	// defaults
+	size = size || 250;
+
+	// return object
+	var api = {
+		itemsCount : 1,
+		hysteresis : 0.1,
+		initialValue : 0.5,
+		flip : false,
+		value : 0,
+		selectedItem : 0,
+		size : size,
+		orientation : orientation,
+		updatePosition : updatePosition,
+		updateValue : updateValue,
+		moveTo : moveTo,
+		moveToContain : moveToContain,
+		onsessionstart : onsessionstart,
+		onsessionupdate : onsessionupdate,
+		onsessionend : onsessionend,
+	}
+	var events = Events();
+	events.eventify(api);
+
+	var center = [0,0,0];
+
+	// hand point control callbacks
+
+	function onsessionstart(focusPosition) {
+		moveTo(focusPosition, api.initialValue);
+		api.value = api.initialValue;
+		api.selectedItem = Math.floor(api.itemsCount * api.value);
+		events.fireEvent('itemselected', api.selectedItem);
+	}
+
+	function onsessionupdate(position) {
+		updatePosition(position);
+	}
+
+	function onsessionend() {
+		events.fireEvent('itemunselected', api.selectedItem);
+	}
+
+	function updatePosition(position) {
+		var distanceFromCenter = position[api.orientation] - center[api.orientation];
+		var ret = (distanceFromCenter / api.size) + 0.5;
+		ret = clamp(ret, 0, 1);
+		if (api.flip) ret = 1 - ret;
+		updateValue(ret);
+	}
+
+	function updateValue(val) {
+		var newSelected = api.selectedItem;
+		var minValue = (api.selectedItem * (1 / api.itemsCount)) - api.hysteresis;
+		var maxValue = (api.selectedItem + 1) * (1 / api.itemsCount) + api.hysteresis;
+		
+		api.value = val;
+		events.fireEvent('valuechange', api.value);
+		
+		if (api.value > maxValue) {
+			newSelected++;
+		}
+		if (api.value < minValue) {
+			newSelected--;
+		}
+		
+		if (newSelected != api.selectedItem) {
+			events.fireEvent('itemunselected', api.selectedItem);
+			api.selectedItem = newSelected;
+			events.fireEvent('itemselected', newSelected);
+		}		
+	}
+	
+	function moveTo(position, value) {
+		if (api.flip) value = 1 - value;
+		center[api.orientation] = position[api.orientation] + ((0.5 - value) * api.size);
+	}
+	
+	function moveToContain(position) {
+		var distanceFromCenter = position[api.orientation] - center[api.orientation];
+		if (distanceFromCenter > api.size / 2) {
+			center[api.orientation] += distanceFromCenter - (api.size / 2);
+		} else if (distanceFromCenter < api.size / -2) {
+			center[api.orientation] += distanceFromCenter + (api.size / 2);
+		}
+	}
+
+	return api;
+}
+
 //-----------------------------------------------------------------------------
 // user controls
 //-----------------------------------------------------------------------------
 
-function HandSessionDetector(user) {
+function HandSessionDetector() {
 	var events = Events();
 	var api = {
-		onlostuser : onlostuser,
+		//onlostuser : onlostuser,
 		onuserupdate : onuserupdate,
+		onattachtouser : onattachtouser,
+		ondetachfromuser : ondetachfromuser,
 		startSession : startSession,
 		stopSession : stopSession,
 	}
@@ -309,6 +433,7 @@ function HandSessionDetector(user) {
 	var framesNotInBbox = 0;
 	var maxFramesNotInBbox = 15;
 
+	var currentUser;
 	var leftSteady = zig.SteadyDetector(zig.Joints.LeftHand);
 	var rightSteady = zig.SteadyDetector(zig.Joints.RightHand);
 
@@ -319,16 +444,26 @@ function HandSessionDetector(user) {
 		steadyDetected(zig.Joints.RightHand);
 	});
 
-	user.addListener(leftSteady);
-	user.addListener(rightSteady);
-	user.addListener(api);
+	function onattachtouser(user) {
+		currentUser = user;
+		user.addListener(leftSteady);
+		user.addListener(rightSteady);
+	}
+
+	function ondetachfromuser(user) {
+		if (inSession) {
+			inSession = false;
+			events.fireEvent('sessionend');
+		}
+		currentUser = undefined;
+	}
 	
 	function rotatedPoint(point) {
-		return (shouldRotateHand) ? rotatePoint(point, user.position) : point;
+		return (shouldRotateHand) ? rotatePoint(point, currentUser.position) : point;
 	}
 
 	function inBbox(point) {
-		var userPosition = rotatedPoint(user.position);
+		var userPosition = rotatedPoint(currentUser.position);
 		bbox.recenter($V(userPosition).add(bboxOffset));
 		return bbox.contains(rotatedPoint(point));
 	}
@@ -336,7 +471,7 @@ function HandSessionDetector(user) {
 	function steadyDetected(joint) {
 		if (inSession) return;
 		
-		if (inBbox(user.skeleton[joint].position)) {
+		if (inBbox(currentUser.skeleton[joint].position)) {
 			startSession(joint);
 		}
 	}
@@ -360,7 +495,7 @@ function HandSessionDetector(user) {
 		stopSession();
 		inSession = true;
 		jointToUse = joint;
-		events.fireEvent('sessionstart', user.skeleton[joint].position);
+		events.fireEvent('sessionstart', rotatedPoint(currentUser.skeleton[joint].position));
 	}
 
 	function stopSession() {
@@ -392,6 +527,7 @@ function HandSessionDetector(user) {
 		return (Matrix.RotationX(xRot).x(Matrix.RotationY(yRot))).x($V(handPos)).elements;
 	}
 
+	/*
 	// HACK - this ensures we get notified if our user was lost during a session.
 	// if this happens we fire the session end event, and remove our reference from
 	// the main zig object
@@ -404,7 +540,7 @@ function HandSessionDetector(user) {
 			}
 			zig.removeListener(api);
 		}
-	}
+	}*/
 
 	return api;
 }
@@ -446,7 +582,8 @@ function EngageFirstUserInSession() {
 	}
 
 	function onnewuser(newUser) {
-		var sessionDetector = HandSessionDetector(newUser);
+		var sessionDetector = HandSessionDetector();
+
 		sessionDetector.addEventListener('sessionstart', function(focusPosition) {
 			onsessionstart(newUser, focusPosition);
 		});
@@ -456,6 +593,8 @@ function EngageFirstUserInSession() {
 		sessionDetector.addEventListener('sessionend', function() {
 			onsessionend(newUser);
 		});
+
+		newUser.addListener(sessionDetector);
 	}
 
 	function onlostuser(lostUser) {
@@ -531,6 +670,8 @@ var zig = (function() {
 		Joints : Joints,
 
 		SteadyDetector : SteadyDetector,
+		Fader : Fader,
+		HandSessionDetector : HandSessionDetector,
 		EngageFirstUserInSession : EngageFirstUserInSession,
 		EngageUsersWithSkeleton : EngageUsersWithSkeleton,
 	}
@@ -604,8 +745,18 @@ var zig = (function() {
 						this.skeleton = newjoints;
 					}
 				};
-				userEvents.eventify(newUser);
 				newUser.update(users[key]);
+
+				// expose Events interface, but override default functionality
+				userEvents.eventify(newUser);
+				newUser.addListener = function(listener) {
+					userEvents.addListener(listener);
+					userEvents.fireEvent('attachtouser', newUser, listener);
+				}
+				newUser.removeListener = function(listener) {
+					userEvents.removeListener(listener);
+					userEvents.fireEvent('detachfromuser', newUser, listener);
+				}
 
 				// add to internal lists
 				trackedUsers[newUser.id] = newUser;
@@ -629,7 +780,7 @@ var zig = (function() {
 		}
 
 		// fire all add/remove events 
-		toRemove.forEach(function(user) { log('Lost user: ' + user.id); events.fireEvent('lostuser', user); });
+		toRemove.forEach(function(user) { log('Lost user: ' + user.id); user.removeListener(); events.fireEvent('lostuser', user); });
 		toAdd.forEach(function(user) { log('New user: ' + user.id); events.fireEvent('newuser', user); });
 
 		// fire all update events (dataupdate for all users and userupdate for each user)

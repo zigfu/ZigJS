@@ -47,14 +47,25 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 function ZigPluginLoaded() {
 	zig.init(document.getElementById("ZigPlugin"));
 
-	var crap = zig.EngageUsersWithSkeleton(2);
+
+	var fader = zig.Fader(0, 300);
+	fader.addEventListener('valuechange', function(value) {console.log(value);});
+	
+	/*var crap = zig.EngageUsersWithSkeleton(1);
+	
+	var hsd = zig.HandSessionDetector();
+	hsd.addListener(fader);*/
+
+	var crap = zig.EngageFirstUserInSession();
+	crap.addListener(fader);
 
 	crap.addEventListener('userengaged', function(user) {
-		console.log("User engaged: ");
-		console.log(user);
+		console.log("User engaged");
+		//user.addListener(hsd);
 	});
 	crap.addEventListener('userdisengaged', function(user) {
 		console.log('User disengaged');
+		//user.removeListener(hsd);
 	});
 	crap.addEventListener('allusersengaged', function(allUsers) {
 		console.log('All users engaged: ' + allUsers.length);
@@ -64,7 +75,7 @@ function ZigPluginLoaded() {
 		console.log("Session start");
 	});
 	crap.addEventListener('sessionupdate', function(p) {
-		console.log("Update: " + p);
+		//console.log("Update: " + p);
 	})
 	crap.addEventListener('sessionend', function() {
 		console.log("Session end");
