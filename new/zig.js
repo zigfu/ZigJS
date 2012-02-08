@@ -138,6 +138,22 @@ function BoundingBox(size, center) {
 	}
 }
 
+function FpsCounter() {
+	var lastFrame;
+
+	var pub = {
+		markframe : markframe,
+		lastDelta : 0,
+		fps : 0,
+	}
+
+	function markframe(timestamp) {
+		timestamp = timestamp || (new Date()).getTime();
+		pub.lastDelta = (lastFrame - timestamp) / 1000;
+		pub.fps = 1 / pub.lastDelta;
+	}
+}
+
 function clamp(x, min, max)
 {
 	if (x < min) return min;
@@ -192,6 +208,12 @@ var Joints = {
  	RightAnkle 		: 23,
  	RightFoot 		: 24,
 };
+
+var Orientation = {
+	X : 0,
+	Y : 1,
+	Z : 2,
+}
 
 //-----------------------------------------------------------------------------
 // UI session controls
@@ -329,6 +351,8 @@ function Fader(orientation, size) {
 		flip : false,
 		value : 0,
 		selectedItem : 0,
+		driftAmount : 0,
+		autoMoveToContain : false,
 		size : size,
 		orientation : orientation,
 		updatePosition : updatePosition,
@@ -342,7 +366,9 @@ function Fader(orientation, size) {
 	var events = Events();
 	events.eventify(api);
 
+	var isEdge = false;
 	var center = [0,0,0];
+	var fps = FpsCounter();
 
 	// hand point control callbacks
 
@@ -362,6 +388,16 @@ function Fader(orientation, size) {
 	}
 
 	function updatePosition(position) {
+		fps.markframe();
+		if (api.autoMoveToContain) {
+			moveToContain(position);
+		}
+
+		if (api.driftAmount != 0) {
+			var delta = api.initialValue - api.value;
+			moveTo(position, api.value + (delta * api.driftAmount * fps.lastDelta));
+		}
+
 		var distanceFromCenter = position[api.orientation] - center[api.orientation];
 		var ret = (distanceFromCenter / api.size) + 0.5;
 		ret = clamp(ret, 0, 1);
@@ -377,6 +413,12 @@ function Fader(orientation, size) {
 		api.value = val;
 		events.fireEvent('valuechange', api.value);
 		
+		var isThisFrameEdge = (val == 0) || (val == 1);
+		if (!isEdge && isThisFrameEdge) {
+			events.fireEvent('edge', val);
+		}
+		isEdge = isThisFrameEdge;
+
 		if (api.value > maxValue) {
 			newSelected++;
 		}
@@ -408,6 +450,110 @@ function Fader(orientation, size) {
 	return api;
 }
 
+function PushDetector(size) {
+	size = size || 250;
+
+	var api = {
+		isPushed : false,
+		pushProgress : 0,
+		pushTime : 0,
+		driftAmount : 15,
+		onsessionstart: onsessionstart,
+		onsessionupdate: onsessionupdate,
+		onsessionend : onsessionend,
+	}
+	var events = Events();
+	events.eventify(api);
+
+	var fader = Fader(Orientation.Z, size);
+	fader.flip = true; // positive Z is backwards by default, so flip it
+	fader.initialValue = 0.2;
+	fader.autoMoveToContain = true;
+
+	fader.driftAmount = api.driftSpeed; // mm/s
+	
+	function onsessionstart(focusPosition) {
+		fader.onsessionstart(focusPosition);
+	}
+
+	function onsessionupdate(position) {
+		fader.moveToContain(position);
+		fader.onsessionupdate(position);
+		api.pushProgress = fader.value;
+		
+		if (!api.isPushed) {
+			if (1.0 == api.pushProgress) {
+				api.isPushed = true;
+				api.pushTime = (new Date()).getTime();
+				api.pushPosition = position;
+				fader.driftAmount = 0; // stop drifting when pushed
+				events.fireEvent('push', api);
+			}
+		} else {
+			if (api.pushProgress < 0.5) {
+				api.isPushed = false;
+				fader.driftAmount = api.driftAmount;
+				if (isClick()) {
+					events.fireEvent('click', api);
+				}
+				events.fireEvent('release', api);
+			}
+		}
+	}
+	
+	function onsessionend() {
+		fader.onsessionend();
+		if (api.isPushed) {
+			api.isPushed = false;
+			events.fireEvent('release', api);
+		}
+	}
+
+	function isClick() {
+		var delta = (new Date()).getTime() - api.pushTime;
+		return (delta < 1000);
+	} 
+
+	return api;
+}
+
+function SwipeDetector() {
+	var events = Events();
+	var horizontalFader = Fader(Orientation.X);
+	var verticalFader = Fader(Orientation.Y);
+
+	var api = {
+		driftAmount : 20;
+		horizontalFader : horizontalFader,
+		verticalFader : verticalFader,
+		onsessionstart: onsessionstart,
+		onsessionupdate: onsessionupdate,
+		onsessionend : onsessionend,
+	}
+	events.eventify(api);
+
+	horizontalFader.autoMoveToContain = true;
+	verticalFader.autoMoveToContain = true;
+	horizontalFader.driftAmount = api.driftAmount;
+	verticalFader.driftAmount = api.driftAmount;
+
+	function onsessionstart(focusPosition) {
+		horizontalFader.onsessionstart(focusPosition);
+		verticalFader.onsessionstart(focusPosition);
+	}
+	function onsessionupdate(position) {
+		horizontalFader.onsessionupdate(focusPosition);
+		verticalFader.onsessionupdate(focusPosition);
+	}
+	function onsessionend() {
+		horizontalFader.onsessionend(focusPosition);
+		verticalFader.onsessionend(focusPosition);
+	}
+
+
+	return api;
+}
+
 //-----------------------------------------------------------------------------
 // user controls
 //-----------------------------------------------------------------------------
@@ -415,7 +561,7 @@ function Fader(orientation, size) {
 function HandSessionDetector() {
 	var events = Events();
 	var api = {
-		//onlostuser : onlostuser,
+		//onuserlost : onuserlost,
 		onuserupdate : onuserupdate,
 		onattachtouser : onattachtouser,
 		ondetachfromuser : ondetachfromuser,
@@ -527,21 +673,6 @@ function HandSessionDetector() {
 		return (Matrix.RotationX(xRot).x(Matrix.RotationY(yRot))).x($V(handPos)).elements;
 	}
 
-	/*
-	// HACK - this ensures we get notified if our user was lost during a session.
-	// if this happens we fire the session end event, and remove our reference from
-	// the main zig object
-	zig.addListener(api);
-	function onlostuser(lostUser) {
-		if (lostUser.id === user.id) {
-			if (inSession) {
-				inSession = false;
-				events.fireEvent('sessionend');
-			}
-			zig.removeListener(api);
-		}
-	}*/
-
 	return api;
 }
 
@@ -553,8 +684,8 @@ function HandSessionDetector() {
 function EngageFirstUserInSession() {
 	var events = Events();
 	var api = {
-		onnewuser : onnewuser,
-		onlostuser : onlostuser,
+		onuserfound : onuserfound,
+		onuserlost : onuserlost,
 	}
 	events.eventify(api);
 	var engagedUserId = 0;
@@ -581,7 +712,7 @@ function EngageFirstUserInSession() {
 		}
 	}
 
-	function onnewuser(newUser) {
+	function onuserfound(newUser) {
 		var sessionDetector = HandSessionDetector();
 
 		sessionDetector.addEventListener('sessionstart', function(focusPosition) {
@@ -597,7 +728,7 @@ function EngageFirstUserInSession() {
 		newUser.addListener(sessionDetector);
 	}
 
-	function onlostuser(lostUser) {
+	function onuserlost(lostUser) {
 		if (lostUser.id == engagedUserId) {
 			onsessionend(lostUser);
 		}
@@ -614,7 +745,7 @@ function EngageUsersWithSkeleton(count) {
 
 	var events = Events();
 	var api = {
-		onlostuser : onlostuser,
+		onuserlost : onuserlost,
 		ondataupdate : ondataupdate,
 	}
 	events.eventify(api);
@@ -640,7 +771,7 @@ function EngageUsersWithSkeleton(count) {
 		}
 	}
 
-	function onlostuser(lostUser) {
+	function onuserlost(lostUser) {
 		var i = engagedUsers.indexOf(lostUser);
 		if (-1 != i) {
 			engagedUsers.splice(i, 1);
@@ -671,6 +802,7 @@ var zig = (function() {
 
 		SteadyDetector : SteadyDetector,
 		Fader : Fader,
+		PushDetector : PushDetector,
 		HandSessionDetector : HandSessionDetector,
 		EngageFirstUserInSession : EngageFirstUserInSession,
 		EngageUsersWithSkeleton : EngageUsersWithSkeleton,
@@ -780,8 +912,8 @@ var zig = (function() {
 		}
 
 		// fire all add/remove events 
-		toRemove.forEach(function(user) { log('Lost user: ' + user.id); user.removeListener(); events.fireEvent('lostuser', user); });
-		toAdd.forEach(function(user) { log('New user: ' + user.id); events.fireEvent('newuser', user); });
+		toRemove.forEach(function(user) { log('Lost user: ' + user.id); user.removeListener(); events.fireEvent('userlost', user); });
+		toAdd.forEach(function(user) { log('New user: ' + user.id); events.fireEvent('userfound', user); });
 
 		// fire all update events (dataupdate for all users and userupdate for each user)
 		events.fireEvent('dataupdate', publicApi);
