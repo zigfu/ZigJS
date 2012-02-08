@@ -259,7 +259,7 @@ function SteadyDetector(jointId, maxVariance)
 		var steadyThisFrame = true;
 		var stdDevs = getStddevs(pointBuffer);
 		for(var k in stdDevs) {
-			steadyThisFrame &= stdDevs[k] < 50;
+			steadyThisFrame &= stdDevs[k] < maxVariance;
 		}
 		if (steadyThisFrame && (!steady)) {
 			steady = true;
