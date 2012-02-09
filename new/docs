@@ -1,0 +1,148 @@
+Main Zig Object
+===============
+
+Properties
+----------
+* users
+* verbose
+
+Methods
+-------
+* init(pluginElement)
+
+Events
+------
+* dataupdate(zig)
+* userfound(user)
+* userlost(user)
+
+-------------------------------------------------------------------------------
+
+User Object
+===========
+
+Properties
+----------
+* id
+* positionTracked
+* position
+* skeletonTracked
+* skeleton
+
+Events
+------
+* userupdate(user)
+* attachtouser(user)
+* detachfromuser(user)
+
+-------------------------------------------------------------------------------
+
+EngageFirstUserInSession - ZigListener
+========================
+
+Properties
+----------
+* engagedUser - currently engaged User. null if no engaged user
+
+Events
+------
+* userengaged(user)
+* userdisengaged(user)
+
+-------------------------------------------------------------------------------
+
+EngageUsersWithSkeleton - ZigListener
+=======================
+
+Properties
+----------
+
+Methods
+-------
+
+Events
+------
+
+-------------------------------------------------------------------------------
+
+HandSessionDetector - UserListener
+===================
+
+Properties
+----------
+
+Methods
+-------
+
+Events
+------
+
+-------------------------------------------------------------------------------
+
+Fader - SessionListener
+=====
+
+Properties
+----------
+
+Methods
+-------
+
+Events
+------
+
+-------------------------------------------------------------------------------
+
+Fader2D - SessionListener
+=======
+
+Properties
+----------
+
+Methods
+-------
+
+Events
+------
+
+-------------------------------------------------------------------------------
+
+Fader3D - SessionListener
+=======
+
+Properties
+----------
+
+Methods
+-------
+
+Events
+------
+
+-------------------------------------------------------------------------------
+
+PushDetector - SessionListener
+============
+
+Properties
+----------
+
+Methods
+-------
+
+Events
+------
+
+-------------------------------------------------------------------------------
+
+SwipeDetector - SessionListener
+=============
+
+Properties
+----------
+
+Methods
+-------
+
+Events
+------
