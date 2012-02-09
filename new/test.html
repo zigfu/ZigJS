@@ -56,6 +56,9 @@ function ZigPluginLoaded() {
 	pushdetector.addEventListener('release', function() { console.log('Release'); });
 	pushdetector.addEventListener('click', function() { console.log('Click'); });
 
+	var swipeDetector = zig.SwipeDetector();
+	swipeDetector.addEventListener('swipe', function(dir) { console.log('Swipe: ' + dir); });
+
 	/*var crap = zig.EngageUsersWithSkeleton(1);
 	
 	var hsd = zig.HandSessionDetector();
@@ -64,6 +67,7 @@ function ZigPluginLoaded() {
 	var crap = zig.EngageFirstUserInSession();
 	crap.addListener(fader);
 	crap.addListener(pushdetector);
+	crap.addListener(swipeDetector);
 
 	crap.addEventListener('userengaged', function(user) {
 		console.log("User engaged");
