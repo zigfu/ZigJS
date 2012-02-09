@@ -149,9 +149,13 @@ function FpsCounter() {
 
 	function markframe(timestamp) {
 		timestamp = timestamp || (new Date()).getTime();
-		pub.lastDelta = (lastFrame - timestamp) / 1000;
+		lastFrame = lastFrame || timestamp;
+		pub.lastDelta = ((timestamp - lastFrame) / 1000);
 		pub.fps = 1 / pub.lastDelta;
+		lastFrame = timestamp;
 	}
+
+	return pub;
 }
 
 function clamp(x, min, max)
@@ -226,7 +230,6 @@ function SteadyDetector(jointId, maxVariance) {
 
 	var frameCount = 15;
 	var pointBuffer = [];
-	var steady = false;
 	var maxVariance = maxVariance;
 	var jointId = jointId;
 	var events = Events();
@@ -299,7 +302,7 @@ function SteadyDetector(jointId, maxVariance) {
 	
 	function clear() {
 		pointBuffer = [];
-		steady = false;
+		publicApi.isSteady = false;
 	}
 	
 	function addValue(position) {
@@ -311,16 +314,16 @@ function SteadyDetector(jointId, maxVariance) {
 		var steadyThisFrame = true;
 		var stdDevs = getStddevs(pointBuffer);
 		for(var k in stdDevs) {
-			steadyThisFrame &= stdDevs[k] < maxVariance;
+			steadyThisFrame &= stdDevs[k] < publicApi.maxVariance;
 		}
-		if (steadyThisFrame && (!steady)) {
-			steady = true;
-			events.fireEvent('steady');
-			events.fireEvent('steadychanged', steady);
-		} else if (!steadyThisFrame && steady) {
-			steady = false;
-			events.fireEvent('unsteady');
-			events.fireEvent('steadychanged', steady);
+		if (steadyThisFrame && (!publicApi.isSteady)) {
+			publicApi.isSteady = true;
+			events.fireEvent('steady', publicApi);
+			events.fireEvent('steadychanged', publicApi);
+		} else if (!steadyThisFrame && publicApi.isSteady) {
+			publicApi.isSteady = false;
+			events.fireEvent('unsteady', publicApi);
+			events.fireEvent('steadychanged', publicApi);
 		}
 	}
 
@@ -332,6 +335,8 @@ function SteadyDetector(jointId, maxVariance) {
 
 	var publicApi = {
 		addValue : addValue,
+		maxVariance : maxVariance,
+		isSteady : false,
 		onuserupdate : onuserupdate,
 	}
 	events.eventify(publicApi);
@@ -376,7 +381,7 @@ function Fader(orientation, size) {
 		moveTo(focusPosition, api.initialValue);
 		api.value = api.initialValue;
 		api.selectedItem = Math.floor(api.itemsCount * api.value);
-		events.fireEvent('itemselected', api.selectedItem);
+		events.fireEvent('itemselected', api);
 	}
 
 	function onsessionupdate(position) {
@@ -384,7 +389,7 @@ function Fader(orientation, size) {
 	}
 
 	function onsessionend() {
-		events.fireEvent('itemunselected', api.selectedItem);
+		events.fireEvent('itemunselected', api);
 	}
 
 	function updatePosition(position) {
@@ -393,16 +398,16 @@ function Fader(orientation, size) {
 			moveToContain(position);
 		}
 
-		if (api.driftAmount != 0) {
-			var delta = api.initialValue - api.value;
-			moveTo(position, api.value + (delta * api.driftAmount * fps.lastDelta));
-		}
-
 		var distanceFromCenter = position[api.orientation] - center[api.orientation];
 		var ret = (distanceFromCenter / api.size) + 0.5;
 		ret = clamp(ret, 0, 1);
 		if (api.flip) ret = 1 - ret;
 		updateValue(ret);
+
+		if (api.driftAmount != 0) {
+			var delta = api.initialValue - api.value;
+			moveTo(position, api.value + (delta * 0.05));//api.driftAmount * fps.lastDelta));
+		}
 	}
 
 	function updateValue(val) {
@@ -411,11 +416,11 @@ function Fader(orientation, size) {
 		var maxValue = (api.selectedItem + 1) * (1 / api.itemsCount) + api.hysteresis;
 		
 		api.value = val;
-		events.fireEvent('valuechange', api.value);
+		events.fireEvent('valuechange', api);
 		
 		var isThisFrameEdge = (val == 0) || (val == 1);
 		if (!isEdge && isThisFrameEdge) {
-			events.fireEvent('edge', val);
+			events.fireEvent('edge', api);
 		}
 		isEdge = isThisFrameEdge;
 
@@ -427,9 +432,9 @@ function Fader(orientation, size) {
 		}
 		
 		if (newSelected != api.selectedItem) {
-			events.fireEvent('itemunselected', api.selectedItem);
+			events.fireEvent('itemunselected', api);
 			api.selectedItem = newSelected;
-			events.fireEvent('itemselected', newSelected);
+			events.fireEvent('itemselected', api);
 		}		
 	}
 	
@@ -521,14 +526,16 @@ function SwipeDetector() {
 	var events = Events();
 	var horizontalFader = Fader(Orientation.X);
 	var verticalFader = Fader(Orientation.Y);
-
 	var api = {
-		driftAmount : 20;
+		driftAmount : 20,
 		horizontalFader : horizontalFader,
 		verticalFader : verticalFader,
+		isSwiped : false,
 		onsessionstart: onsessionstart,
 		onsessionupdate: onsessionupdate,
 		onsessionend : onsessionend,
+		onedge : onedge,
+		onvaluechange : onvaluechange,
 	}
 	events.eventify(api);
 
@@ -537,19 +544,43 @@ function SwipeDetector() {
 	horizontalFader.driftAmount = api.driftAmount;
 	verticalFader.driftAmount = api.driftAmount;
 
+	horizontalFader.swipeDirections = ['left','right'];
+	verticalFader.swipeDirections = ['down','up'];
+
+	horizontalFader.addListener(api);
+	verticalFader.addListener(api);
+
+	function onedge(fader) {
+		console.log('edge');
+		var dir = fader.swipeDirections[fader.value];
+		events.fireEvent('swipe' + dir, api);
+		events.fireEvent('swipe', dir);
+		fader.driftAmount = 0;
+		fader.swipeValue = fader.value;
+	}
+
+	function onvaluechange(fader) {
+		if (undefined !== fader.swipeValue) {
+			if (Math.abs(fader.swipeValue - fader.value) >= 0.5) {
+				delete fader.swipeValue;
+				fader.driftAmount = api.driftAmount;
+				events.fireEvent('swiperelease', api);
+			}
+		}
+	}
+
 	function onsessionstart(focusPosition) {
 		horizontalFader.onsessionstart(focusPosition);
 		verticalFader.onsessionstart(focusPosition);
 	}
 	function onsessionupdate(position) {
-		horizontalFader.onsessionupdate(focusPosition);
-		verticalFader.onsessionupdate(focusPosition);
+		horizontalFader.onsessionupdate(position);
+		verticalFader.onsessionupdate(position);
 	}
 	function onsessionend() {
-		horizontalFader.onsessionend(focusPosition);
-		verticalFader.onsessionend(focusPosition);
+		horizontalFader.onsessionend();
+		verticalFader.onsessionend();
 	}
-
 
 	return api;
 }
@@ -803,6 +834,7 @@ var zig = (function() {
 		SteadyDetector : SteadyDetector,
 		Fader : Fader,
 		PushDetector : PushDetector,
+		SwipeDetector : SwipeDetector,
 		HandSessionDetector : HandSessionDetector,
 		EngageFirstUserInSession : EngageFirstUserInSession,
 		EngageUsersWithSkeleton : EngageUsersWithSkeleton,
