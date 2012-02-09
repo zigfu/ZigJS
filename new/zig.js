@@ -808,6 +808,7 @@ function EngageFirstUserInSession() {
 	var api = {
 		onuserfound : onuserfound,
 		onuserlost : onuserlost,
+		engagedUser : null,
 	}
 	events.eventify(api);
 	var engagedUserId = 0;
@@ -816,6 +817,7 @@ function EngageFirstUserInSession() {
 		if (engagedUserId != 0) return;
 
 		engagedUserId = user.id;
+		api.engagedUser = user;
 		events.fireEvent('userengaged', user);
 		events.fireEvent('sessionstart', focusPosition);
 	}
@@ -829,6 +831,7 @@ function EngageFirstUserInSession() {
 	function onsessionend(user) {
 		if (user.id == engagedUserId) {
 			engagedUserId = 0;
+			api.engagedUser = null;
 			events.fireEvent('sessionend');
 			events.fireEvent('userdisengaged', user);
 		}
@@ -915,22 +918,30 @@ var zig = (function() {
 	var trackedUsers = {};
 	var userCallbacks = {};
 
-	var publicApi = {
-		init : init,
-		verbose : verbose,
-		users : trackedUsers,
-
-		Joints : Joints,
-
+	var controls = {
 		SteadyDetector : SteadyDetector,
 		Fader : Fader,
 		Fader2D : Fader2D,
 		Fader3D : Fader3D,
 		PushDetector : PushDetector,
 		SwipeDetector : SwipeDetector,
-		HandSessionDetector : HandSessionDetector,
+	}
+
+	var version = "0.95 beta";
+
+	var publicApi = {
+		init : init,
+		version : version,
+		verbose : verbose,
+		users : trackedUsers,
+
+		Joints : Joints,
+		
 		EngageFirstUserInSession : EngageFirstUserInSession,
 		EngageUsersWithSkeleton : EngageUsersWithSkeleton,
+
+		HandSessionDetector : HandSessionDetector,
+		controls : controls,
 	}
 
 	// Make sure our public API supports events
