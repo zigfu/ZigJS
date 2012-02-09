@@ -44,6 +44,19 @@ function loaded() {
 
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false); 
 
+function bindFaderToRange(fader, rangeElement) {
+	fader.addEventListener('valuechange', function(f) { rangeElement.value=(f.value*100);} );
+}
+
+function bindFader2DToNub(fader2d, nub) {
+	fader2d.addEventListener('valuechange', function(f) { positionInParent(nub, f.value[0], f.value[1]);});
+}
+
+function positionInParent(element, posX, posY) {
+	element.style.left = (posX * element.parentNode.offsetWidth - (element.offsetWidth / 2)) + "px";
+	element.style.top = (posY * element.parentNode.offsetHeight - (element.offsetHeight / 2)) + "px";
+}
+
 function ZigPluginLoaded() {
 	zig.init(document.getElementById("ZigPlugin"));
 
@@ -59,8 +72,17 @@ function ZigPluginLoaded() {
 	var swipeDetector = zig.SwipeDetector();
 	swipeDetector.addEventListener('swipe', function(dir) { console.log('Swipe: ' + dir); });
 
+	bindFaderToRange(swipeDetector.verticalFader, document.getElementById('swipeVert'));
+	bindFaderToRange(swipeDetector.horizontalFader, document.getElementById('swipeHoriz'));
+	
+	var fader2d = Fader2D(300,250);
+	var nub = document.getElementById('nub');
+	bindFader2DToNub(fader2d, nub);
+
 	/*var crap = zig.EngageUsersWithSkeleton(1);
 	
+	
+
 	var hsd = zig.HandSessionDetector();
 	hsd.addListener(fader);*/
 
@@ -68,6 +90,7 @@ function ZigPluginLoaded() {
 	crap.addListener(fader);
 	crap.addListener(pushdetector);
 	crap.addListener(swipeDetector);
+	crap.addListener(fader2d);
 
 	crap.addEventListener('userengaged', function(user) {
 		console.log("User engaged");
@@ -83,12 +106,14 @@ function ZigPluginLoaded() {
 
 	crap.addEventListener('sessionstart', function(fp) {
 		console.log("Session start");
+		nub.style.display = 'block';
 	});
 	crap.addEventListener('sessionupdate', function(p) {
 		//console.log("Update: " + p);
 	})
 	crap.addEventListener('sessionend', function() {
 		console.log("Session end");
+		nub.style.display = 'none';
 	});
 
 	zig.addListener(crap);
@@ -100,6 +125,25 @@ function ZigPluginLoaded() {
 
 </script>
 
+<style>
+
+#visualizer {
+	display: block;
+	position:relative;
+	width:500px;
+	height:500px;
+	border:solid black 1px;
+}
+
+#nub {
+	display: none;
+	position:relative;
+	width:30px;
+	height:30px;
+	background-color: blue;
+}
+
+</style>
 
 </head>
 <body>
@@ -113,6 +157,13 @@ function ZigPluginLoaded() {
 	</object>
 </div> 
 
+<input type='range' min="0" max="100" value="80" id='swipeVert'></input>
+<br>
+<input type='range' min="0" max="100" value="80" id='swipeHoriz'></input>
+
+<div id='visualizer'>
+	<div id='nub'></div>
+</div>
 
 </body>
 </html>

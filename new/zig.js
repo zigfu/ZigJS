@@ -158,26 +158,30 @@ function FpsCounter() {
 	return pub;
 }
 
-function clamp(x, min, max)
-{
+function clamp(x, min, max) {
 	if (x < min) return min;
 	if (x > max) return max;
 	return x;
 }
 
-function lerp(from, to, amount) 
-{
+function vclamp(v, vmin, vmax) {
+	return [clamp(v[0], vmin[0], vmax[0]), clamp(v[1], vmin[1], vmax[1]), clamp(v[2], vmin[2], vmax[2])];
+}
+
+function lerp(from, to, amount) {
 	return from + ((to - from) * amount);
 }
 
-function vlerp(p1,p2,r)
-{
+function vlerp(p1,p2,r) {
 	out = [];
-	for (i=0;i<p1.length;i++)
-	{	
+	for (i=0;i<p1.length;i++) {	
 		out.push(p2[i]*r+p1[i]*(1-r));
 	}
 	return out;
+}
+
+function vscale(v1, v2) {
+	return [v1[0]*v2[0], v1[1]*v2[1], v1[2]*v2[2]];
 }
 
 
@@ -455,6 +459,85 @@ function Fader(orientation, size) {
 	return api;
 }
 
+function Fader3D(size) {
+	var events = Events();
+	var api = {
+		size : size,
+		value : [0,0,0],
+		initialValue : [0.5, 0.5, 0.5],
+		onsessionstart : onsessionstart,
+		onsessionupdate : onsessionupdate,
+		onsessionend : function() {},
+	}
+	events.eventify(api);
+
+	var center = [0,0,0];
+
+	function onsessionstart(focusPosition) {
+		moveTo(focusPosition, api.initialValue);
+	}
+
+	function onsessionupdate(position) {
+		var d = $V(position).subtract($V(center)).elements;
+		var val = [clamp((d[0]/api.size[0]) + 0.5, 0, 1),
+				   clamp((d[1]/api.size[1]) + 0.5, 0, 1),
+				   clamp((d[2]/api.size[2]) + 0.5, 0, 1)];
+		updateValue(val);
+	}
+
+	function updateValue(value) {
+		api.value = value;
+		events.fireEvent('valuechange', api);
+	}
+
+	function moveTo(position, value) {
+		//var delta = vscale($V([0.5,0.5,0.5]).subtract($V(value)).elements, api.size);
+		//center = position.add($V(delta)).elements;
+		center[0] = position[0] + ((0.5 - value[0]) * api.size[0]);
+		center[1] = position[1] + ((0.5 - value[1]) * api.size[1]);
+		center[2] = position[2] + ((0.5 - value[2]) * api.size[2]);
+	}
+
+	return api;
+}
+
+function Fader2D(width, height) {
+	width = width || 300;
+	height = height || 250;
+
+	var events = Events();
+	var api = {
+		width : width,
+		height : height,
+		value : [0,0],
+		onsessionstart : onsessionstart,
+		onsessionupdate : onsessionupdate,
+		onsessionend : onsessionend,
+	}
+	events.eventify(api);
+
+	var fader3d = Fader3D([width, height, 1]);
+	fader3d.addEventListener('valuechange', function(f) {
+		api.value[0] = f.value[0];
+		api.value[1] = f.value[1];
+		events.fireEvent('valuechange', api);
+	});
+
+	function onsessionstart(focusPosition) {
+		fader3d.onsessionstart(focusPosition);
+	}
+	function onsessionupdate(position) {
+		fader3d.size[0] = api.width;
+		fader3d.size[1] = api.height;
+		fader3d.onsessionupdate(position);
+	}
+	function onsessionend() {
+		fader3d.onsessionend();
+	}
+
+	return api;
+}
+
 function PushDetector(size) {
 	size = size || 250;
 
@@ -551,7 +634,6 @@ function SwipeDetector() {
 	verticalFader.addListener(api);
 
 	function onedge(fader) {
-		console.log('edge');
 		var dir = fader.swipeDirections[fader.value];
 		events.fireEvent('swipe' + dir, api);
 		events.fireEvent('swipe', dir);
@@ -592,7 +674,8 @@ function SwipeDetector() {
 function HandSessionDetector() {
 	var events = Events();
 	var api = {
-		//onuserlost : onuserlost,
+		shouldRotateHand : true,
+		shouldSmoothPoints : true,
 		onuserupdate : onuserupdate,
 		onattachtouser : onattachtouser,
 		ondetachfromuser : ondetachfromuser,
@@ -604,11 +687,12 @@ function HandSessionDetector() {
 	var bboxOffset = $V([0, 250, -300]);
 	var bbox = BoundingBox([1000, 500, 500]);
 
-	var shouldRotateHand = true;
+	var rotateReference;
 	var inSession = false;
 	var jointToUse;
 	var framesNotInBbox = 0;
 	var maxFramesNotInBbox = 15;
+	var lastPosition = [0,0,0];
 
 	var currentUser;
 	var leftSteady = zig.SteadyDetector(zig.Joints.LeftHand);
@@ -623,6 +707,7 @@ function HandSessionDetector() {
 
 	function onattachtouser(user) {
 		currentUser = user;
+		rotateReference = user.position;
 		user.addListener(leftSteady);
 		user.addListener(rightSteady);
 	}
@@ -636,7 +721,7 @@ function HandSessionDetector() {
 	}
 	
 	function rotatedPoint(point) {
-		return (shouldRotateHand) ? rotatePoint(point, currentUser.position) : point;
+		return (api.shouldRotateHand) ? rotatePoint(point, rotateReference) : point;
 	}
 
 	function inBbox(point) {
@@ -654,6 +739,7 @@ function HandSessionDetector() {
 	}
 
 	function onuserupdate(userData) {
+		rotateReference = vlerp(rotateReference, userData.position, 0.5);
 		if (inSession) {
 			if (!inBbox(userData.skeleton[jointToUse].position)) {
 				framesNotInBbox++;
@@ -663,7 +749,12 @@ function HandSessionDetector() {
 				}
 			} else {
 				framesNotInBbox = 0;
-				events.fireEvent('sessionupdate', rotatedPoint(userData.skeleton[jointToUse].position));
+				var position = rotatedPoint(userData.skeleton[jointToUse].position);
+				if (api.shouldSmoothPoints) {
+					position = vlerp(lastPosition, position, 0.5);
+				}
+				lastPosition = position;
+				events.fireEvent('sessionupdate', lastPosition);
 			}
 		}
 	}
@@ -833,6 +924,8 @@ var zig = (function() {
 
 		SteadyDetector : SteadyDetector,
 		Fader : Fader,
+		Fader2D : Fader2D,
+		Fader3D : Fader3D,
 		PushDetector : PushDetector,
 		SwipeDetector : SwipeDetector,
 		HandSessionDetector : HandSessionDetector,
