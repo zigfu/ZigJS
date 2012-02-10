@@ -76,8 +76,16 @@ function Events() {
 	function eventify(obj) {
 		obj.addEventListener = addEventListener;
 		obj.removeEventListener = removeEventListener;
-		obj.addListener = addListener;
-		obj.removeListener = removeListener;
+		obj.addListener = function(listener) {
+			addListener(listener);
+			fireEvent('attach', obj, listener);
+			return listener;
+		}
+		obj.removeListener = function(listener) {
+			fireEvent('detach', obj, listener);
+			removeListener(listener);
+		}
+
 		return obj;
 	}
 
@@ -539,7 +547,7 @@ function Fader2D(width, height) {
 }
 
 function PushDetector(size) {
-	size = size || 250;
+	size = size || 200;
 
 	var api = {
 		isPushed : false,
@@ -614,9 +622,11 @@ function SwipeDetector() {
 		horizontalFader : horizontalFader,
 		verticalFader : verticalFader,
 		isSwiped : false,
-		onsessionstart: onsessionstart,
+		/*nsessionstart: onsessionstart,
 		onsessionupdate: onsessionupdate,
-		onsessionend : onsessionend,
+		onsessionend : onsessionend,*/
+		onattach : onattach,
+		ondetach : ondetach,
 		onedge : onedge,
 		onvaluechange : onvaluechange,
 	}
@@ -651,17 +661,99 @@ function SwipeDetector() {
 		}
 	}
 
-	function onsessionstart(focusPosition) {
-		horizontalFader.onsessionstart(focusPosition);
-		verticalFader.onsessionstart(focusPosition);
+	function onattach(target) {
+		target.addListener(horizontalFader);
+		target.addListener(verticalFader);
 	}
-	function onsessionupdate(position) {
-		horizontalFader.onsessionupdate(position);
-		verticalFader.onsessionupdate(position);
+
+	function ondetach(target) {
+		target.removeListener(horizontalFader);
+		target.removeListener(verticalFader);
 	}
-	function onsessionend() {
-		horizontalFader.onsessionend();
-		verticalFader.onsessionend();
+
+	return api;
+}
+
+function Cursor() {
+	var fader2d = Fader2D();
+	var pushDetector = PushDetector();
+
+	var events = Events();
+	var api = {
+		onattach : onattach,
+		ondetach : ondetach,
+		pushDetector : pushDetector,
+		fader2d : fader2d,
+		value : [0,0],
+	}
+	events.eventify(api);
+	
+	fader2d.addEventListener('valuechange', function(f) {
+		api.value[0] =  f.value[0];
+		api.value[1] =  1 - f.value[1];
+		events.fireEvent('move', api);
+	});
+
+	pushDetector.addEventListener('push', function(pd) {
+		events.fireEvent('push', api);
+	});
+	pushDetector.addEventListener('release', function(pd) {
+		events.fireEvent('release', api);
+	});
+	pushDetector.addEventListener('click', function(pd) {
+		events.fireEvent('click', api);
+	});
+
+	function onattach(target) {
+		target.addListener(fader2d);
+		target.addListener(pushDetector);
+	}
+
+	function ondetach(target) {
+		target.removeListener(fader2d);
+		target.removeListener(pushDetector);
+	}
+
+	return api;
+}
+
+function WaveDetector() {
+	var fader = Fader(Orientation.X, 100);
+	fader.autoMoveToContain = true;
+	fader.driftAmount = 15;
+
+	var api = {
+		onattach : onattach,
+		ondetach : ondetach,
+		fader : fader,
+		numberOfWaves : 5,
+	}
+	var events = Events();
+	events.eventify(api);
+
+	var edgebuffer = []
+	var lastEdge = -1;
+
+	fader.addEventListener('edge', function(f) {
+		var now = (new Date()).getTime();
+		while ((edgebuffer.length > 0) && (now - edgebuffer[0] > 2000)) edgebuffer.shift();
+		if (edgebuffer.length == 0) lastEdge = -1;
+		if (lastEdge != f.value) edgebuffer.push(now);
+		lastEdge = f.value;
+
+		if (edgebuffer.length >= api.numberOfWaves) {
+			console.log('Timespan: ' + (now - edgebuffer[0]));
+			console.log(edgebuffer);
+			events.fireEvent('wave', api);
+			edgebuffer=[];
+		}
+	});
+
+	function onattach(target) {
+		target.addListener(fader);
+	}
+	function ondetach(target) {
+		target.removeListener(fader);
 	}
 
 	return api;
@@ -677,8 +769,8 @@ function HandSessionDetector() {
 		shouldRotateHand : true,
 		shouldSmoothPoints : true,
 		onuserupdate : onuserupdate,
-		onattachtouser : onattachtouser,
-		ondetachfromuser : ondetachfromuser,
+		onattach : onattach,
+		ondetach : ondetach,
 		startSession : startSession,
 		stopSession : stopSession,
 	}
@@ -695,8 +787,8 @@ function HandSessionDetector() {
 	var lastPosition = [0,0,0];
 
 	var currentUser;
-	var leftSteady = zig.SteadyDetector(zig.Joints.LeftHand);
-	var rightSteady = zig.SteadyDetector(zig.Joints.RightHand);
+	var leftSteady = SteadyDetector(zig.Joints.LeftHand);
+	var rightSteady = SteadyDetector(zig.Joints.RightHand);
 
 	leftSteady.addEventListener('steady', function() {
 		steadyDetected(zig.Joints.LeftHand);
@@ -705,14 +797,14 @@ function HandSessionDetector() {
 		steadyDetected(zig.Joints.RightHand);
 	});
 
-	function onattachtouser(user) {
+	function onattach(user) {
 		currentUser = user;
 		rotateReference = user.position;
 		user.addListener(leftSteady);
 		user.addListener(rightSteady);
 	}
 
-	function ondetachfromuser(user) {
+	function ondetach(user) {
 		if (inSession) {
 			inSession = false;
 			events.fireEvent('sessionend');
@@ -751,7 +843,7 @@ function HandSessionDetector() {
 				framesNotInBbox = 0;
 				var position = rotatedPoint(userData.skeleton[jointToUse].position);
 				if (api.shouldSmoothPoints) {
-					position = vlerp(lastPosition, position, 0.5);
+					position = vlerp(lastPosition, position, 0.8);
 				}
 				lastPosition = position;
 				events.fireEvent('sessionupdate', lastPosition);
@@ -925,6 +1017,8 @@ var zig = (function() {
 		Fader3D : Fader3D,
 		PushDetector : PushDetector,
 		SwipeDetector : SwipeDetector,
+		WaveDetector : WaveDetector,
+		Cursor : Cursor,
 	}
 
 	var version = "0.95 beta";
@@ -1017,14 +1111,14 @@ var zig = (function() {
 
 				// expose Events interface, but override default functionality
 				userEvents.eventify(newUser);
-				newUser.addListener = function(listener) {
+				/*newUser.addListener = function(listener) {
 					userEvents.addListener(listener);
 					userEvents.fireEvent('attachtouser', newUser, listener);
 				}
 				newUser.removeListener = function(listener) {
 					userEvents.removeListener(listener);
 					userEvents.fireEvent('detachfromuser', newUser, listener);
-				}
+				}*/
 
 				// add to internal lists
 				trackedUsers[newUser.id] = newUser;

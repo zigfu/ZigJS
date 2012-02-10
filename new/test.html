@@ -61,23 +61,41 @@ function ZigPluginLoaded() {
 	zig.init(document.getElementById("ZigPlugin"));
 
 
-	var fader = zig.Fader(0, 300);
+	var fader = zig.controls.Fader(0, 300);
 	//fader.addEventListener('valuechange', function(value) {console.log(value);});
 	
-	var pushdetector = zig.PushDetector();
+	var pushdetector = zig.controls.PushDetector();
 	pushdetector.addEventListener('push', function() { console.log('Push'); });
 	pushdetector.addEventListener('release', function() { console.log('Release'); });
 	pushdetector.addEventListener('click', function() { console.log('Click'); });
 
-	var swipeDetector = zig.SwipeDetector();
+	var swipeDetector = zig.controls.SwipeDetector();
 	swipeDetector.addEventListener('swipe', function(dir) { console.log('Swipe: ' + dir); });
 
 	bindFaderToRange(swipeDetector.verticalFader, document.getElementById('swipeVert'));
 	bindFaderToRange(swipeDetector.horizontalFader, document.getElementById('swipeHoriz'));
 	
-	var fader2d = Fader2D(300,250);
+	var fader2d = zig.controls.Fader2D(300,250);
 	var nub = document.getElementById('nub');
-	bindFader2DToNub(fader2d, nub);
+	//bindFader2DToNub(fader2d, nub);
+
+	var cursor = zig.controls.Cursor();
+	cursor.addEventListener('move', function(c) {
+		positionInParent(nub, c.value[0], c.value[1]);
+	});
+	cursor.addEventListener('push', function(c) {
+		nub.classList.add('pushed');
+	});
+	cursor.addEventListener('release', function(c) {
+		nub.classList.remove('pushed');
+	});
+
+	var waveD = zig.controls.WaveDetector();
+	waveD.addEventListener('wave', function(wd) {
+		console.log('WAVE');
+	});
+
+	bindFaderToRange(waveD.fader, document.getElementById('waved'));
 
 	/*var crap = zig.EngageUsersWithSkeleton(1);
 	
@@ -90,7 +108,8 @@ function ZigPluginLoaded() {
 	crap.addListener(fader);
 	crap.addListener(pushdetector);
 	crap.addListener(swipeDetector);
-	crap.addListener(fader2d);
+	crap.addListener(cursor);
+	crap.addListener(waveD)
 
 	crap.addEventListener('userengaged', function(user) {
 		console.log("User engaged");
@@ -143,6 +162,10 @@ function ZigPluginLoaded() {
 	background-color: blue;
 }
 
+#nub pushed {
+	background-color: red;
+}
+
 </style>
 
 </head>
@@ -157,6 +180,8 @@ function ZigPluginLoaded() {
 	</object>
 </div> 
 
+<input type='range' min="0" max="100" value="80" id='waved'></input>
+<br>
 <input type='range' min="0" max="100" value="80" id='swipeVert'></input>
 <br>
 <input type='range' min="0" max="100" value="80" id='swipeHoriz'></input>
