@@ -235,7 +235,7 @@ var Orientation = {
 // UI session controls
 //-----------------------------------------------------------------------------
 
-function SteadyDetector(jointId, maxVariance) {
+function SteadyDetector(maxVariance) {
 	if (undefined === maxVariance) {
 		maxVariance = 50;
 	}
@@ -339,17 +339,20 @@ function SteadyDetector(jointId, maxVariance) {
 		}
 	}
 
-	function onuserupdate(userData) {
-		if (undefined != jointId && userData.skeletonTracked && userData.skeleton.hasOwnProperty(jointId)) {
-			addValue(userData.skeleton[jointId].position);
-		}
+	function onsessionstart(focusPosition) {
+		clear();
 	}
 
+	function onsessionupdate(position) {
+		addValue(position);
+	}
+	
 	var publicApi = {
 		addValue : addValue,
 		maxVariance : maxVariance,
+		onsessionstart : onsessionstart,
+		onsessionupdate : onsessionupdate,
 		isSteady : false,
-		onuserupdate : onuserupdate,
 	}
 	events.eventify(publicApi);
 	return publicApi;
@@ -742,8 +745,6 @@ function WaveDetector() {
 		lastEdge = f.value;
 
 		if (edgebuffer.length >= api.numberOfWaves) {
-			console.log('Timespan: ' + (now - edgebuffer[0]));
-			console.log(edgebuffer);
 			events.fireEvent('wave', api);
 			edgebuffer=[];
 		}
@@ -787,21 +788,19 @@ function HandSessionDetector() {
 	var lastPosition = [0,0,0];
 
 	var currentUser;
-	var leftSteady = SteadyDetector(zig.Joints.LeftHand);
-	var rightSteady = SteadyDetector(zig.Joints.RightHand);
+	var leftSteady = SteadyDetector(50);
+	var rightSteady = SteadyDetector(50);
 
-	leftSteady.addEventListener('steady', function() {
-		steadyDetected(zig.Joints.LeftHand);
-	});
-	rightSteady.addEventListener('steady', function() {
-		steadyDetected(zig.Joints.RightHand);
-	});
+	leftSteady.addEventListener('steady', steadyDetected);
+	rightSteady.addEventListener('steady', steadyDetected);
+	leftSteady.steadyJoint = Joints.LeftHand;
+	rightSteady.steadyJoint = Joints.RightHand;
 
 	function onattach(user) {
 		currentUser = user;
 		rotateReference = user.position;
-		user.addListener(leftSteady);
-		user.addListener(rightSteady);
+		user.mapJointToControl(Joints.LeftHand, leftSteady);
+		user.mapJointToControl(Joints.RightHand, rightSteady);
 	}
 
 	function ondetach(user) {
@@ -810,6 +809,7 @@ function HandSessionDetector() {
 			events.fireEvent('sessionend');
 		}
 		currentUser = undefined;
+		// TODO: unmap joint->control
 	}
 	
 	function rotatedPoint(point) {
@@ -822,11 +822,11 @@ function HandSessionDetector() {
 		return bbox.contains(rotatedPoint(point));
 	}
 
-	function steadyDetected(joint) {
+	function steadyDetected(detector) {
 		if (inSession) return;
 		
-		if (inBbox(currentUser.skeleton[joint].position)) {
-			startSession(joint);
+		if (inBbox(currentUser.skeleton[detector.steadyJoint].position)) {
+			startSession(detector.steadyJoint);
 		}
 	}
 
@@ -1000,6 +1000,63 @@ function EngageUsersWithSkeleton(count) {
 }
 
 //-----------------------------------------------------------------------------
+// Tracked user object
+//-----------------------------------------------------------------------------
+
+function User(userData) {
+
+	//var jointMappings = {};
+
+	var api = {
+		update : update,
+		mapJointToControl : mapJointToControl,
+	};
+
+	update(userData);
+
+	function update(userData) {
+		api.id = userData.id;
+		api.positionTracked = true;
+		api.position = userData.centerofmass;
+		api.skeletonTracked = (userData.tracked > 0);
+
+		// convert joints from an array to associative list for easier access
+		var currjoints = userData.joints;
+		var newjoints = {};
+		for (var i=0; i<currjoints.length; i++) {
+			newjoints[currjoints[i].id] = currjoints[i];
+		}
+		api.skeleton = newjoints;
+	}
+
+	function mapJointToControl(joint, control) {
+		var events = Events();
+		events.addListener(control);
+		var inSession = false;
+
+		function onuserupdate(userData) {
+			if (userData.skeletonTracked && userData.skeleton.hasOwnProperty(joint)) {
+				if (!inSession) {
+					inSession = true;
+					events.fireEvent('sessionstart', userData.skeleton[joint].position);
+				}
+				events.fireEvent('sessionupdate', userData.skeleton[joint].position);
+			} else if (inSession) {
+				inSession = false;
+				events.fireEvent('sessionend');
+			}
+		}
+
+		var adapter = {
+			onuserupdate : onuserupdate
+		}
+		api.addListener(adapter);
+	}
+
+	return api;
+}
+
+//-----------------------------------------------------------------------------
 // Main 'zig' object
 //-----------------------------------------------------------------------------
 
@@ -1091,34 +1148,8 @@ var zig = (function() {
 				
 				// create the new user & feed it with initial data
 				var userEvents = Events();
-				var newUser = {
-					update : function(userData) {
-						this.id = userData.id;
-						this.positionTracked = true;
-						this.position = userData.centerofmass;
-						this.skeletonTracked = (userData.tracked > 0);
-
-						// convert joints from an array to associative list for easier access
-						var currjoints = userData.joints;
-						var newjoints = {};
-						for (var i=0; i<currjoints.length; i++) {
-							newjoints[currjoints[i].id] = currjoints[i];
-						}
-						this.skeleton = newjoints;
-					}
-				};
-				newUser.update(users[key]);
-
-				// expose Events interface, but override default functionality
+				var newUser = User(users[key])
 				userEvents.eventify(newUser);
-				/*newUser.addListener = function(listener) {
-					userEvents.addListener(listener);
-					userEvents.fireEvent('attachtouser', newUser, listener);
-				}
-				newUser.removeListener = function(listener) {
-					userEvents.removeListener(listener);
-					userEvents.fireEvent('detachfromuser', newUser, listener);
-				}*/
 
 				// add to internal lists
 				trackedUsers[newUser.id] = newUser;
