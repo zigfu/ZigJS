@@ -774,6 +774,8 @@ function HandSessionDetector() {
 		ondetach : ondetach,
 		startSession : startSession,
 		stopSession : stopSession,
+		startOnWave : false,
+		startOnSteady : true,
 	}
 	events.eventify(api);
 
@@ -788,19 +790,28 @@ function HandSessionDetector() {
 	var lastPosition = [0,0,0];
 
 	var currentUser;
-	var leftSteady = SteadyDetector(50);
-	var rightSteady = SteadyDetector(50);
-
-	leftSteady.addEventListener('steady', steadyDetected);
-	rightSteady.addEventListener('steady', steadyDetected);
-	leftSteady.steadyJoint = Joints.LeftHand;
-	rightSteady.steadyJoint = Joints.RightHand;
 
 	function onattach(user) {
 		currentUser = user;
 		rotateReference = user.position;
-		user.mapJointToControl(Joints.LeftHand, leftSteady);
-		user.mapJointToControl(Joints.RightHand, rightSteady);
+
+		if (api.startOnWave) {
+			var wdLeft = WaveDetector();
+			var wdRight = WaveDetector();
+			wdLeft.addEventListener('wave', sessionShouldStart);
+			wdRight.addEventListener('wave', sessionShouldStart);
+			user.mapJointToControl(Joints.LeftHand, wdLeft);
+			user.mapJointToControl(Joints.RightHand, wdRight);
+		}
+
+		if (api.startOnSteady) {
+			var sdLeft = SteadyDetector();
+			var sdRight = SteadyDetector();
+			sdLeft.addEventListener('steady', sessionShouldStart);
+			sdRight.addEventListener('steady', sessionShouldStart);
+			user.mapJointToControl(Joints.LeftHand, sdLeft);
+			user.mapJointToControl(Joints.RightHand, sdRight);
+		}
 	}
 
 	function ondetach(user) {
@@ -822,11 +833,11 @@ function HandSessionDetector() {
 		return bbox.contains(rotatedPoint(point));
 	}
 
-	function steadyDetected(detector) {
+	function sessionShouldStart(detector) {
 		if (inSession) return;
 		
-		if (inBbox(currentUser.skeleton[detector.steadyJoint].position)) {
-			startSession(detector.steadyJoint);
+		if (inBbox(currentUser.skeleton[detector.mappedJoint].position)) {
+			startSession(detector.mappedJoint);
 		}
 	}
 
@@ -1031,18 +1042,19 @@ function User(userData) {
 
 	function mapJointToControl(joint, control) {
 		var events = Events();
-		events.addListener(control);
 		var inSession = false;
 
 		function onuserupdate(userData) {
 			if (userData.skeletonTracked && userData.skeleton.hasOwnProperty(joint)) {
 				if (!inSession) {
+					control.mappedJoint = joint;
 					inSession = true;
 					events.fireEvent('sessionstart', userData.skeleton[joint].position);
 				}
 				events.fireEvent('sessionupdate', userData.skeleton[joint].position);
 			} else if (inSession) {
 				inSession = false;
+				delete control.mappedJoint;
 				events.fireEvent('sessionend');
 			}
 		}
@@ -1050,6 +1062,8 @@ function User(userData) {
 		var adapter = {
 			onuserupdate : onuserupdate
 		}
+		events.eventify(adapter);
+		adapter.addListener(control);
 		api.addListener(adapter);
 	}
 
