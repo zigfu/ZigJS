@@ -1,3 +1,6 @@
+// script: zig.js
+// Does stuff
+
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
@@ -192,12 +195,7 @@ function vscale(v1, v2) {
 	return [v1[0]*v2[0], v1[1]*v2[1], v1[2]*v2[2]];
 }
 
-
-//-----------------------------------------------------------------------------
-// Consts
-//-----------------------------------------------------------------------------
-
-var Joints = {
+var Joint = {
  	Invalid 		: 0,
  	Head 			: 1,
  	Neck 			: 2,
@@ -235,6 +233,9 @@ var Orientation = {
 // UI session controls
 //-----------------------------------------------------------------------------
 
+// group: Single point controls
+
+//class: SteadyDetector
 function SteadyDetector(maxVariance) {
 	if (undefined === maxVariance) {
 		maxVariance = 50;
@@ -257,7 +258,7 @@ function SteadyDetector(maxVariance) {
 		return sum;
 	}
 	
-	// Reference: Oliver K. Smith: Eigenvalues of a symmetric 3 × 3 matrix. Commun. ACM 4(4): 168 (1961) 
+	// Reference : Oliver K. Smith: Eigenvalues of a symmetric 3 × 3 matrix. Commun. ACM 4(4): 168 (1961) 
 	// find the eigenvalues of a 3x3 symmetric matrix
 	function getEigenvalues(mat) {
 		var m = mat.trace() / 3;
@@ -358,14 +359,19 @@ function SteadyDetector(maxVariance) {
 	return publicApi;
 }
 
-// Fader
+// class: Fader
+// Simple 1D fader
 function Fader(orientation, size) {
 	// defaults
 	size = size || 250;
 
 	// return object
 	var api = {
+		// property: itemsCount
+		// How many logical items on our Fader
 		itemsCount : 1,
+		// property: hysteresis
+		// blah blah blah
 		hysteresis : 0.1,
 		initialValue : 0.5,
 		flip : false,
@@ -470,6 +476,8 @@ function Fader(orientation, size) {
 	return api;
 }
 
+//class: Fader3D
+// 3D fader
 function Fader3D(size) {
 	var events = Events();
 	var api = {
@@ -512,6 +520,8 @@ function Fader3D(size) {
 	return api;
 }
 
+// class: Fader2D
+// This is the 2d version of the popular fader
 function Fader2D(width, height) {
 	width = width || 300;
 	height = height || 250;
@@ -549,6 +559,8 @@ function Fader2D(width, height) {
 	return api;
 }
 
+// class: PushDetector
+// Detects push gestures
 function PushDetector(size) {
 	size = size || 200;
 
@@ -616,6 +628,8 @@ function PushDetector(size) {
 	return api;
 }
 
+// class: SwipeDetector
+// Detects swipes
 function SwipeDetector() {
 	var events = Events();
 	var horizontalFader = Fader(Orientation.X);
@@ -677,6 +691,8 @@ function SwipeDetector() {
 	return api;
 }
 
+// class: Cursor
+// Use this for your cursor needs
 function Cursor() {
 	var fader2d = Fader2D();
 	var pushDetector = PushDetector();
@@ -720,6 +736,8 @@ function Cursor() {
 	return api;
 }
 
+// class: WaveDetector
+// Detects wave gestures
 function WaveDetector() {
 	var fader = Fader(Orientation.X, 100);
 	fader.autoMoveToContain = true;
@@ -764,6 +782,9 @@ function WaveDetector() {
 // user controls
 //-----------------------------------------------------------------------------
 
+// class: HandSessionDetector
+// Manages the lifetime of hand point based sessions. Controls can be attached 
+// to the session detector with <HandSessionDetector.addListener>
 function HandSessionDetector() {
 	var events = Events();
 	var api = {
@@ -800,8 +821,8 @@ function HandSessionDetector() {
 			var wdRight = WaveDetector();
 			wdLeft.addEventListener('wave', sessionShouldStart);
 			wdRight.addEventListener('wave', sessionShouldStart);
-			user.mapJointToControl(Joints.LeftHand, wdLeft);
-			user.mapJointToControl(Joints.RightHand, wdRight);
+			user.mapJointToControl(Joint.LeftHand, wdLeft);
+			user.mapJointToControl(Joint.RightHand, wdRight);
 		}
 
 		if (api.startOnSteady) {
@@ -809,8 +830,8 @@ function HandSessionDetector() {
 			var sdRight = SteadyDetector();
 			sdLeft.addEventListener('steady', sessionShouldStart);
 			sdRight.addEventListener('steady', sessionShouldStart);
-			user.mapJointToControl(Joints.LeftHand, sdLeft);
-			user.mapJointToControl(Joints.RightHand, sdRight);
+			user.mapJointToControl(Joint.LeftHand, sdLeft);
+			user.mapJointToControl(Joint.RightHand, sdRight);
 		}
 	}
 
@@ -906,6 +927,8 @@ function HandSessionDetector() {
 // user engagers
 //-----------------------------------------------------------------------------
 
+// class: EngageFirstUserInSession
+// Waits for the first user in session
 function EngageFirstUserInSession() {
 	var events = Events();
 	var api = {
@@ -965,7 +988,8 @@ function EngageFirstUserInSession() {
 	return api;
 }
 
-
+// class: EngageUsersWithSkeleton
+// Waits for the first <count> users with skeleton tracking to enter the frame
 function EngageUsersWithSkeleton(count) {
 	if (undefined === count) {
 		count = 1;
@@ -1010,17 +1034,46 @@ function EngageUsersWithSkeleton(count) {
 	return api;
 }
 
-//-----------------------------------------------------------------------------
-// Tracked user object
-//-----------------------------------------------------------------------------
+// class: UserJoint
+// Represents a tracked joint
+function UserJoint() {
+// property: id
+// The <zig.Joint> of this joint
+var id;
+// property: position
+// Joint position
+var position;
+// property: rotation
+// Joint orientation
+var rotation;
+}
 
+//-----------------------------------------------------------------------------
+// class: User
+// Represents a tracked user
+//-----------------------------------------------------------------------------
 function User(userData) {
 
-	//var jointMappings = {};
-
 	var api = {
-		update : update,
+		// property: id
+		// User id as reported by middleware
+		id : 0,
+		// property: positionTracked
+		// true if user has a valid position
+		positionTracked : false,
+		// property: position
+		// Position of user relative to the sensor, only valid if positionTracked is true
+		position : [0,0,0],
+		// property: skeletonTracked
+		// true if user has full body skeleton data available
+		skeletonTracked : false,
+		// property: skeleton
+		// Full body skeleton data, only valid if skeletonTracked. Collection of <UserJoints> indexed by <UserJoint.id>
+		skeleton : {},
+		// method: mapJointToControl
+		// Updates a control with data from a specific <zig.Joint> for tracked user
 		mapJointToControl : mapJointToControl,
+		update : update,
 	};
 
 	update(userData);
@@ -1071,9 +1124,8 @@ function User(userData) {
 }
 
 //-----------------------------------------------------------------------------
-// Main 'zig' object
+// class: zig
 //-----------------------------------------------------------------------------
-
 var zig = (function() {
 	var plugin;
 
@@ -1095,13 +1147,28 @@ var zig = (function() {
 	var version = "0.95 beta";
 
 	var publicApi = {
+		// method: init
+		// Initializes zigjs using an existing plugin object
 		init : init,
+		// method: embed
+		// Initializes zigjs by embedding a new plugin object in the dom
+		embed : function(todo){},
+		// property: version
+		// Zig.js version number, not to be confused with the plugin version number
 		version : version,
+		// property: verbose
+		// Output zigjs trace messages to console
 		verbose : verbose,
+		// property: users
+		// Collection of <Users> currently tracked, indexed by <User.id>
 		users : trackedUsers,
+		// enum: zig.Joint
+		// List of Joint ID's
+		Joint : Joint,
+		// enum: Orientation
+		// Possible orientations for oriented controls (<Fader>, for instance)
+		Orientation : Orientation,
 
-		Joints : Joints,
-		
 		EngageFirstUserInSession : EngageFirstUserInSession,
 		EngageUsersWithSkeleton : EngageUsersWithSkeleton,
 
