@@ -69,6 +69,7 @@ function Events() {
 		// and then events
 		if (events.hasOwnProperty(eventName)) {
 			events[eventName].forEach(function(cb) {
+				if (undefined !== specificListener && specificListener != cb) return;
 				try {
 					cb.call(null, arg);
 				} catch (e) { console.log("Error calling callback for " + eventName + ": " + e); }
@@ -1152,7 +1153,7 @@ var zig = (function() {
 		init : init,
 		// method: embed
 		// Initializes zigjs by embedding a new plugin object in the dom
-		embed : function(todo){},
+		embed : embed,
 		// property: version
 		// Zig.js version number, not to be confused with the plugin version number
 		version : version,
@@ -1264,11 +1265,9 @@ var zig = (function() {
 		}
 	}
 
-	function init(pluginElement) {
-		// TODO: handle pluginElement = id (getElementById)
-		// TODO: handle pluginElement = undefined (add object tag)
-		plugin = pluginElement;
-		bindDomEvent(pluginElement, "NewFrame", function () {
+	function init(zo) {
+		plugin = zo;
+		bindDomEvent(zo, "NewFrame", function () {
 		 return function(data) { 
 		 	try {
 				var obj = JSON.parse(data); 
@@ -1278,8 +1277,64 @@ var zig = (function() {
 			}
 		 }}());
 		log("inited");
+		events.fireEvent('loaded', zo);
+
+		// anyone registering to 'loaded' event from now on will have his cb fired immediately
+		var oldaddEventListener = publicApi.addEventListener;
+		var newaddEventListener = function(eventName, cb) {
+			oldaddEventListener(eventName, cb);
+			if ('loaded' == eventName) {
+				events.fireEvent('loaded', zo, cb);
+			}
+		}
+		publicApi.addEventListener = newaddEventListener;
 	}
+
+	function embed(div) {
+		if (undefined === div) {
+			div = document.createElement('div');
+			document.body.appendChild(div);
+		}
+		if ('string' == typeof div) div = document.getElementById(div);
+
+		var html = '<object id="zigPluginObject" type="application/x-zig" width="0" height="0"><param name="onload" value="zigloaded" /></object>';
+		div.innerHTML = html;
+		//return document.getElementById('zigPluginObject');
+	}
+
+	var zigobject = null;
+	function findzigobject()
+	{
+		if (typeof zigobject == 'undefined') {
+			zigobject = null;
+		}
+
+		if (null == zigobject) {
+			var objs = document.getElementsByTagName('object');
+			for (var i=0; i<objs.length; i++) {
+				if (objs[i].requestStreams !== undefined) {
+					zigobject = objs[i];
+					break;
+				}
+			}
+		}
+		return zigobject;
+	}
+
+	function domloaded() {
+		// try and embed the zig plugin object, if it isn't embedded already
+		var zo = findzigobject();
+		if (null != zo) {
+			init(zo);
+		} else {
+			embed();
+		}
+	}
+	document.addEventListener('DOMContentLoaded', function () { setTimeout(domloaded, 200); }, false); 
 
 	return publicApi;
 
 }());
+function zigloaded() {
+	zig.init(zig.findzigobject());	
+}

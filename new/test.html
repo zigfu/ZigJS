@@ -8,7 +8,7 @@
 var radar;
 
 function loaded() {
-	radar = (function(parent, userClass) {
+	/*radar = (function(parent, userClass) {
 		var parentElement = parent;
 		var users = [];
 
@@ -39,7 +39,13 @@ function loaded() {
 			onlostuser : onlostuser, 
 			ondataupdate : ondataupdate,
 		}
-	}(document.getElementById("radar"), "user"));
+	}(document.getElementById("radar"), "user"));*/
+
+	if (undefined !== zig) {
+		zig.addEventListener('loaded', function() {
+			console.log('zig loaded omercy');
+		});
+	}
 }
 
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false); 
@@ -173,13 +179,13 @@ function ZigPluginLoaded() {
 
 
 <div id="radar"></div>
-
+<!--
 <div id="pluginContainer">
 	<object id="ZigPlugin" type="application/x-zig" width="0" height="0">
 		<param name="onload" value="ZigPluginLoaded" />
 	</object>
 </div> 
-
+-->
 <input type='range' min="0" max="100" value="80" id='waved'></input>
 <br>
 <input type='range' min="0" max="100" value="80" id='swipeVert'></input>
