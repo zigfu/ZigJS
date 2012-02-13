@@ -1,3 +1,5 @@
+if (undefined === zig) {
+
 // script: zig.js
 // Does stuff
 
@@ -705,12 +707,14 @@ function Cursor() {
 		pushDetector : pushDetector,
 		fader2d : fader2d,
 		value : [0,0],
+		x : 0,
+		y : 0,
 	}
 	events.eventify(api);
 	
 	fader2d.addEventListener('valuechange', function(f) {
-		api.value[0] =  f.value[0];
-		api.value[1] =  1 - f.value[1];
+		api.value[0] = api.x = f.value[0];
+		api.value[1] = api.y = 1 - f.value[1];
 		events.fireEvent('move', api);
 	});
 
@@ -1154,6 +1158,9 @@ var zig = (function() {
 		// method: embed
 		// Initializes zigjs by embedding a new plugin object in the dom
 		embed : embed,
+		// method : findZigObject
+		// Find the zig object dom element, or null if none found
+		findZigObject : findzigobject,
 		// property: version
 		// Zig.js version number, not to be confused with the plugin version number
 		version : version,
@@ -1332,9 +1339,58 @@ var zig = (function() {
 	}
 	document.addEventListener('DOMContentLoaded', function () { setTimeout(domloaded, 200); }, false); 
 
+	// some default controls, always available
+	// comment out if taking too much cpu
+	publicApi.singleUserSession = EngageFirstUserInSession();
+	publicApi.addListener(publicApi.singleUserSession);
+
 	return publicApi;
 
 }());
 function zigloaded() {
-	zig.init(zig.findzigobject());	
+	zig.init(zig.findZigObject());	
+}
+
+
+// NOT SURE WHERE THESE ALL BELONG
+
+zig.toys = (function() {
+
+	injectCursor = function() {
+		var c = zig.controls.Cursor();
+		var ce = document.createElement('div');
+		ce.style.position = 'fixed';
+		ce.style.display = 'none';
+		ce.style.width = '50px';
+		ce.style.height = '50px';
+		ce.style.backgroundColor = 'blue';
+		document.body.appendChild(ce);
+
+		// show/hide cursor on session start/end
+		zig.singleUserSession.addEventListener('sessionstart', function(focusPosition) {
+			ce.style.display = 'block';
+		});
+		zig.singleUserSession.addEventListener('sessionend', function() {
+			ce.style.display = 'none';
+		});
+
+		// move the cursor element on cursor move
+		c.addEventListener('move', function(cursor) {
+			ce.style.left = (c.x * window.innerWidth - (ce.offsetWidth / 2)) + "px";
+			ce.style.top = (c.y * window.innerHeight - (ce.offsetHeight / 2)) + "px";
+		});
+
+		// add the cursor to our singleUserSession to make sure we get events
+		zig.singleUserSession.addListener(c);
+	}
+
+	return {
+		injectCursor : injectCursor
+	}
+}());
+
+
+} // if (undefined === zig)
+else {
+	console.log('preventing double init zig.js');
 }
