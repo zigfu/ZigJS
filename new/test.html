@@ -1,6 +1,5 @@
 <html>
 <head>
-	<script src='zig.js'></script>
 
 
 <script>
@@ -69,7 +68,7 @@ function loaded() {
 		}
 	}(document.getElementById("radar"), "user"));*/
 
-	if (undefined !== zig) {
+	if (typeof zig != 'undefined') {
 		//zig.toys.injectCursor();
 	}
 }
@@ -222,7 +221,7 @@ function ZigPluginLoaded() {
 	<div id='nub'></div>
 </div>
 
-<a href="javascript:(function(){var s=document.createElement('script');s.src='zig.js';s.onload=function(){zig.toys.injectCursor()};document.body.appendChild(s);})()"> Inject cursor </a>
+<a href="javascript:(function(){var s=document.createElement('script');s.src='http://www.zigfu.com/zigjs/zig.min.js';s.onload=function(){zig.embed();zig.toys.injectCursor()};document.body.appendChild(s);})()"> Inject cursor </a>
 
 </body>
 </html>
