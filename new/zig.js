@@ -371,7 +371,7 @@ function Fader(orientation, size) {
 		initialValue : 0.5,
 		flip : false,
 		value : 0,
-		selectedItem : 0,
+		hoverItem : -1,
 		driftAmount : 0,
 		autoMoveToContain : false,
 		size : size,
@@ -396,8 +396,8 @@ function Fader(orientation, size) {
 	function onsessionstart(focusPosition) {
 		moveTo(focusPosition, api.initialValue);
 		api.value = api.initialValue;
-		api.selectedItem = Math.floor(api.itemsCount * api.value);
-		events.fireEvent('itemselected', api);
+		api.hoverItem = Math.floor(api.itemsCount * api.value);
+		events.fireEvent('hoverstart', api);
 	}
 
 	function onsessionupdate(position) {
@@ -405,7 +405,8 @@ function Fader(orientation, size) {
 	}
 
 	function onsessionend() {
-		events.fireEvent('itemunselected', api);
+		events.fireEvent('hoverstop', api);
+		api.hoverItem = -1;
 	}
 
 	function updatePosition(position) {
@@ -427,9 +428,9 @@ function Fader(orientation, size) {
 	}
 
 	function updateValue(val) {
-		var newSelected = api.selectedItem;
-		var minValue = (api.selectedItem * (1 / api.itemsCount)) - api.hysteresis;
-		var maxValue = (api.selectedItem + 1) * (1 / api.itemsCount) + api.hysteresis;
+		var newSelected = api.hoverItem;
+		var minValue = (api.hoverItem * (1 / api.itemsCount)) - api.hysteresis;
+		var maxValue = (api.hoverItem + 1) * (1 / api.itemsCount) + api.hysteresis;
 		
 		api.value = val;
 		events.fireEvent('valuechange', api);
@@ -447,10 +448,10 @@ function Fader(orientation, size) {
 			newSelected--;
 		}
 		
-		if (newSelected != api.selectedItem) {
-			events.fireEvent('itemunselected', api);
-			api.selectedItem = newSelected;
-			events.fireEvent('itemselected', api);
+		if (newSelected != api.hoverItem) {
+			events.fireEvent('hoverstop', api);
+			api.hoverItem = newSelected;
+			events.fireEvent('hoverstart', api);
 		}		
 	}
 	
@@ -792,7 +793,7 @@ function HandSessionDetector() {
 		ondetach : ondetach,
 		startSession : startSession,
 		stopSession : stopSession,
-		startOnWave : false,
+		startOnWave : true,
 		startOnSteady : true,
 	}
 	events.eventify(api);
@@ -1157,7 +1158,7 @@ zig = (function() {
 		version : version,
 		// property: verbose
 		// Output zigjs trace messages to console
-		verbose : verbose,
+		verbose : true,
 		// property: users
 		// Collection of <Users> currently tracked, indexed by <User.id>
 		users : trackedUsers,
