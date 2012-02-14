@@ -1,0 +1,279 @@
+<html>
+<head>
+<script type="text/javascript" src='google-code-prettify/prettify.js'></script>
+<link type='text/css' rel="Stylesheet" href='google-code-prettify/prettify.css' />
+</head>
+<body onload='prettyPrint()'>
+<h1>Recipes o'mercy</h1>
+
+<h2>Embed zigfu browser plugin object</h2>
+
+<pre class="prettyprint"><code class="language-js">zig.embed();
+</code></pre>
+
+
+<h2>Read sensor state</h2>
+
+<pre class="prettyprint"><code class="language-js">zig.TODO();
+</code></pre>
+
+<h2>Handling ZDK events in JavaScript</h2>
+
+<pre class="prettyprint"><code class="language-js">// Method 1: specific event listeners
+object.addEventListener('eventname1', callback);
+object.removeEventListener('eventname1', callback);
+
+// also works with anonymous callbacks
+var cb = object.addEventListener('eventname2', function() { /* do something */ });
+object.removeEventListener(cb);
+
+// Method 2: listener object
+// Note that onattach and ondetach are only called when using addListener, and not addEventListener
+var listener = {
+	oneventname1 : callback,
+	oneventname2 : callback,
+	onattach : callback,
+	ondetach : callback,
+}
+object.addListener(listener);
+object.removeListener(listener);
+
+</code></pre>
+
+<h2>User found & lost notifications</h2>
+
+<pre class="prettyprint"><code class="language-js">// Method 1: specific event listeners
+zig.addEventListener('userfound', function(user) {
+	console.log('Found user. ID: ' + user.id);
+});
+zig.addEventListener('userlost', function(user) {
+	console.log('Lost user. ID: ' + user.id);
+})
+
+// Method 2: listener object
+zig.addListener({
+	onuserfound: function(user){
+		console.log('Found user. ID: ' + user.id);
+	},
+	onuserlost: function(user){
+		console.log('Lost user. ID: ' + user.id);
+	}
+});
+</code></pre>
+
+
+<h2>Wait for first user with full body skeleton data</h2>
+
+<pre class="prettyprint"><code class="language-js">var engager = zig.EngageUsersWithSkeleton(1);
+engager.addEventListener('userengaged', function(user) {
+	console.log('User engaged: ' + user.id);
+});
+engager.addEventListener('userdisengaged', function(user) {
+	console.log('User disengaged: ' + user.id);
+});
+</code></pre>
+
+
+<h2>Wait for multiple users with full body skeleton data</h2>
+
+<pre class="prettyprint"><code class="language-js">var multiEngager = zig.EngageUsersWithSkeleton(2);
+multiEngager.addEventListener('userengaged', function(user) {
+	console.log('User engaged: ' + user.id);
+});
+multiEngager.addEventListener('userdisengaged', function(user) {
+	console.log('User disengaged: ' + user.id);
+});
+multiEngager.addEventListener('allusersengaged', function(users) {
+	console.log('Engaged all users, starting game');
+	// start game
+});
+</code></pre>
+
+
+<h2>Single user UI session</h2>
+
+<pre class="prettyprint"><code class="language-js">zig.singleUserSession.addEventListener('userengaged', function(user) {
+	console.log('User started UI session: ' + user.id);
+});
+zig.singleUserSession.addEventListener('userdisengaged', function(user) {
+	console.log('User ended UI session: ' + user.id);
+});
+zig.singleUserSession.addEventListener('sessionstart', function(initialPosition) {
+	console.log('Session started at ' + initialPosition);
+});
+zig.singleUserSession.addEventListener('sessionend', function() {
+	console.log('Session ended')
+});
+</code></pre>
+
+
+<h2>Print head position every frame for first engaged user</h2>
+
+<pre class="prettyprint"><code class="language-js">var engager = zig.EngageUsersWithSkeleton(1);
+engager.addEventListener('userengaged', function(user) {
+	console.log('User engaged: ' + user.id);
+
+	user.addEventListener('userupdate', function(user) {
+		console.log('Head position: ' + user.skeleton[zig.Joints.Head].position);
+	});
+});
+engager.addEventListener('userdisengaged', function(user) {
+	console.log('User disengaged: ' + user.id);
+});
+</code></pre>
+
+
+<h2>Horizontal Fader with range of 0 - 100</h2>
+
+<pre class="prettyprint"><code class="language-js">var f = zig.controls.Fader(zig.Orientation.X);
+f.addEventListener('valuechange', function (f) {
+	console.log('Fader value: ' + (f.value * 100));
+})
+zig.singleUserSession.addListener(f);
+</code></pre>
+
+
+<h2>Vertical Fader with 4 items</h2>
+
+<pre class="prettyprint"><code class="language-js">var f = zig.controls.Fader(zig.Orientation.Y);
+f.itemsCount = 4;
+f.addEventListener('hoverstart', function (f) {
+	console.log('Fader item hover: ' + f.hoverItem);
+});
+f.addEventListener('hoverstop', function(f) {
+	console.log('Fader item not hovering any more: ' + f.hoverItem);
+})
+zig.singleUserSession.addListener(f);
+</code></pre>
+
+<h2>Various low level UI controls</h2>
+
+<pre class="prettyprint"><code class="language-js">// PushDetector
+var pushDetector = zig.controls.PushDetector();
+pushDetector.addEventListener('push', function(pd) {
+	console.log('PushDetector: Push');
+});
+pushDetector.addEventListener('release', function(pd) {
+	console.log('PushDetector: Release');
+});
+pushDetector.addEventListener('click', function(pd) {
+	console.log('PushDetector: Click');
+});
+
+// SwipeDetector
+var swipeDetector = zig.controls.SwipeDetector();
+swipeDetector.addEventListener('swipeup', function(pd) {
+	console.log('SwipeDetector: Swipe Up');
+});
+swipeDetector.addEventListener('swipedown', function(pd) {
+	console.log('SwipeDetector: Swipe Down');
+});
+swipeDetector.addEventListener('swipeleft', function(pd) {
+	console.log('SwipeDetector: Swipe Left');
+});
+swipeDetector.addEventListener('swiperight', function(pd) {
+	console.log('SwipeDetector: Swipe Right');
+});
+swipeDetector.addEventListener('swipe', function(dir) {
+	console.log('SwipeDetector: Swipe direction: ' + dir);
+});
+
+// WaveDetector
+var waveDetector = zig.controls.WaveDetector();
+waveDetector.addEventListener('wave', function(pd) {
+	console.log('WaveDetector: Wave');
+});
+
+// SteadyDetector
+var steadyDetector = zig.controls.SteadyDetector();
+steadyDetector.addEventListener('steady', function(sd) {
+	console.log('SteadyDetector: Steady');
+});
+steadyDetector.addEventListener('unsteady', function(sd) {
+	console.log('SteadyDetector: Unsteady');
+});
+</code></pre>
+
+<h2>Simple cursor</h2>
+
+<pre class="prettyprint"><code class="language-js">// Create cursor and cursor dom element
+var c = zig.controls.Cursor();
+var ce = document.createElement('div');
+ce.id = 'mycursor';
+document.body.appendChild(ce);
+
+// show/hide cursor on session start/end
+zig.singleUserSession.addEventListener('sessionstart', function(focusPosition) {
+	ce.style.display = 'block';
+});
+zig.singleUserSession.addEventListener('sessionend', function() {
+	ce.style.display = 'none';
+});
+
+// move the cursor element on cursor move
+c.addEventListener('move', function(cursor) {
+	ce.style.left = (c.x * window.innerWidth - (ce.offsetWidth / 2)) + "px";
+	ce.style.top = (c.y * window.innerHeight - (ce.offsetHeight / 2)) + "px";
+});
+
+// Add/remove 'pushed' class on cursor push/release
+c.addEventListener('push', function(c) {
+	ce.classList.add('pushed');
+});
+c.addEventListener('release', function(c) {
+	ce.classList.remove('pushed');
+});
+
+// Simulate mouse click on our virtual cursor
+c.addEventListener('click', function(c) {
+	var xpos = c.x * window.innerWidth;
+	var ypos = c.y * window.innerHeight;
+	var evt = document.createEvent("MouseEvents");
+	evt.initMouseEvent("click", true, true, window, 1, xpos, ypos, xpos, ypos, false, false, false, false, 0, null);
+	elt.dispatchEvent(evt);
+});
+
+// Add cursor to our single user UI session
+zig.singleUserSession.addListener(c);
+</code></pre>
+
+<h2>Top-down "users radar"</h2>
+
+<pre class="prettyprint"><code class="language-js">function usersRadar(parentElement) {
+	// physical dimensions of radar in room. Lets use 4m x 4m
+	this.radarWidth = 4000;
+	this.radarHeight = 4000;
+
+	this.onuserfound = function(user) {
+		// create a new element for this user, add to dom
+		var el = document.createElement('div');
+		el.classList.add('user');
+		parentElement.appendChild(el);
+
+		// move the element every frame
+		user.addEventListener('userupdate', function(user) {
+			// we need to convert [user.x, user.z] to [screen.x, screen.y]
+			// first get normalized user position
+			var xpos = (user.position[0] / this.radarWidth) + 0.5; // 0 for x is actually the center of the depthmap
+			var ypos = (user.position[2] / this.radarHeight);
+			// convert normalized position to fit into our radar element
+			el.style.left = xpos * parentElement.offsetWidth - (el.offsetWidth / 2) + "px";
+			el.style.top = ypos * parentElement.offsetHeight - (el.offsetHeight / 2) + "px";
+		});
+	}
+	
+	this.onuserlost = function(user) {
+		// remove the element we created from the dom and ZDK user object
+		parentElement.removeChild(user.radarElement);
+		delete user.radarElement;
+	}
+}
+
+// make sure you add &lt;div id='radar'&gt;&lt;/div&gt; to your html body
+var radar = new usersRadar(document.getElementById('radar'));
+zig.addListener(radar);
+</code></pre>
+
+</body>
+</html>
+
