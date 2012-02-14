@@ -1,5 +1,5 @@
 // script: zig.js
-// Does stuff
+// ZDK for Javascript
 
 if ('undefined' == typeof zig) {
 
@@ -190,6 +190,8 @@ function vscale(v1, v2) {
 	return [v1[0]*v2[0], v1[1]*v2[1], v1[2]*v2[2]];
 }
 
+// enum: zig.Joint
+// List of Joint ID's
 var Joint = {
  	Invalid 		: 0,
  	Head 			: 1,
@@ -218,6 +220,8 @@ var Joint = {
  	RightFoot 		: 24,
 };
 
+// enum: zig.Orientation
+// Possible orientations for oriented controls (<Fader>, for instance)
 var Orientation = {
 	X : 0,
 	Y : 1,
@@ -225,12 +229,15 @@ var Orientation = {
 }
 
 //-----------------------------------------------------------------------------
-// UI session controls
+// class: SteadyDetector
+// Detects steady
+//
+// event: steady
+// Triggered when hand is steady. Triggered only once per steady
+//
+// event: unsteady
+// Triggered when hand is unsteady. Triggered only once per unsteady.
 //-----------------------------------------------------------------------------
-
-// group: Single point controls
-
-//class: SteadyDetector
 function SteadyDetector(maxVariance) {
 	if (undefined === maxVariance) {
 		maxVariance = 50;
@@ -239,7 +246,6 @@ function SteadyDetector(maxVariance) {
 	var frameCount = 15;
 	var pointBuffer = [];
 	var maxVariance = maxVariance;
-	var jointId = jointId;
 	var events = Events();
 	
 	function sumMatrix(mat) {
@@ -313,7 +319,12 @@ function SteadyDetector(maxVariance) {
 		publicApi.isSteady = false;
 	}
 	
-	function addValue(position) {
+	// method: addPosition
+	// Add an external position [x,y,z] to the steady detector
+	//
+	// Arguments:
+	//   position - the external position [x,y,z] to add
+	function addPosition(position) {
 		pointBuffer.push($V(position));
 		while (pointBuffer.length > frameCount) {
 			pointBuffer.shift();
@@ -340,22 +351,40 @@ function SteadyDetector(maxVariance) {
 	}
 
 	function onsessionupdate(position) {
-		addValue(position);
+		addPosition(position);
 	}
 	
 	var publicApi = {
-		addValue : addValue,
+		addPosition : addPosition,
+		// property: maxVariance
+		// Steady detector sensitivity
 		maxVariance : maxVariance,
 		onsessionstart : onsessionstart,
 		onsessionupdate : onsessionupdate,
+		// property: isSteady
+		// Is hand steady right now? *Read only*.
 		isSteady : false,
 	}
 	events.eventify(publicApi);
 	return publicApi;
 }
 
+//-----------------------------------------------------------------------------
 // class: Fader
-// Simple 1D fader
+// Axis aligned fader. Can be oriented on x, y, or z. The fader can also be split up into logical items using <itemsCount>.
+// 
+// event: valuechange
+// Triggered whenever the fader value changes
+//
+// event: edge
+// Triggered when the fader reaches an edge (value of 0 or 1). Will only trigger once per edge
+//
+// event: hoverstart
+// Triggered when the hand is hovering over <Fader.hoverItem>
+//
+// event: hoverstop
+// Triggered when the hand is not hovering over <Fader.hoverItem> any more
+//-----------------------------------------------------------------------------
 function Fader(orientation, size) {
 	// defaults
 	size = size || 250;
@@ -366,16 +395,33 @@ function Fader(orientation, size) {
 		// How many logical items on our Fader
 		itemsCount : 1,
 		// property: hysteresis
-		// blah blah blah
+		// Used by <Fader.hoverstart> and <Fader.hoverstop> events.
 		hysteresis : 0.1,
+		// property: initialValue
+		// Value of fader when hand is in the initial focus position of the UI session
 		initialValue : 0.5,
+		// property: flip
+		// Use this to flip the value of the fader
 		flip : false,
+		// property: value
+		// Current fader value. Useful for visualizing the fader
 		value : 0,
+		// property: hoverItem
+		// Logical hovered item. -1 if not in session
 		hoverItem : -1,
+		// property: driftAmount
+		// If larger than 0, the fader will drift towards current hand point until fader <value> is <initialValue>
 		driftAmount : 0,
+		// property: autoMoveToContain
+		// If true, the fader will always move to contain current hand point
 		autoMoveToContain : false,
+		// property: size
+		// Physical size of fader, in millimeters
 		size : size,
+		// property: orientation
+		// Which <zig.Orientation> is this fader aligned to?
 		orientation : orientation,
+
 		updatePosition : updatePosition,
 		updateValue : updateValue,
 		moveTo : moveTo,
@@ -409,6 +455,11 @@ function Fader(orientation, size) {
 		api.hoverItem = -1;
 	}
 
+	// method: updatePosition
+	// Manually update a fader with external positions
+	//
+	// Arguments:
+	//   position - external position [x,y,z]
 	function updatePosition(position) {
 		fps.markframe();
 		if (api.autoMoveToContain) {
@@ -427,15 +478,20 @@ function Fader(orientation, size) {
 		}
 	}
 
-	function updateValue(val) {
+	// method: updateValue
+	// Manually update the fader with external values
+	//
+	// Arguments:
+	//   value - normalized (0-1) external value
+	function updateValue(value) {
 		var newSelected = api.hoverItem;
 		var minValue = (api.hoverItem * (1 / api.itemsCount)) - api.hysteresis;
 		var maxValue = (api.hoverItem + 1) * (1 / api.itemsCount) + api.hysteresis;
 		
-		api.value = val;
+		api.value = value;
 		events.fireEvent('valuechange', api);
 		
-		var isThisFrameEdge = (val == 0) || (val == 1);
+		var isThisFrameEdge = (value == 0) || (value == 1);
 		if (!isEdge && isThisFrameEdge) {
 			events.fireEvent('edge', api);
 		}
@@ -455,11 +511,22 @@ function Fader(orientation, size) {
 		}		
 	}
 	
+	// method: moveTo
+	// Move the fader so that when the hand is at given position, the <Fader.value> will be given value
+	//
+	// Arguments:
+	//   position - position [x,y,z]
+	//   value - target value for given position
 	function moveTo(position, value) {
 		if (api.flip) value = 1 - value;
 		center[api.orientation] = position[api.orientation] + ((0.5 - value) * api.size);
 	}
 	
+	// method: moveToContain
+	// Move the fader to ensure that given position is within the fader bounds
+	//
+	// Arguments:
+	//   position - position [x,y,z]
 	function moveToContain(position) {
 		var distanceFromCenter = position[api.orientation] - center[api.orientation];
 		if (distanceFromCenter > api.size / 2) {
@@ -472,7 +539,6 @@ function Fader(orientation, size) {
 	return api;
 }
 
-//class: Fader3D
 // 3D fader
 function Fader3D(size) {
 	var events = Events();
@@ -516,8 +582,7 @@ function Fader3D(size) {
 	return api;
 }
 
-// class: Fader2D
-// This is the 2d version of the popular fader
+// 2D fader
 function Fader2D(width, height) {
 	width = width || 300;
 	height = height || 250;
@@ -555,15 +620,34 @@ function Fader2D(width, height) {
 	return api;
 }
 
+//-----------------------------------------------------------------------------
 // class: PushDetector
 // Detects push gestures
+//
+// event: push
+// Push
+//
+// event: release
+// Release
+//
+// event: click
+// Click
+//-----------------------------------------------------------------------------
 function PushDetector(size) {
 	size = size || 200;
 
 	var api = {
+		// property: isPushed
+		// push state, true when pushed. *read only*
 		isPushed : false,
+		// property: pushProgress
+		// Normalized push progress, useful for push visualization on a cursor
 		pushProgress : 0,
+		// property: pushTime
+		// Timestamp of last push
 		pushTime : 0,
+		// property: driftAmount
+		// How fast should the push detector drift after the hand point
 		driftAmount : 15,
 		onsessionstart: onsessionstart,
 		onsessionupdate: onsessionupdate,
@@ -624,20 +708,45 @@ function PushDetector(size) {
 	return api;
 }
 
+//-----------------------------------------------------------------------------
 // class: SwipeDetector
 // Detects swipes
+//
+// event: swipeup
+// Swipe up
+//
+// event: swipedown
+// Swipe down
+//
+// event: swipeleft
+// Swipe left
+//
+// event: swiperight
+// Swipe right
+//
+// event: swipe
+// Triggered every swipe with direction argument. Direction will be one of 'up', 'down', 'left', or 'right'.
+//
+// event: swiperelease
+// Triggered after a swipe is 'released', when the hand moves back towards the initial position
+//-----------------------------------------------------------------------------
 function SwipeDetector() {
 	var events = Events();
 	var horizontalFader = Fader(Orientation.X);
 	var verticalFader = Fader(Orientation.Y);
 	var api = {
+		// property: driftAmount
+		// How fast should the swipe detector follow the hand point
 		driftAmount : 20,
+		// property: horizontalFader
+		// Internal <Fader> used to detect horizontal swipes. *Read only*.
 		horizontalFader : horizontalFader,
+		// property: verticalFader
+		// Internal <Fader> used to detect vertical swipes. *Read only*.
 		verticalFader : verticalFader,
+		// property: isSwiped
+		// True when the swipe detector is 'swiped', between one of the swipe* events and the <swiperelease> event
 		isSwiped : false,
-		/*nsessionstart: onsessionstart,
-		onsessionupdate: onsessionupdate,
-		onsessionend : onsessionend,*/
 		onattach : onattach,
 		ondetach : ondetach,
 		onedge : onedge,
@@ -687,8 +796,19 @@ function SwipeDetector() {
 	return api;
 }
 
+//-----------------------------------------------------------------------------
 // class: Cursor
-// Use this for your cursor needs
+// Basic cursor, implemented using <Fader2D> and <PushDetector>
+//
+// event: push
+// Push
+//
+// event: release
+// Release
+//
+// event: click
+// Click
+//-----------------------------------------------------------------------------
 function Cursor() {
 	var fader2d = Fader2D();
 	var pushDetector = PushDetector();
@@ -734,8 +854,13 @@ function Cursor() {
 	return api;
 }
 
+//-----------------------------------------------------------------------------
 // class: WaveDetector
 // Detects wave gestures
+//
+// event: wave
+// Triggered when a wave gesture is detected
+//-----------------------------------------------------------------------------
 function WaveDetector() {
 	var fader = Fader(Orientation.X, 100);
 	fader.autoMoveToContain = true;
@@ -744,7 +869,11 @@ function WaveDetector() {
 	var api = {
 		onattach : onattach,
 		ondetach : ondetach,
+		// property: fader
+		// The <Fader> used internally by the wave detector
 		fader : fader,
+		// property: numberOfWaves
+		// How many waves before we trigger the <wave> event
 		numberOfWaves : 5,
 	}
 	var events = Events();
@@ -777,23 +906,37 @@ function WaveDetector() {
 }
 
 //-----------------------------------------------------------------------------
-// user controls
-//-----------------------------------------------------------------------------
-
 // class: HandSessionDetector
-// Manages the lifetime of hand point based sessions. Controls can be attached 
-// to the session detector with <HandSessionDetector.addListener>
+// Manages the lifetime of hand point based sessions.
+//
+// event: sessionstart(focusPosition)
+// Triggered when a hand session is started, with the initial focus position as an argument
+//
+// event: sessionupdate(position)
+// Triggered every frame during a session with current hand position
+// 
+// event: sessionend
+// Triggered when the session ends. This can happen if tracked hand is lowered, or if the tracked user leaves the scene
+//-----------------------------------------------------------------------------
 function HandSessionDetector() {
 	var events = Events();
 	var api = {
+		// property: shouldRotateHand
+		// Attempt to normalize hand positions to sensor center. Makes implementing UI controls a bit easier if we can assume the user is always facing the sensor, even when this isn't the case
 		shouldRotateHand : true,
+		// property: shouldSmoothPoints
+		// Should hand points be smoothed
 		shouldSmoothPoints : true,
 		onuserupdate : onuserupdate,
 		onattach : onattach,
 		ondetach : ondetach,
 		startSession : startSession,
 		stopSession : stopSession,
+		// property: startOnWave
+		// Should a hand session start when user waves?
 		startOnWave : true,
+		// property: startOnSteady
+		// Should a hand session start on hand steady?
 		startOnSteady : true,
 	}
 	events.eventify(api);
@@ -986,7 +1129,7 @@ function EngageFirstUserInSession() {
 }
 
 // class: EngageUsersWithSkeleton
-// Waits for the first <count> users with skeleton tracking to enter the frame
+// Waits for the first n users with skeleton tracking to enter the frame
 function EngageUsersWithSkeleton(count) {
 	if (undefined === count) {
 		count = 1;
@@ -1031,44 +1174,47 @@ function EngageUsersWithSkeleton(count) {
 	return api;
 }
 
+//-----------------------------------------------------------------------------
 // class: UserJoint
 // Represents a tracked joint
+//-----------------------------------------------------------------------------
 function UserJoint() {
-// property: id
-// The <zig.Joint> of this joint
-var id;
-// property: position
-// Joint position
-var position;
-// property: rotation
-// Joint orientation
-var rotation;
+	// property: id
+	// The <zig.Joint> of this joint. *Read only*.
+	var id;
+	// property: position
+	// Joint position as 3d vector [x,y,z] in millimeters relative to the depth sensor [x,y,z] *Read only*.
+	var position;
+	// property: rotation
+	// Joint orientation as 3x3 rotation matrix relative to the depth sensor. *Read only*.
+	var rotation;
 }
 
 //-----------------------------------------------------------------------------
 // class: User
 // Represents a tracked user
+//
+// event: userupdate
+// Called every frame, with the tracked <User> as the single argument
 //-----------------------------------------------------------------------------
 function User(userData) {
 
 	var api = {
 		// property: id
-		// User id as reported by middleware
+		// User id as reported by middleware. *Read only*.
 		id : 0,
 		// property: positionTracked
-		// true if user has a valid position
+		// true if user has a valid position. *Read only*.
 		positionTracked : false,
 		// property: position
-		// Position of user relative to the sensor, only valid if positionTracked is true
+		// Position of user relative to the sensor, only valid if <positionTracked> is true. *Read only*.
 		position : [0,0,0],
 		// property: skeletonTracked
-		// true if user has full body skeleton data available
+		// true if user has full body skeleton data available. *Read only*.
 		skeletonTracked : false,
 		// property: skeleton
-		// Full body skeleton data, only valid if skeletonTracked. Collection of <UserJoints> indexed by <UserJoint.id>
+		// Full body skeleton data, only valid if <skeletonTracked> is true. Collection of <UserJoints> indexed by <UserJoint.id>. *Read only*.
 		skeleton : {},
-		// method: mapJointToControl
-		// Updates a control with data from a specific <zig.Joint> for tracked user
 		mapJointToControl : mapJointToControl,
 		update : update,
 	};
@@ -1090,6 +1236,15 @@ function User(userData) {
 		api.skeleton = newjoints;
 	}
 
+	// method: mapJointToControl
+	// Updates a control with data from a specific <zig.Joint> for tracked <User>
+	//
+	// Arguments:
+	//   joint - the <zig.Joint> to map to the control
+	//   control - listener
+	//
+	// Return Value:
+	// The function returns a listener object that can be used with <removeListener> to remove this joint to control mapping
 	function mapJointToControl(joint, control) {
 		var events = Events();
 		var inSession = false;
@@ -1115,6 +1270,7 @@ function User(userData) {
 		events.eventify(adapter);
 		adapter.addListener(control);
 		api.addListener(adapter);
+		return adapter;
 	}
 
 	return api;
@@ -1122,6 +1278,15 @@ function User(userData) {
 
 //-----------------------------------------------------------------------------
 // class: zig
+//
+// event: userfound(user)
+// Triggered when a new <User> enters the scene
+//
+// event: userleft(user)
+// Triggered when a tracked <User> leaves the scene
+//
+// event: dataupdate
+// Triggered every frame
 //-----------------------------------------------------------------------------
 zig = (function() {
 	var plugin;
@@ -1154,24 +1319,20 @@ zig = (function() {
 		// Find the zig object dom element, or null if none found
 		findZigObject : findzigobject,
 		// property: version
-		// Zig.js version number, not to be confused with the plugin version number
+		// Zig.js version number, not to be confused with the plugin version number. *Read only*.
 		version : version,
 		// property: verbose
-		// Output zigjs trace messages to console
+		// Output zig.js trace messages to console
 		verbose : true,
 		// property: users
-		// Collection of <Users> currently tracked, indexed by <User.id>
+		// Collection of <Users> currently tracked, indexed by <User.id>. *Read only*.
 		users : trackedUsers,
-		// enum: zig.Joint
-		// List of Joint ID's
+
 		Joint : Joint,
-		// enum: Orientation
-		// Possible orientations for oriented controls (<Fader>, for instance)
 		Orientation : Orientation,
 
 		EngageFirstUserInSession : EngageFirstUserInSession,
 		EngageUsersWithSkeleton : EngageUsersWithSkeleton,
-
 		HandSessionDetector : HandSessionDetector,
 		controls : controls,
 	}
