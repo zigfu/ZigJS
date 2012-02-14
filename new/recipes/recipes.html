@@ -25,15 +25,15 @@ object.removeEventListener('eventname1', callback);
 
 // also works with anonymous callbacks
 var cb = object.addEventListener('eventname2', function() { /* do something */ });
-object.removeEventListener(cb);
+object.removeEventListener('eventname2', cb);
 
 // Method 2: listener object
 // Note that onattach and ondetach are only called when using addListener, and not addEventListener
 var listener = {
-	oneventname1 : callback,
-	oneventname2 : callback,
-	onattach : callback,
-	ondetach : callback,
+	oneventname1 : callback1,
+	oneventname2 : callback2,
+	onattach : callback3,
+	ondetach : callback4,
 }
 object.addListener(listener);
 object.removeListener(listener);
@@ -48,7 +48,7 @@ zig.addEventListener('userfound', function(user) {
 });
 zig.addEventListener('userlost', function(user) {
 	console.log('Lost user. ID: ' + user.id);
-})
+});
 
 // Method 2: listener object
 zig.addListener({
