@@ -12,9 +12,11 @@
 </code></pre>
 
 
-<h2>Read sensor state</h2>
+<h2>Various version, sensor state</h2>
 
-<pre class="prettyprint"><code class="language-js">zig.addEventListener('statuschange', function() {
+<pre class="prettyprint"><code class="language-js">console.log("Browser plugin version: " + zig.pluginVersion);
+console.log("Zig.js version: " + zig.version);
+zig.addEventListener('statuschange', function() {
 	console.log("Sensor connected: " + zig.sensorConnected);
 });
 </code></pre>
