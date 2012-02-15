@@ -14,7 +14,9 @@
 
 <h2>Read sensor state</h2>
 
-<pre class="prettyprint"><code class="language-js">zig.TODO();
+<pre class="prettyprint"><code class="language-js">zig.addEventListener('statuschange', function() {
+	console.log("Sensor connected: " + zig.sensorConnected);
+});
 </code></pre>
 
 <h2>Handling ZDK events in JavaScript</h2>
@@ -251,6 +253,7 @@ This snippet shows how to control a cursor element based on the ZDK Cursor contr
 <li>Showing and hiding the cursor element when a hand session starts and ends.</li>
 <li>Moving the cursor element when we should</li>
 <li>Adding a 'pushed' class the the cursor when appropiate</li>
+<li>Simulating a 'click' event</li>
 </ol>
 
 <pre class="prettyprint"><code class="language-js">// Create cursor and cursor dom element
@@ -259,7 +262,7 @@ var ce = document.createElement('div');
 ce.id = 'mycursor';
 document.body.appendChild(ce);
 
-// show/hide cursor on session start/end
+// 1. show/hide cursor on session start/end
 zig.singleUserSession.addEventListener('sessionstart', function(focusPosition) {
 	ce.style.display = 'block';
 });
@@ -267,13 +270,13 @@ zig.singleUserSession.addEventListener('sessionend', function() {
 	ce.style.display = 'none';
 });
 
-// move the cursor element on cursor move
+// 2. move the cursor element on cursor move
 c.addEventListener('move', function(cursor) {
 	ce.style.left = (c.x * window.innerWidth - (ce.offsetWidth / 2)) + "px";
 	ce.style.top = (c.y * window.innerHeight - (ce.offsetHeight / 2)) + "px";
 });
 
-// Add/remove 'pushed' class on cursor push/release
+// 3. Add/remove 'pushed' class on cursor push/release
 c.addEventListener('push', function(c) {
 	ce.classList.add('pushed');
 });
@@ -281,7 +284,7 @@ c.addEventListener('release', function(c) {
 	ce.classList.remove('pushed');
 });
 
-// Simulate mouse click on our virtual cursor
+// 4. Simulate mouse click on our virtual cursor
 c.addEventListener('click', function(c) {
 	var xpos = c.x * window.innerWidth;
 	var ypos = c.y * window.innerHeight;

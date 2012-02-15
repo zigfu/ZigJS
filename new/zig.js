@@ -1287,6 +1287,9 @@ function User(userData) {
 //
 // event: dataupdate
 // Triggered every frame
+//
+// event: statuschange
+// Triggered when <sensorConnected> changes
 //-----------------------------------------------------------------------------
 zig = (function() {
 	var plugin;
@@ -1327,6 +1330,9 @@ zig = (function() {
 		// property: users
 		// Collection of <Users> currently tracked, indexed by <User.id>. *Read only*.
 		users : trackedUsers,
+		// property: sensorConnected
+		// true when the a depth sensor is connected, false otherwise
+		sensorConnected : false,
 
 		Joint : Joint,
 		Orientation : Orientation,
@@ -1439,6 +1445,11 @@ zig = (function() {
 			}
 		}
 		publicApi.addEventListener = newaddEventListener;
+
+		bindDomEvent(zo, "StatusChange", function(status) {
+			publicApi.sensorConnected = status;
+			events.fireEvent('statuschange', status);
+		});
 	}
 
 	function embed(div) {
