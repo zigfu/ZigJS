@@ -4,11 +4,13 @@ Main Zig Object
 Properties
 ----------
 * users
+* version
 * verbose
 
 Methods
 -------
 * init(pluginElement)
+* embed (todo)
 
 Events
 ------
@@ -32,8 +34,6 @@ Properties
 Events
 ------
 * userupdate(user)
-* attachtouser(user)
-* detachfromuser(user)
 
 -------------------------------------------------------------------------------
 
@@ -48,6 +48,9 @@ Events
 ------
 * userengaged(user)
 * userdisengaged(user)
+* sessionstart(focusPosition)
+* sessionupdate(position)
+* sessionend
 
 -------------------------------------------------------------------------------
 
