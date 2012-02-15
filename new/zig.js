@@ -1309,7 +1309,7 @@ zig = (function() {
 		Cursor : Cursor,
 	}
 
-	var version = "0.95 beta";
+	var version = "0.96beta";
 
 	var publicApi = {
 		// method: init
@@ -1324,6 +1324,9 @@ zig = (function() {
 		// property: version
 		// Zig.js version number, not to be confused with the plugin version number. *Read only*.
 		version : version,
+		// property: pluginVersion
+		// Browser plugin version, not to be confused with zig.js version
+		pluginVersion : 0,
 		// property: verbose
 		// Output zig.js trace messages to console
 		verbose : true,
@@ -1446,10 +1449,13 @@ zig = (function() {
 		}
 		publicApi.addEventListener = newaddEventListener;
 
+		publicApi.sensorConnected = zo.sensorConnected;
 		bindDomEvent(zo, "StatusChange", function(status) {
 			publicApi.sensorConnected = status;
 			events.fireEvent('statuschange', status);
 		});
+
+		publicApi.pluginVersion = zo.version;
 	}
 
 	function embed(div) {
