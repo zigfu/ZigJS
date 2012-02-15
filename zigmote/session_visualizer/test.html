@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>
+Session Visualizer
+</title>
+<script>
+
+var users = [
+	{ name : 'Harpo', id : 0123412341234 },
+	{ name : 'Groucho', id : 112341234123412 },
+	{ name : 'Chico', id : 2123412421 },
+	{ name : 'Gummo', id : 1234124 },
+	{ name : 'Zeppo', id : 4123421341234 }
+];
+
+function loaded () {
+
+
+	var usertable = document.createElement('table');
+	var tablehead = document.createElement('thead');
+	var tablebody = document.createElement('tbody');
+	usertable.appendChild(tablehead);
+	usertable.border = '1';
+	usertable.style.borderStyle = 'solid';
+	usertable.style.borderWidth = '1px';
+	usertable.style.borderColor = '#44FF44';
+
+	var headrow = document.createElement('tr');
+	headrow.style.textAlign = 'left';
+	var head1 = document.createElement('th');
+	var head2 = document.createElement('th');
+	head1.innerHTML = 'user';
+	head2.innerHTML = 'id';
+
+	headrow.appendChild(head1);
+	headrow.appendChild(head2);
+	tablehead.appendChild(headrow);
+
+	usertable.appendChild(tablebody);
+	usertable.style.position = 'fixed';
+	usertable.style.right = '0px';
+	usertable.style.top = '0px';
+	usertable.style.fontFamily = 'monospace';
+	usertable.style.backgroundColor = 'black';
+	usertable.style.color = '#44FF44';
+	usertable.style.padding = '10px';
+
+	for (i=0; i < users.length; i++) {
+		var tr = document.createElement('tr');
+		tr.innerHTML = '<td>'+users[i].name + "</td><td>" + users[i].id + "</td>";
+		tr.padding = '0px';
+		tablebody.appendChild(tr);
+	}
+	document.body.appendChild(usertable);
+}
+
+document.addEventListener('DOMContentLoaded', function () {setTimeout(loaded,200); }, false);
+</script>
+</head>
+<body>
+</body>
+</html>
