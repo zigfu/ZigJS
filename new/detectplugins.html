@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+function loaded()
+{
+	if( ! detectplugins() )
+	{
+		console.log('Plugin not detected.');
+		var el = document.createElement('div');
+		el.innerHTML = 'The Zig browser plugin is required to use your 3D sensor on this page.';
+		el.style.display = 'block';
+		// el.style.position = 'absolute';
+		el.style.width = '98%';
+		el.style.height = '40px';
+		el.style.backgroundColor = '#FFFF00';
+		el.style.marginTop = '0px';
+		el.style.top = '8px';
+		el.style.marginLeft = '0px';
+		el.style.marginRight = '8px';
+		el.style.paddingTop = '0px';
+		el.style.paddingLeft = '0px';
+		el.style.paddingRight = '8px';
+		var a = document.createElement('a');
+		a.href = 'http://www.zigfu.com/devtools.html';
+		a.innerHTML = 'Download from zigfu.com';
+		el.appendChild(a);
+		if (document.body.firstChild)
+		{
+			document.body.insertBefore(el,document.body.firstChild);
+		}
+		else
+		{
+			document.body.appendChild(el);
+		}
+		
+	}
+	else
+	{
+		console.log('Plugin detected.');
+	}
+}
+function detectplugins()
+{
+	var plugins = navigator.plugins;
+	var pluginEnabled = false;
+	for (var key in plugins)
+	{
+		if(plugins.hasOwnProperty(key))
+		{
+			var pluginContainer = navigator.plugins[key];
+			if (pluginContainer.hasOwnProperty('0'))
+			{
+				var plugin = pluginContainer['0'];
+				if(plugin.type !== undefined)
+				{
+					if (plugin.type == 'application/x-zig'){
+						pluginEnabled = true;
+					}
+				}
+			}
+		}
+	}
+	return pluginEnabled;
+}
+</script>
+</head>
+<body onload='loaded()'>
+<div>
+Hi, this is a paragraph that is only here to see what happens to it when the plugin isn't detected.  
+I'll just fill up this paragraph with a bunch of stupid crap.
+</div>
+</body>
+</html>
