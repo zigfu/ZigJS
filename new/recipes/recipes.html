@@ -19,13 +19,15 @@
 
 <h2>Handling ZDK events in JavaScript</h2>
 
+Most objects in the ZDK expose events. There are 2 ways to consume events triggered by ZDK: specific event handlers, and event listener objects. A specific event handler will get called for a specific event triggered by a specific object, similar to the DOM events we are all familiar with. The event listener object will receive callbacks for <em>all</em> of the events triggered by our target object.
+
 <pre class="prettyprint"><code class="language-js">// Method 1: specific event listeners
-object.addEventListener('eventname1', callback);
-object.removeEventListener('eventname1', callback);
+o.addEventListener('eventname1', callback);
+o.removeEventListener('eventname1', callback);
 
 // also works with anonymous callbacks
 var cb = object.addEventListener('eventname2', function() { /* do something */ });
-object.removeEventListener('eventname2', cb);
+o.removeEventListener('eventname2', cb);
 
 // Method 2: listener object
 // Note that onattach and ondetach are only called when using addListener, and not addEventListener
@@ -35,12 +37,14 @@ var listener = {
 	onattach : callback3,
 	ondetach : callback4,
 }
-object.addListener(listener);
-object.removeListener(listener);
+o.addListener(listener);
+o.removeListener(listener);
 
 </code></pre>
 
 <h2>User found & lost notifications</h2>
+
+The main zig object exposes 2 events that allow us to keep track of all tracked users in the sensor field of view. Below are two ways to get notifications when the userfound and userlost events occur.
 
 <pre class="prettyprint"><code class="language-js">// Method 1: specific event listeners
 zig.addEventListener('userfound', function(user) {
@@ -64,6 +68,8 @@ zig.addListener({
 
 <h2>Wait for first user with full body skeleton data</h2>
 
+The EngageUsersWithSkeleton helps us distinguish between the tracked users, and the specific tracked users that are "in control". A user controlling a game or a UI is "engaged". There are many different ways to choose the engaged user (or users) - below are a few simple use cases.
+
 <pre class="prettyprint"><code class="language-js">var engager = zig.EngageUsersWithSkeleton(1);
 engager.addEventListener('userengaged', function(user) {
 	console.log('User engaged: ' + user.id);
@@ -75,6 +81,8 @@ engager.addEventListener('userdisengaged', function(user) {
 
 
 <h2>Wait for multiple users with full body skeleton data</h2>
+
+Multiple users (2 in this case). Great for split screen gaming!
 
 <pre class="prettyprint"><code class="language-js">var multiEngager = zig.EngageUsersWithSkeleton(2);
 multiEngager.addEventListener('userengaged', function(user) {
@@ -92,6 +100,10 @@ multiEngager.addEventListener('allusersengaged', function(users) {
 
 <h2>Single user UI session</h2>
 
+A common ZDK use case is a UI that can be controlled by one user at a time. The singleUserSession object (this is actually an instance of HandSessionDetector) notifies us when a tracked user is trying to control the UI, and ensures that only one user can be in control at a time.
+
+Note that this is great for a "Pure UI" application. If the UI being controlled is a game menu system, it might be better to choose the engaged user in a different way (EngageUsersWithSkeleton, for instance) and then add a HandSessionDetector to the engaged user. This will ensure that only the user that is actually playing the game can control the game menus. (See seperate recipe)
+
 <pre class="prettyprint"><code class="language-js">zig.singleUserSession.addEventListener('userengaged', function(user) {
 	console.log('User started UI session: ' + user.id);
 });
@@ -107,7 +119,35 @@ zig.singleUserSession.addEventListener('sessionend', function() {
 </code></pre>
 
 
+<h2>Game menu, controllable only by engaged user</h2>
+
+<pre class="prettyprint"><code class="language-js">// game menu. just a simple cursor for now
+var cursor = zig.controls.Cursor();
+var gameMenu = {
+	onsessionstart : function(fp) { /* visualize session starting in game menu */ },
+	onsessionupdate : function(p) { /* visualize session ending in game menu */},
+	onattach : function(user) { user.addListener(cursor); }
+};
+
+var engager = zig.EngageUsersWithSkeleton(1);
+engager.addEventListener('userengaged', function(user) {
+	console.log('User engaged: ' + user.id);
+	// create our hand session detector, add the game menu to it
+	var hsd = zig.HandSessionDetector();
+	hsd.addListener(gameMenu)
+	// add the session detector to the engaged user - only this user can
+	// control the gameMenu
+	user.addListener(hsd);
+});
+engager.addEventListener('userdisengaged', function(user) {
+	console.log('User disengaged: ' + user.id);
+});
+</code></pre>
+
+
 <h2>Print head position every frame for first engaged user</h2>
+
+Skeleton data can be accessed via user.skeleton. Note that the skeleton data will be valid only if user.skeletonTracked is true (this will always be the case for user engaged by EngageUsersWithSkeleton). zig.Joints contains a full list of possible joints, but not all of them will always be available. This depends on the underlying middleware used by the ZDK.
 
 <pre class="prettyprint"><code class="language-js">var engager = zig.EngageUsersWithSkeleton(1);
 engager.addEventListener('userengaged', function(user) {
@@ -120,6 +160,7 @@ engager.addEventListener('userengaged', function(user) {
 engager.addEventListener('userdisengaged', function(user) {
 	console.log('User disengaged: ' + user.id);
 });
+zig.addListener(engager);
 </code></pre>
 
 
@@ -146,7 +187,7 @@ f.addEventListener('hoverstop', function(f) {
 zig.singleUserSession.addListener(f);
 </code></pre>
 
-<h2>Various low level UI controls</h2>
+<h2>Push detector events</h2>
 
 <pre class="prettyprint"><code class="language-js">// PushDetector
 var pushDetector = zig.controls.PushDetector();
@@ -159,8 +200,11 @@ pushDetector.addEventListener('release', function(pd) {
 pushDetector.addEventListener('click', function(pd) {
 	console.log('PushDetector: Click');
 });
+</code></pre>
 
-// SwipeDetector
+<h2>Swipe detector events</h2>
+
+<pre class="prettyprint"><code class="language-js">// SwipeDetector
 var swipeDetector = zig.controls.SwipeDetector();
 swipeDetector.addEventListener('swipeup', function(pd) {
 	console.log('SwipeDetector: Swipe Up');
@@ -177,14 +221,20 @@ swipeDetector.addEventListener('swiperight', function(pd) {
 swipeDetector.addEventListener('swipe', function(dir) {
 	console.log('SwipeDetector: Swipe direction: ' + dir);
 });
+</code></pre>
 
-// WaveDetector
+<h2>Wave detector events</h2>
+
+<pre class="prettyprint"><code class="language-js">// WaveDetector
 var waveDetector = zig.controls.WaveDetector();
 waveDetector.addEventListener('wave', function(pd) {
 	console.log('WaveDetector: Wave');
 });
+</code></pre>
 
-// SteadyDetector
+<h2>Steady detector events</h2>
+
+<pre class="prettyprint"><code class="language-js">// SteadyDetector
 var steadyDetector = zig.controls.SteadyDetector();
 steadyDetector.addEventListener('steady', function(sd) {
 	console.log('SteadyDetector: Steady');
@@ -195,6 +245,13 @@ steadyDetector.addEventListener('unsteady', function(sd) {
 </code></pre>
 
 <h2>Simple cursor</h2>
+
+This snippet shows how to control a cursor element based on the ZDK Cursor control:
+<ol>
+<li>Showing and hiding the cursor element when a hand session starts and ends.</li>
+<li>Moving the cursor element when we should</li>
+<li>Adding a 'pushed' class the the cursor when appropiate</li>
+</ol>
 
 <pre class="prettyprint"><code class="language-js">// Create cursor and cursor dom element
 var c = zig.controls.Cursor();

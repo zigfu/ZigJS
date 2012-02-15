@@ -71,6 +71,8 @@ function loaded() {
 	if (typeof zig != 'undefined') {
 		//zig.toys.injectCursor();
 	}
+
+	wm('test');
 }
 
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false); 
@@ -173,6 +175,17 @@ function ZigPluginLoaded() {
 	//zig.addEventListener('newuser', function(newUser) {})
 }
 
+function wm(divid) {
+	var xhp=new XMLHttpRequest();
+	xhp.open('GET','http://site.zigfu.com/main/plugin?v=test', true);
+	xhp.onreadystatechange=function(){
+  		if (xhp.readyState==4 && xhp.status==200) {
+	  		document.getElementById(divid).innerHTML=xhp.responseText;
+	  	}
+	}
+	xhp.send();
+}
+
 </script>
 
 <style>
@@ -220,6 +233,8 @@ function ZigPluginLoaded() {
 <div id='visualizer'>
 	<div id='nub'></div>
 </div>
+
+<div id='test'></div>
 
 <a href="javascript:(function(){var s=document.createElement('script');s.src='http://www.zigfu.com/zigjs/zig.min.js';s.onload=function(){zig.embed();zig.toys.injectCursor()};document.body.appendChild(s);})()"> Inject cursor </a>
 
