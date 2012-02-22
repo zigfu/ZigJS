@@ -27,13 +27,13 @@
 
 	
 	<style>
-	#myslider { width: 800px; height: 450px; }
+	#myslider { width: 800px; height: 600px; }
 	
 	
 	.menu{
 		margin:0; 
 		padding:0; 
-		width:450px; 
+		width:600px; 
 		list-style:none;
 		background:rgb();
 	}
@@ -424,7 +424,7 @@ function addToAnythingslider(toAdd, hideleft, hideright, caption) {
 		if (typeof unityObject != "undefined") {
 			// make our zig plugin wait a bit
 			Zig.Pause();
-			unityObject.embedUnity("unityPlayer", webplayerFilename, 800, 450);
+			unityObject.embedUnity("unityPlayer", webplayerFilename, 800, 600);
 			// resume zigjs in 1 second
 			PauseInterval = window.setInterval(function() { window.clearInterval(PauseInterval); Zig.Resume(); }, 1000);
 		}
@@ -450,17 +450,13 @@ function addToAnythingslider(toAdd, hideleft, hideright, caption) {
 
 <script type="text/javascript">
 			if (undefined !== unityObject) {
-				unityObject.embedUnity("unityPlayer", "punchingbag.unity3d", 800, 450);
+				unityObject.embedUnity("unityPlayer", "punchingbag.unity3d", 800, 600);
 			}
 </script>
 
 
 <!-- ZigJS plugin -->
-<div id="pluginContainer">
-	<object id="ZigPlugin" type="application/x-zig" width="0" height="0">
-		<param name="onload" value="ZigPluginLoaded" />
-	</object>
-</div> 
+
 
 </body>
 </html>
