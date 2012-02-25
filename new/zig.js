@@ -649,6 +649,7 @@ function PushDetector(size) {
 		// property: driftAmount
 		// How fast should the push detector drift after the hand point
 		driftAmount : 15,
+		fader : undefined,
 		onsessionstart: onsessionstart,
 		onsessionupdate: onsessionupdate,
 		onsessionend : onsessionend,
@@ -660,6 +661,7 @@ function PushDetector(size) {
 	fader.flip = true; // positive Z is backwards by default, so flip it
 	fader.initialValue = 0.2;
 	fader.autoMoveToContain = true;
+	api.fader = fader;
 
 	fader.driftAmount = api.driftSpeed; // mm/s
 	
@@ -949,7 +951,7 @@ function HandSessionDetector() {
 	var jointToUse;
 	var framesNotInBbox = 0;
 	var maxFramesNotInBbox = 15;
-	var lastPosition = [0,0,0];
+	var lastPosition = undefined;
 
 	var currentUser;
 
@@ -1028,7 +1030,8 @@ function HandSessionDetector() {
 		stopSession();
 		inSession = true;
 		jointToUse = joint;
-		events.fireEvent('sessionstart', rotatedPoint(currentUser.skeleton[joint].position));
+		lastPosition = rotatedPoint(currentUser.skeleton[joint].position);
+		events.fireEvent('sessionstart', lastPosition);
 	}
 
 	function stopSession() {
@@ -1062,6 +1065,7 @@ function HandSessionDetector() {
 
 	return api;
 }
+
 
 //-----------------------------------------------------------------------------
 // user engagers
@@ -1321,6 +1325,9 @@ zig = (function() {
 		// method : findZigObject
 		// Find the zig object dom element, or null if none found
 		findZigObject : findzigobject,
+		// property: pluginInstalled
+		// true if zig.js plugin is installed
+		pluginInstalled : false,
 		// property: version
 		// Zig.js version number, not to be confused with the plugin version number. *Read only*.
 		version : version,
@@ -1472,8 +1479,7 @@ zig = (function() {
 	}
 
 	var zigobject = null;
-	function findzigobject()
-	{
+	function findzigobject() {
 		if (typeof zigobject == 'undefined') {
 			zigobject = null;
 		}
@@ -1488,6 +1494,18 @@ zig = (function() {
 			}
 		}
 		return zigobject;
+	}
+
+	function hasPlugin(mimeType) {
+		for (var k in navigator.plugins) if (navigator.plugins.hasOwnProperty(k)) {
+			var p = navigator.plugins[k];
+			for (var mime in p) if (p.hasOwnProperty(mime)) {
+				if (undefined !== p[mime].type && mimeType == p[mime].type) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	function domloaded() {
@@ -1506,6 +1524,9 @@ zig = (function() {
 	publicApi.singleUserSession = EngageFirstUserInSession();
 	publicApi.addListener(publicApi.singleUserSession);
 
+	// is the plugin installed?
+	publicApi.pluginInstalled = hasPlugin("application/x-zig");
+
 	return publicApi;
 
 }());
@@ -1518,7 +1539,68 @@ zigloaded = function() {
 
 zig.toys = (function() {
 
-	injectCursor = function() {
+	function usersRadar(parentElement) {
+		// physical dimensions of radar in room. Lets use 4m x 4m
+		this.radarWidth = 4000;
+		this.radarHeight = 4000;
+	 
+		this.onuserfound = function(user) {
+			// create a new element for this user, add to dom
+			var el = document.createElement('div');
+			el.classList.add('user');
+			parentElement.appendChild(el);
+			// we can simply add the newly created element to the tracked user object for later
+			user.radarElement = el;
+	 
+			// move the element every frame
+			var that = this;
+			user.addEventListener('userupdate', function(user) {
+				// we need to convert [user.x, user.z] to [screen.x, screen.y]
+				// first get normalized user position
+				var xpos = (user.position[0] / that.radarWidth) + 0.5; // 0 for x is actually the center of the depthmap
+				var ypos = (user.position[2] / that.radarHeight);
+				// convert normalized position to fit into our radar element
+				var el = user.radarElement;
+				el.style.left = xpos * parentElement.offsetWidth - (el.offsetWidth / 2) + "px";
+				el.style.top = ypos * parentElement.offsetHeight - (el.offsetHeight / 2) + "px";
+			});
+		}
+		
+		this.onuserlost = function(user) {
+			// remove the element we created from the dom and ZDK user object
+			parentElement.removeChild(user.radarElement);
+			delete user.radarElement;
+		}
+
+		zig.singleUserSession.addEventListener('userengaged', function(user) {
+			user.radarElement.classList.add('active');
+		});
+		zig.singleUserSession.addEventListener('userdisengaged', function(user) {
+			user.radarElement.classList.remove('active');
+		});
+	}
+
+	function injectRadar() {
+		console.log('injecting radar');
+		// create some style sheets for our radar
+		var style = document.createElement('style');
+		style.type = 'text/css';
+		style.innerHTML = '#zigfuRadar { width:300px;height:300px;bottom:20px;right:20px;border-radius:15px;position:fixed;display:block;background:url(http://cdn.zigfu.com/zigjs/toys/radar.png) } ';
+		style.innerHTML += '#zigfuRadar .user { width:35px; height:35px; position:relative;display:block; background:url(http://cdn.zigfu.com/zigjs/toys/user.png) } ';
+		style.innerHTML += '#zigfuRadar .user.active { background:url(http://cdn.zigfu.com/zigjs/toys/user_active.png) } ';
+		document.getElementsByTagName('head')[0].appendChild(style);
+
+		// create radar element
+		var re = document.createElement('div');
+		re.id = 'zigfuRadar';
+		document.body.appendChild(re);
+
+		// create radar listener
+		var r = new usersRadar(re);
+		zig.addListener(r);
+	}
+
+	function injectCursor() {
 		var c = zig.controls.Cursor();
 		var ce = document.createElement('div');
 		ce.style.position = 'fixed';
@@ -1547,7 +1629,8 @@ zig.toys = (function() {
 	}
 
 	return {
-		injectCursor : injectCursor
+		injectCursor : injectCursor,
+		injectRadar : injectRadar,
 	}
 }());
 
