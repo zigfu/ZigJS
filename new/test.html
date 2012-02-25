@@ -72,7 +72,17 @@ function loaded() {
 		//zig.toys.injectCursor();
 	}
 
-	wm('test');
+	//wm('test');
+
+	zig.embed();
+
+	var pd = zig.controls.PushDetector();
+	pd.addEventListener('click', function() {
+		console.log('clicked');
+	});
+	pd.fader.verbose = true;
+	//zig.singleUserSession.shouldRotateHand = false;
+	zig.singleUserSession.addListener(pd);
 }
 
 document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 200); }, false); 
@@ -235,8 +245,8 @@ function wm(divid) {
 </div>
 
 <div id='test'></div>
-
+<!--
 <a href="javascript:(function(){var s=document.createElement('script');s.src='http://www.zigfu.com/zigjs/zig.min.js';s.onload=function(){zig.embed();zig.toys.injectCursor()};document.body.appendChild(s);})()"> Inject cursor </a>
-
+-->
 </body>
 </html>

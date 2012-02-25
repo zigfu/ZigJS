@@ -63,6 +63,20 @@ function detectplugins()
 	}
 	return pluginEnabled;
 }
+
+function hasPlugin(mimeType) {
+	for (var k in navigator.plugins) if (navigator.plugins.hasOwnProperty(k)) {
+		var p = navigator.plugins[k];
+		for (var mime in p) if (p.hasOwnProperty(mime)) {
+			console.log(p[mime].type);
+			if (undefined !== p[mime].type && mimeType == p[mime].type) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 </script>
 </head>
 <body onload='loaded()'>
