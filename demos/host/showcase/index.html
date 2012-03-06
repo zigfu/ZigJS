@@ -53,18 +53,34 @@ var Base64 =
         return output;
     }
 }
+function addListener(domobject, eventname, func) {
+  if (domobject.attachEvent) {
+    domobject.attachEvent('on' + eventname, func);
+  } else {
+    domobject.addEventListener(eventname, func, false);
+  }
+}
 
 function ZigPluginLoaded() {
 
     var pluginObj = document.getElementById("ZigPlugin");
     i = 0;
-    var handleDepth = function(u) { i++; drawDM(pluginObj);drawIM(pluginObj); };
-    if (pluginObj.attachEvent) {
-      pluginObj.attachEvent("onNewFrame", handleDepth);
-    } else {
-      pluginObj.addEventListener("NewFrame", handleDepth, false);
+    var handleFrameNoLabel = function(u) { i++; drawDM(pluginObj);drawIM(pluginObj); };
+    var handleFrame = function(u) { i++; drawDM(pluginObj);drawIM(pluginObj);drawLM(pluginObj); };
+    var hasLabelmap = false;
+    try{
+      pluginObj.requestStreams(true, true, false);
+    } catch(e) {
+      console.log('new style plugin');
+      pluginObj.requestStreams({updateDepth: true, updateImage: true, updateLabelMap : true});
+      hasLabelmap = true;
     }
-    pluginObj.requestStreams(true, true, false);
+    if (!hasLabelmap) {
+      addListener(pluginObject, "NewFrame", handleFrameNoLabel);
+    } else {
+      addListener(pluginObj, "NewFrame", handleFrame);
+      document.getElementById('labelCan').style.cssText = '';
+    }
 
   }
 function drawDM(plugin) {
@@ -99,6 +115,31 @@ function drawDM(plugin) {
     }
     ctx.putImageData(pix, 0, 0);
   }
+
+  function drawLM(plugin) {
+        var lm = plugin.labelMap;
+        if (lm.length == 0) return;
+        var canv = document.getElementById('labelMap');
+        var ctx = canv.getContext('2d');
+        var pix = ctx.createImageData(160,120);
+        var data = pix.data;
+        var srcData = Base64.decode(lm);
+        var pixel = 0;
+        var col = 0;
+        for(var i = 0; i < 160*120; i++) {
+            pixel = srcData[i*2] | (srcData[i*2 + 1] << 3);
+            if (pixel != 0) {
+                data[i*4] = 255;
+                col = pixel % 16;
+                data[i*4 + 1] = col*16;
+                data[i*4 + 2] = ((col+8) % 16)*16;
+                
+            }
+            data[i*4 + 3] = 255;
+            
+        }
+        ctx.putImageData(pix, 0, 0);
+    }
 
 var socket;
 var host;
@@ -153,6 +194,8 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
 </div> 
     	
         <div id="imageCan"><canvas style="width:320px; height:240px;" id='image' width='160' height='120'></canvas>
+</div>
+        <div id="labelCan" style="display:none;"><canvas style="width:320px; height:240px;" id='labelMap' width='160' height='120'></canvas>
 </div>
     
     </div>
