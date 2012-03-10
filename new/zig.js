@@ -1372,7 +1372,7 @@ zig = (function() {
 	}
 
 	function getItemById(collection, id) {
-		for (key in collection) if (collection.hasOwnProperty(key)) {
+		for (var key in collection) if (collection.hasOwnProperty(key)) {
 			if (collection[key].id == id) return collection[key];
 		}
 		return undefined;
