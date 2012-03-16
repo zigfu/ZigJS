@@ -140,7 +140,11 @@ function BoundingBox(size, center) {
 		contains : contains,
 		resize : resize,
 		recenter : recenter,
-		inspect : inspect
+		inspect : inspect,
+		getsize : function() { return size; },
+		getcenter : function() { return center; },
+		getmin : function() { return min; },
+		getmax : function() { return max; },
 	}
 }
 
@@ -940,11 +944,17 @@ function HandSessionDetector() {
 		// property: startOnSteady
 		// Should a hand session start on hand steady?
 		startOnSteady : true,
+		// property: bbox
+		// Bounding box for session bounds
+		bbox : BoundingBox([1000, 500, 500]),
+		// property: bboxOffset
+		// Offset of session bounds from user position
+		bboxOffset : [0, 250, -300],
 	}
 	events.eventify(api);
 
-	var bboxOffset = $V([0, 250, -300]);
-	var bbox = BoundingBox([1000, 500, 500]);
+	//var bboxOffset = $V([0, 250, -300]);
+	//var bbox = BoundingBox([1000, 500, 500]);
 
 	var rotateReference;
 	var inSession = false;
@@ -993,8 +1003,8 @@ function HandSessionDetector() {
 
 	function inBbox(point) {
 		var userPosition = rotatedPoint(currentUser.position);
-		bbox.recenter($V(userPosition).add(bboxOffset));
-		return bbox.contains(rotatedPoint(point));
+		api.bbox.recenter($V(userPosition).add($V(api.bboxOffset)));
+		return api.bbox.contains(rotatedPoint(point));
 	}
 
 	function sessionShouldStart(detector) {
@@ -1079,6 +1089,8 @@ function EngageFirstUserInSession() {
 		onuserfound : onuserfound,
 		onuserlost : onuserlost,
 		engagedUser : null,
+		bboxBounds : [1000, 500, 500],
+		bboxOffset : [0, 250, -300],
 	}
 	events.eventify(api);
 	var engagedUserId = 0;
@@ -1109,6 +1121,8 @@ function EngageFirstUserInSession() {
 
 	function onuserfound(newUser) {
 		var sessionDetector = HandSessionDetector();
+		sessionDetector.bbox.resize(api.bboxBounds);
+		sessionDetector.bboxOffset = api.bboxOffset;
 
 		sessionDetector.addEventListener('sessionstart', function(focusPosition) {
 			onsessionstart(newUser, focusPosition);
@@ -1440,6 +1454,7 @@ zig = (function() {
 				var obj = JSON.parse(data); 
 			} catch (e) { 
 				console.log("Error parsing JSON from plugin, skipping frame");
+				return;
 			}
 			doUpdate(obj.users);
 		 }}());
