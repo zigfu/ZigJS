@@ -1,0 +1,328 @@
+<html>
+
+<head>
+
+<style>
+#cursor {
+	position: absolute;
+	display : none;
+	width : 40px;
+	height : 40px;
+	background-color : blue;
+}
+ 
+#cursor.pushed {
+	background-color: red;
+}
+</style>
+
+<script src="iscroll.js"></script>
+<script src="../new/zig.js"></script>
+
+<script>
+
+var h;
+var testlist;
+var listelem;
+var pushed;
+function loaded() {
+	// force external hand point only
+	zig.singleUserSession.startOnWave = false;
+	zig.singleUserSession.startOnSteady = false;
+	zig.singleUserSession.startOnExternalHandpoint = true;
+	zig.singleUserSession.bboxBounds = [1200, 5000, 1000];
+	zig.singleUserSession.bboxOffset = [0, 400, -400];
+
+	h = hysteresis("hoverable", 20, document.getElementById('testlist'));
+
+	// Create cursor and cursor dom element
+	var c = zig.controls.Cursor();
+	//var ce = document.createElement('div');
+	//ce.id = 'mycursor';
+	//console.log(document.body.appendChild(ce));
+	 
+	ce = cursorElem = document.getElementById("cursor");
+
+	
+
+	// 1. show/hide cursor on session start/end
+	zig.singleUserSession.addEventListener('sessionstart', function(focusPosition) {
+		//ce.style.display = 'block';
+		insession = true;
+		cursorTarget[0] = cursorCurr[0] = c.x;
+		cursorTarget[1] = cursorCurr[1] = c.y;
+		h.start();
+	});
+	zig.singleUserSession.addEventListener('sessionend', function() {
+		//ce.style.display = 'none';
+		insession = false;
+		h.stop();
+		iscrollMouseUp(testlist, cursorCurr[0] * listelem.offsetWidth, cursorCurr[1] * listelem.offsetHeight);
+	});
+	 
+	// 2. move the cursor element on cursor move
+	c.addEventListener('move', function(cursor) {
+		//ce.style.left = (c.x * window.innerWidth - (ce.offsetWidth / 2)) + "px";
+		//ce.style.top = (c.y * window.innerHeight - (ce.offsetHeight / 2)) + "px";
+		cursorTarget[0] = cursor.x;
+		cursorTarget[1] = cursor.y;
+	});
+	 
+	// 3. Add/remove 'pushed' class on cursor push/release
+	c.addEventListener('push', function(c) {
+		ce.classList.add('pushed');
+		console.log("Pushed");
+		h.stop();
+		iscrollMouseDown(testlist, c.x * listelem.offsetWidth, c.y * listelem.offsetHeight);
+		pushed = true;
+	});
+	c.addEventListener('release', function(c) {
+		ce.classList.remove('pushed');
+		pushed = false;
+		console.log("Released");
+		h.start();
+		iscrollMouseUp(testlist, cursorCurr[0] * listelem.offsetWidth, cursorCurr[1] * listelem.offsetHeight);
+
+	});
+	 
+	// 4. Simulate mouse click on our virtual cursor
+	c.addEventListener('click', function(c) {
+		var xpos = c.x * window.innerWidth;
+		var ypos = c.y * window.innerHeight;
+		var evt = document.createEvent("MouseEvents");
+		evt.initMouseEvent("click", true, true, window, 1, xpos, ypos, xpos, ypos, false, false, false, false, 0, null);
+		window.dispatchEvent(evt);
+	});
+	 
+	// Add cursor to our single user UI session
+	zig.singleUserSession.addListener(c);
+	updateCursor();
+
+
+	// iscroll stuff
+	testlist = new iScroll("testlist");
+	listelem = document.getElementById("testlist");
+}
+
+document.addEventListener('DOMContentLoaded', setTimeout(loaded, 200), false);
+
+if ( !window.requestAnimationFrame ) {
+
+	window.requestAnimationFrame = ( function() {
+
+		return window.webkitRequestAnimationFrame ||
+		window.mozRequestAnimationFrame ||
+		window.oRequestAnimationFrame ||
+		window.msRequestAnimationFrame ||
+		function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
+
+			window.setTimeout( callback, 1000 / 60 );
+
+		};
+
+	} )();
+}
+
+function iscrollMouseMove(iscroll, x,y) {
+  iscroll.handleEvent({
+      type:"mousemove", 
+      pageX : x, 
+      pageY : y,
+      });
+}
+
+function iscrollMouseDown(iscroll, x,y) {
+  iscroll.handleEvent({
+      type:"mousedown", 
+      pageX : x, 
+      pageY : y,
+      button : 0,
+      preventDefault : function() {} });
+}
+
+function iscrollMouseUp(iscroll, x,y) {
+  iscroll.handleEvent({
+      type:"mouseup", 
+      pageX : x, 
+      pageY : y,
+      button : 0});
+}
+
+
+function lerp(from, to, amount) {
+	return from + ((to - from) * amount);
+}
+
+var cursorCurr = [0,0];
+var cursorTarget = [0,0];
+var insession = false;
+var cursorElem = null;
+function updateCursor() {
+	if (insession) {
+		cursorCurr[0] = lerp(cursorCurr[0], cursorTarget[0], 0.5);
+		cursorCurr[1] = lerp(cursorCurr[1], cursorTarget[1], 0.5);
+		//cursorElem.style.left = (cursorCurr[0] * cursorElem.parentNode.offsetWidth - (cursorElem.offsetWidth / 2)) + "px";
+		//cursorElem.style.top = (cursorCurr[1] * cursorElem.parentNode.offsetHeight - (cursorElem.offsetHeight / 2)) + "px";
+		if (!pushed) h.updateNormalized(cursorCurr[0], cursorCurr[1]);
+		
+		if (pushed) {
+			iscrollMouseMove(testlist, cursorCurr[0] * listelem.offsetWidth, cursorCurr[1] * listelem.offsetHeight);
+		}
+
+	}
+	requestAnimationFrame(updateCursor);
+}
+
+function hysteresis(classname, pixelsize, container) {
+  var cls = classname;
+  var size = pixelsize; //TODO: separate X, Y sizes?
+  var items;
+  var currentItem = null;
+
+  if (undefined === container) {
+    container = document.body;
+  }
+
+  function refreshItems() {
+    items = document.getElementsByClassName(cls);
+  }
+  function start() {
+    currentItem = null;
+  }
+  function stop() {
+    if (currentItem) {
+      currentItem.classList.remove("hovering");
+    }
+  }
+  function inItem(item, x, y) {
+    var rect = item.getBoundingClientRect();
+    return (rect.left <= x) && (x <= rect.right) && (rect.top <= y) && (y <= rect.bottom);
+  }
+  function stillIn(item, x, y) {
+    var rect = item.getBoundingClientRect();
+    return ((rect.left-size) <= x) && (x <= (rect.right+size)) && ((rect.top-size) <= y) && (y <= (rect.bottom+size));
+  }
+  function updateNormalized(x,y) {
+    update(container.offsetWidth * x, container.offsetHeight * y);
+  }
+  function update(x,y) {
+    //TODO: something similar to jQuery .offset() instead - this can probably
+    //      break in some ways I don't know when using borders, padding and margins
+    var rect = container.getBoundingClientRect();
+    x += rect.left;
+    y += rect.top;
+    if (currentItem) {
+      if (stillIn(currentItem, x, y)) return;
+      // we left the current item
+      //TODO: not special case
+      currentItem.classList.remove("hovering");
+      currentItem = null;
+    }
+    for (var i = 0; i < items.length; i++) {
+      if (inItem(items[i], x, y)) {
+        currentItem = items[i];
+        currentItem.classList.add("hovering");
+        break;
+      }
+    }
+  }
+  refreshItems();
+  return { refreshItems : refreshItems,
+       start : start,
+       stop : stop,
+       update : update,
+       updateNormalized : updateNormalized,
+    };
+}
+
+</script>
+
+<style>
+
+.mylist {
+	margin: auto;
+	width : 50%;
+	border : solid 2px grey;
+}
+
+.iscrolllist {
+	height : 600px;
+	overflow:hidden;
+	position:relative;
+}
+
+.mylist .scrollerheader {
+	top:0; left:0;
+	width:100%;
+	height:45px;
+	line-height:45px;
+	background-color:#d51875;
+	background-image:-webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #fe96c9), color-stop(0.05, #d51875), color-stop(1, #7b0a2e));
+	background-image:-moz-linear-gradient(top, #fe96c9, #d51875 5%, #7b0a2e);
+	background-image:-o-linear-gradient(top, #fe96c9, #d51875 5%, #7b0a2e);
+	padding:0;
+	color:#eee;
+	font-size:20px;
+	text-align:center;
+}
+
+.mylist ul {
+	list-style:none;
+	padding:0;
+	margin:0;
+	width:100%;
+	text-align:left;
+}
+
+.mylist li {
+	padding:0 10px;
+	height:80px;
+	line-height:80px;
+	border-bottom:1px solid #ccc;
+	border-top:1px solid #fff;
+	background-color:#fafafa;
+	font-size:34px;
+}
+
+.mylist li.hovering {
+	background-color:green;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="mylist">
+	<div class="scrollerheader">List Header</div>
+	<div class="iscrolllist" id="testlist">
+		<ul>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+			<li class="hoverable">Hello World!</li>
+		</ul>
+		<div id="cursor"></div>
+	</div>
+</div>
+
+</body>
+
+</html>
