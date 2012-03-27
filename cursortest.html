@@ -1,0 +1,127 @@
+<html>
+
+<head>
+
+<style>
+#mycursor {
+	position: fixed;
+	display : none;
+	width : 40px;
+	height : 40px;
+	background-color : blue;
+}
+ 
+#mycursor.pushed {
+	background-color: red;
+}
+</style>
+
+<script src="new/zig.js"></script>
+
+<script>
+
+function loaded() {
+	// force external hand point only
+	zig.singleUserSession.startOnWave = false;
+	zig.singleUserSession.startOnSteady = false;
+	zig.singleUserSession.startOnExternalHandpoint = true;
+	zig.singleUserSession.bboxBounds = [1200, 1000, 1000];
+	zig.singleUserSession.bboxOffset = [0, 400, -400];
+
+
+	// Create cursor and cursor dom element
+	var c = zig.controls.Cursor();
+	var ce = document.createElement('div');
+	ce.id = 'mycursor';
+	console.log(document.body.appendChild(ce));
+	 
+	cursorElem = ce;
+
+	// 1. show/hide cursor on session start/end
+	zig.singleUserSession.addEventListener('sessionstart', function(focusPosition) {
+		ce.style.display = 'block';
+		insession = true;
+		cursorTarget[0] = cursorCurr[0] = c.x;
+		cursorTarget[1] = cursorCurr[1] = c.y;
+	});
+	zig.singleUserSession.addEventListener('sessionend', function() {
+		ce.style.display = 'none';
+		insession = false;
+	});
+	 
+	// 2. move the cursor element on cursor move
+	c.addEventListener('move', function(cursor) {
+		//ce.style.left = (c.x * window.innerWidth - (ce.offsetWidth / 2)) + "px";
+		//ce.style.top = (c.y * window.innerHeight - (ce.offsetHeight / 2)) + "px";
+		cursorTarget[0] = cursor.x;
+		cursorTarget[1] = cursor.y;
+	});
+	 
+	// 3. Add/remove 'pushed' class on cursor push/release
+	c.addEventListener('push', function(c) {
+		ce.classList.add('pushed');
+	});
+	c.addEventListener('release', function(c) {
+		ce.classList.remove('pushed');
+	});
+	 
+	// 4. Simulate mouse click on our virtual cursor
+	c.addEventListener('click', function(c) {
+		var xpos = c.x * window.innerWidth;
+		var ypos = c.y * window.innerHeight;
+		var evt = document.createEvent("MouseEvents");
+		evt.initMouseEvent("click", true, true, window, 1, xpos, ypos, xpos, ypos, false, false, false, false, 0, null);
+		window.dispatchEvent(evt);
+	});
+	 
+	// Add cursor to our single user UI session
+	zig.singleUserSession.addListener(c);
+	updateCursor();
+}
+
+document.addEventListener('DOMContentLoaded', setTimeout(loaded, 200), false);
+
+if ( !window.requestAnimationFrame ) {
+
+	window.requestAnimationFrame = ( function() {
+
+		return window.webkitRequestAnimationFrame ||
+		window.mozRequestAnimationFrame ||
+		window.oRequestAnimationFrame ||
+		window.msRequestAnimationFrame ||
+		function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
+
+			window.setTimeout( callback, 1000 / 60 );
+
+		};
+
+	} )();
+}
+
+function lerp(from, to, amount) {
+	return from + ((to - from) * amount);
+}
+
+var cursorCurr = [0,0];
+var cursorTarget = [0,0];
+var insession = false;
+var cursorElem = null;
+function updateCursor() {
+	if (insession) {
+		cursorCurr[0] = lerp(cursorCurr[0], cursorTarget[0], 0.5);
+		cursorCurr[1] = lerp(cursorCurr[1], cursorTarget[1], 0.5);
+		cursorElem.style.left = (cursorCurr[0] * window.innerWidth - (cursorElem.offsetWidth / 2)) + "px";
+		cursorElem.style.top = (cursorCurr[1] * window.innerHeight - (cursorElem.offsetHeight / 2)) + "px";
+	}
+	requestAnimationFrame(updateCursor);
+}
+
+</script>
+
+</head>
+
+<body>
+
+</body>
+
+</html>
