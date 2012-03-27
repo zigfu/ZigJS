@@ -1031,6 +1031,11 @@ function HandSessionDetector() {
 			sessionShouldStart({mappedJoint : Joint.ExternalHandpoint });
 		}
 
+		if (inSession && jointToUse == Joint.ExternalHandpoint && 
+			!userData.skeleton.hasOwnProperty(Joint.ExternalHandpoint)) {
+			stopSession();
+		}
+
 		rotateReference = vlerp(rotateReference, userData.position, 0.5);
 		if (inSession) {
 			var pos = userData.skeleton[jointToUse].position;
