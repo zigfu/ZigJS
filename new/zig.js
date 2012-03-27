@@ -132,7 +132,7 @@ function BoundingBox(size, center) {
 	}
 
 	function resize(newSize) {
-		size = $V(size);
+		size = $V(newSize);
 		extents = size.multiply(0.5);
 		min = center.subtract(extents);
 		max = center.add(extents);
@@ -1062,7 +1062,6 @@ function HandSessionDetector() {
 		inSession = true;
 		jointToUse = joint;
 		lastPosition = rotatedPoint(currentUser.skeleton[joint].position);
-		console.log("Starting session for user " + currentUser.id + " joint " + joint);
 		events.fireEvent('sessionstart', lastPosition);
 	}
 
