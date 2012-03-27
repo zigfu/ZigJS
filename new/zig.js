@@ -56,7 +56,10 @@ function Events() {
 			if (listener.hasOwnProperty(eventName)) {
 				try {
 					listener[eventName].call(listener, arg);
-				} catch (e) { console.log("Error calling callback for " + eventName + ": " + e); }
+				} catch (e) { 
+					console.log("Error calling callback for " + eventName + ": "); 
+					console.log(e);
+				}
 			}
 		});
 
@@ -66,7 +69,10 @@ function Events() {
 				if (undefined !== specificListener && specificListener != cb) return;
 				try {
 					cb.call(null, arg);
-				} catch (e) { console.log("Error calling callback for " + eventName + ": " + e); }
+				} catch (e) { 
+					console.log("Error calling callback for " + eventName + ": "); 
+					console.log(e); 
+				}
 			});
 		}
 	}
@@ -222,6 +228,7 @@ var Joint = {
  	RightKnee 		: 22,
  	RightAnkle 		: 23,
  	RightFoot 		: 24,
+ 	ExternalHandpoint : 100,
 };
 
 // enum: zig.Orientation
@@ -944,6 +951,7 @@ function HandSessionDetector() {
 		// property: startOnSteady
 		// Should a hand session start on hand steady?
 		startOnSteady : true,
+		startOnExternalHandpoint : true,
 		// property: bbox
 		// Bounding box for session bounds
 		bbox : BoundingBox([1000, 500, 500]),
@@ -959,6 +967,7 @@ function HandSessionDetector() {
 	var rotateReference;
 	var inSession = false;
 	var jointToUse;
+	var useExternalHandpoint = false;
 	var framesNotInBbox = 0;
 	var maxFramesNotInBbox = 15;
 	var lastPosition = undefined;
@@ -1016,9 +1025,16 @@ function HandSessionDetector() {
 	}
 
 	function onuserupdate(userData) {
+
+		if (!inSession && api.startOnExternalHandpoint && 
+			userData.skeleton.hasOwnProperty(Joint.ExternalHandpoint)) {
+			sessionShouldStart({mappedJoint : Joint.ExternalHandpoint });
+		}
+
 		rotateReference = vlerp(rotateReference, userData.position, 0.5);
 		if (inSession) {
-			if (!inBbox(userData.skeleton[jointToUse].position)) {
+			var pos = userData.skeleton[jointToUse].position;
+			if (!inBbox(pos)) {
 				framesNotInBbox++;
 				if (framesNotInBbox >= maxFramesNotInBbox) {
 					framesNotInBbox = 0;
@@ -1026,11 +1042,11 @@ function HandSessionDetector() {
 				}
 			} else {
 				framesNotInBbox = 0;
-				var position = rotatedPoint(userData.skeleton[jointToUse].position);
+				var rotatedPos = rotatedPoint(pos);
 				if (api.shouldSmoothPoints) {
-					position = vlerp(lastPosition, position, 0.8);
+					rotatedPos = vlerp(lastPosition, rotatedPos, 0.8);
 				}
-				lastPosition = position;
+				lastPosition = rotatedPos;
 				events.fireEvent('sessionupdate', lastPosition);
 			}
 		}
@@ -1041,6 +1057,7 @@ function HandSessionDetector() {
 		inSession = true;
 		jointToUse = joint;
 		lastPosition = rotatedPoint(currentUser.skeleton[joint].position);
+		console.log("Starting session for user " + currentUser.id + " joint " + joint);
 		events.fireEvent('sessionstart', lastPosition);
 	}
 
@@ -1089,17 +1106,22 @@ function EngageFirstUserInSession() {
 		onuserfound : onuserfound,
 		onuserlost : onuserlost,
 		engagedUser : null,
+		engagedHSD : null,
 		bboxBounds : [1000, 500, 500],
 		bboxOffset : [0, 250, -300],
+		startOnWave : true,
+		startOnSteady : true,
+		startOnExternalHandpoint : true,
 	}
 	events.eventify(api);
 	var engagedUserId = 0;
 
-	function onsessionstart(user, focusPosition) {
+	function onsessionstart(user, focusPosition, detector) {
 		if (engagedUserId != 0) return;
 
 		engagedUserId = user.id;
 		api.engagedUser = user;
+		api.engagedHSD = detector;
 		events.fireEvent('userengaged', user);
 		events.fireEvent('sessionstart', focusPosition);
 	}
@@ -1114,6 +1136,7 @@ function EngageFirstUserInSession() {
 		if (user.id == engagedUserId) {
 			engagedUserId = 0;
 			api.engagedUser = null;
+			api.engagedHSD = null;
 			events.fireEvent('sessionend');
 			events.fireEvent('userdisengaged', user);
 		}
@@ -1123,9 +1146,12 @@ function EngageFirstUserInSession() {
 		var sessionDetector = HandSessionDetector();
 		sessionDetector.bbox.resize(api.bboxBounds);
 		sessionDetector.bboxOffset = api.bboxOffset;
+		sessionDetector.startOnWave = api.startOnWave;
+		sessionDetector.startOnSteady = api.startOnSteady;
+		sessionDetector.startOnExternalHandpoint = api.startOnExternalHandpoint;
 
 		sessionDetector.addEventListener('sessionstart', function(focusPosition) {
-			onsessionstart(newUser, focusPosition);
+			onsessionstart(newUser, focusPosition, sessionDetector);
 		});
 		sessionDetector.addEventListener('sessionupdate', function(position) {
 			onsessionupdate(newUser, position);
@@ -1392,7 +1418,7 @@ zig = (function() {
 		return undefined;
 	}
 
-	function doUpdate(users) {
+	function doUpdate(users, hands) {
 		var toRemove = [];
 		var toAdd = [];
 
@@ -1435,6 +1461,16 @@ zig = (function() {
 			trackedUsers[userid].update(getItemById(users, userid));
 		}
 
+		// add external hand points to users
+		hands.forEach(function(hand) {
+			if (trackedUsers.hasOwnProperty(hand.userid)) {
+				trackedUsers[hand.userid].skeleton[Joint.ExternalHandpoint] = {
+					id : Joint.ExternalHandpoint,
+					position : hand.position,
+				};
+			}
+		});
+
 		// fire all add/remove events 
 		toRemove.forEach(function(user) { log('Lost user: ' + user.id); user.removeListener(); events.fireEvent('userlost', user); });
 		toAdd.forEach(function(user) { log('New user: ' + user.id); events.fireEvent('userfound', user); });
@@ -1456,7 +1492,7 @@ zig = (function() {
 				console.log("Error parsing JSON from plugin, skipping frame");
 				return;
 			}
-			doUpdate(obj.users);
+			doUpdate(obj.users, obj.hands);
 		 }}());
 		log("inited");
 		events.fireEvent('loaded', zo);
