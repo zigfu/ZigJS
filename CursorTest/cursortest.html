@@ -181,7 +181,7 @@ function updateCursor() {
 		
 		if (pushed) {
 			var val = (pushslider.value * 2) - 1;
-			//val *= 0.5;
+			val *= 0.6;
 			/*if (!outtadeadzone){
 				if (Math.abs(val) < 0.2) {
 					val = 0;
@@ -268,10 +268,17 @@ function hysteresis(classname, pixelsize, container) {
 	margin: auto;
 	width : 50%;
 	border : solid 2px grey;
+
+	transition : all 0.2s ease-in-out;
+	-webkit-transition: all 0.2s ease-in-out;
+    -moz-transition: all 0.2s ease-in-out;
+    -o-transition: all 0.2s ease-in-out;
+    -ms-transition: all 0.2s ease-in-out;
 }
 
 .mylist.pushed {
-	-webkit-transform: scale(1);
+	-webkit-transform: scale(0.95);
+	border: solid 1px lightgrey;
 }
 
 .iscrolllist {
