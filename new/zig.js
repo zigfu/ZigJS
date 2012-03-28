@@ -1360,7 +1360,7 @@ zig = (function() {
 		Cursor : Cursor,
 	}
 
-	var version = "0.96beta";
+	var version = "0.9.9";
 
 	var publicApi = {
 		// method: init
