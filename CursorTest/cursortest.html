@@ -47,8 +47,23 @@ function loaded() {
 	ce = cursorElem = document.getElementById("cursor");
 
 	pushslider = zig.controls.Fader(zig.Orientation.Y, 400);
-	
 	zig.singleUserSession.addListener(pushslider);
+
+	// swipe & steady detectors
+	var swipeDetector = zig.controls.SwipeDetector();
+	var steadyDetector = zig.controls.SteadyDetector();
+
+	swipeDetector.addEventListener('swipeleft', function(pd) {
+		console.log("SD LEFT");
+	});
+	
+	swipeDetector.addEventListener('swiperight', function(pd) {
+		console.log("SD RIGHT");
+	});
+
+	steadyDetector.addEventListener('steady', function(sd) {
+	
+	});
 
 	// 1. show/hide cursor on session start/end
 	zig.singleUserSession.addEventListener('sessionstart', function(focusPosition) {
@@ -76,26 +91,27 @@ function loaded() {
 	// 3. Add/remove 'pushed' class on cursor push/release
 	c.addEventListener('push', function(c) {
 		ce.classList.add('pushed');
-		console.log("Pushed");
 		h.stop();
 		iscrollMouseDown(testlist, 0.5 * listelem.offsetWidth, 0.5 * listelem.offsetHeight);
 		pushed = true;
 
 		pushslider.moveTo(c.pushDetector.pushPosition, 0.5);
 		$(".pushable").addClass("pushed");
+
+		zig.singleUserSession.addListener(swipeDetector);
 	});
 	c.addEventListener('release', function(c) {
 		ce.classList.remove('pushed');
 		pushed = false;
 		outtadeadzone = false;
-		console.log("Released");
 		h.start();
 		iscrollMouseUp(testlist, 0.5 * listelem.offsetWidth, pushslider.value * listelem.offsetHeight);
 		$(".pushable").removeClass("pushed");
+
+		zig.singleUserSession.removeListener(swipeDetector);
 	});
 	 
 	pushslider.addEventListener("edge", function(val) {
-		console.log("omercy");
 		c.pushDetector.release();
 	});
 
@@ -112,6 +128,7 @@ function loaded() {
 	zig.singleUserSession.addListener(c);
 	updateCursor();
 
+	
 
 	// iscroll stuff
 	testlist = new iScroll("testlist");
