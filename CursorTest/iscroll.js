@@ -755,7 +755,7 @@ iScroll.prototype = {
 	},
 
 	_momentum: function (dist, time, maxDistUpper, maxDistLower, size) {
-		var deceleration = 0.0006,
+		var deceleration = 0.0056,
 			speed = m.abs(dist) / time,
 			newDist = (speed * speed) / (2 * deceleration),
 			newTime = 0, outsideDist = 0;
