@@ -663,6 +663,10 @@ function PushDetector(size) {
 		// property: driftAmount
 		// How fast should the push detector drift after the hand point
 		driftAmount : 15,
+		// method: release
+		// force a release. should be called after the push event, and before the 
+		// release event. 
+		release : release,
 		fader : undefined,
 		onsessionstart: onsessionstart,
 		onsessionupdate: onsessionupdate,
@@ -698,14 +702,19 @@ function PushDetector(size) {
 			}
 		} else {
 			if (api.pushProgress < 0.5) {
-				api.isPushed = false;
-				fader.driftAmount = api.driftAmount;
-				if (isClick()) {
-					events.fireEvent('click', api);
-				}
-				events.fireEvent('release', api);
+				release();
 			}
 		}
+	}
+
+	function release() {
+		if (!api.isPushed) return;
+		api.isPushed = false;
+		fader.driftAmount = api.driftAmount;
+		if (isClick()) {
+			events.fireEvent('click', api);
+		}
+		events.fireEvent('release', api);
 	}
 	
 	function onsessionend() {
