@@ -17,6 +17,7 @@
 </style>
 
 <script src="iscroll.js"></script>
+<script src="jquery.min.js"></script>
 <script src="../new/zig.js"></script>
 
 <script>
@@ -25,6 +26,8 @@ var h;
 var testlist;
 var listelem;
 var pushed;
+var outtadeadzone = false;
+var pushslider;
 function loaded() {
 	// force external hand point only
 	zig.singleUserSession.startOnWave = false;
@@ -43,7 +46,8 @@ function loaded() {
 	 
 	ce = cursorElem = document.getElementById("cursor");
 
-	
+	pushslider = zig.controls.Fader(zig.Orientation.Y, 400);
+	zig.singleUserSession.addListener(pushslider);
 
 	// 1. show/hide cursor on session start/end
 	zig.singleUserSession.addEventListener('sessionstart', function(focusPosition) {
@@ -73,16 +77,20 @@ function loaded() {
 		ce.classList.add('pushed');
 		console.log("Pushed");
 		h.stop();
-		iscrollMouseDown(testlist, c.x * listelem.offsetWidth, c.y * listelem.offsetHeight);
+		iscrollMouseDown(testlist, 0.5 * listelem.offsetWidth, 0.5 * listelem.offsetHeight);
 		pushed = true;
+
+		pushslider.moveTo(c.pushDetector.pushPosition, 0.5);
+		$(".pushable").addClass("pushed");
 	});
 	c.addEventListener('release', function(c) {
 		ce.classList.remove('pushed');
 		pushed = false;
+		outtadeadzone = false;
 		console.log("Released");
 		h.start();
-		iscrollMouseUp(testlist, cursorCurr[0] * listelem.offsetWidth, cursorCurr[1] * listelem.offsetHeight);
-
+		iscrollMouseUp(testlist, 0.5 * listelem.offsetWidth, pushslider.value * listelem.offsetHeight);
+		$(".pushable").removeClass("pushed");
 	});
 	 
 	// 4. Simulate mouse click on our virtual cursor
@@ -166,7 +174,18 @@ function updateCursor() {
 		if (!pushed) h.updateNormalized(cursorCurr[0], cursorCurr[1]);
 		
 		if (pushed) {
-			iscrollMouseMove(testlist, cursorCurr[0] * listelem.offsetWidth, cursorCurr[1] * listelem.offsetHeight);
+			var val = (pushslider.value * 2) - 1;
+			//val *= 0.5;
+			/*if (!outtadeadzone){
+				if (Math.abs(val) < 0.2) {
+					val = 0;
+				} else {
+					outtadeadzone = true;
+				}
+			}*/
+
+			iscrollMouseMove(testlist, 0.5 * listelem.offsetWidth, (0.5 + val) * listelem.offsetHeight);
+			//iscrollMouseMove(testlist, cursorCurr[0] * listelem.offsetWidth, cursorCurr[1] * listelem.offsetHeight);
 		}
 
 	}
@@ -266,6 +285,13 @@ function hysteresis(classname, pixelsize, container) {
 	text-align:center;
 }
 
+.mylist .scrollerheader.pushed {
+	background-color:#007A00;
+	background-image:-webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #fe96c9), color-stop(0.05, #007A00), color-stop(1, #00CC00));
+	background-image:-moz-linear-gradient(top, #fe96c9, #007A00 5%, #00CC00);
+	background-image:-o-linear-gradient(top, #fe96c9, #007A00 5%, #00CC00);
+}
+
 .mylist ul {
 	list-style:none;
 	padding:0;
@@ -295,29 +321,12 @@ function hysteresis(classname, pixelsize, container) {
 <body>
 
 <div class="mylist">
-	<div class="scrollerheader">List Header</div>
+	<div class="scrollerheader pushable">List Header</div>
 	<div class="iscrolllist" id="testlist">
 		<ul>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
-			<li class="hoverable">Hello World!</li>
+		<script>
+		for (var i=0; i<100; i++) document.write('<li class="hoverable">[' + i + '] Hello World ' + i +'!</li>');
+		</script>
 		</ul>
 		<div id="cursor"></div>
 	</div>
