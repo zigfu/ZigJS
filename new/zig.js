@@ -657,6 +657,9 @@ function PushDetector(size) {
 		// property: pushTime
 		// Timestamp of last push
 		pushTime : 0,
+		// property: pushPosition
+		// position of last push event
+		pushPosition : [0,0,0],
 		// property: driftAmount
 		// How fast should the push detector drift after the hand point
 		driftAmount : 15,
