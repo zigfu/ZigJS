@@ -755,9 +755,12 @@ iScroll.prototype = {
 	},
 
 	_momentum: function (dist, time, maxDistUpper, maxDistLower, size) {
-		var deceleration = 0.0056,
-			speed = m.abs(dist) / time,
-			newDist = (speed * speed) / (2 * deceleration),
+		var deceleration = 0.0006,
+			speed = .5 * m.abs(dist) / time;
+			console.log('Speed: ' + speed);
+		if (speed > 1.3) speed = 1.3;
+
+		var newDist = (speed * speed) / (2 * deceleration),
 			newTime = 0, outsideDist = 0;
 
 		// Proportinally reduce speed if we are outside of the boundaries 
