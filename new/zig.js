@@ -47,26 +47,30 @@ function Events() {
 		if (i>=0) listeners.splice(i,1);
 	}
 
+	function _sendEvent(target, eventName, arg) {
+		if (target.hasOwnProperty(eventName)) {
+			try {
+				target[eventName].call(target, arg);
+			} catch (e) { 
+				console.log("Error calling callback for " + eventName + ": "); 
+				console.log(e);
+			}
+		}
+	}
+
 	function fireEvent(eventName, arg, specificListener) {
 		eventName = "on" + eventName;
+
 		// first listeners
 		listeners.forEach(function(listener) {
 			if (undefined !== specificListener && specificListener != listener) return;
-
-			if (listener.hasOwnProperty(eventName)) {
-				try {
-					listener[eventName].call(listener, arg);
-				} catch (e) { 
-					console.log("Error calling callback for " + eventName + ": "); 
-					console.log(e);
-				}
-			}
+			_sendEvent(listener, eventName, arg);
 		});
 
 		// and then events
 		if (events.hasOwnProperty(eventName)) {
 			events[eventName].forEach(function(cb) {
-				if (undefined !== specificListener && specificListener != cb) return;
+				if (undefined !== specificListener && cb != specificListener) return;
 				try {
 					cb.call(null, arg);
 				} catch (e) { 
@@ -82,11 +86,19 @@ function Events() {
 		obj.removeEventListener = removeEventListener;
 		obj.addListener = function(listener) {
 			addListener(listener);
-			fireEvent('attach', obj, listener);
+			_sendEvent(listener, 'onattach', obj);
+			_sendEvent(obj, 'onlistenerattach', listener);
 			return listener;
 		}
 		obj.removeListener = function(listener) {
 			fireEvent('detach', obj, listener);
+			if (undefined === listener) {
+				listeners.forEach(function (l) {
+					_sendEvent(obj, 'onlistenerdetach', l);
+				});
+			} else {
+				_sendEvent(obj, 'onlistenerdetach', listener);
+			}
 			removeListener(listener);
 		}
 
@@ -970,6 +982,9 @@ function HandSessionDetector() {
 		// property: bboxOffset
 		// Offset of session bounds from user position
 		bboxOffset : [0, 250, -300],
+		// property: focusPosition
+		// focus point for current session
+		focusPosition : [0,0,0]
 	}
 	events.eventify(api);
 
@@ -1037,7 +1052,6 @@ function HandSessionDetector() {
 	}
 
 	function onuserupdate(userData) {
-
 		if (!inSession && api.startOnExternalHandpoint && 
 			userData.skeleton.hasOwnProperty(Joint.ExternalHandpoint)) {
 			sessionShouldStart({mappedJoint : Joint.ExternalHandpoint });
@@ -1047,7 +1061,7 @@ function HandSessionDetector() {
 			!userData.skeleton.hasOwnProperty(Joint.ExternalHandpoint)) {
 			stopSession();
 		}
-
+		
 		rotateReference = vlerp(rotateReference, userData.position, 0.5);
 		if (inSession) {
 			var pos = userData.skeleton[jointToUse].position;
@@ -1074,13 +1088,26 @@ function HandSessionDetector() {
 		inSession = true;
 		jointToUse = joint;
 		lastPosition = rotatedPoint(currentUser.skeleton[joint].position);
-		events.fireEvent('sessionstart', lastPosition);
+		api.focusPosition = lastPosition;
+		events.fireEvent('sessionstart', api.focusPosition);
 	}
 
 	function stopSession() {
 		if (inSession) {
 			inSession = false;
 			events.fireEvent('sessionend');
+		}
+	}
+
+	function onlistenerattach(listener) {
+		if (inSession) {
+			events.fireEvent("sessionstart", api.focusPosition, listener);
+		}
+	}
+
+	function onlistenerdetach(listener) {
+		if (inSession) {
+			events.fireEvent("sessionend", null, listener);
 		}
 	}
 
@@ -1121,6 +1148,8 @@ function EngageFirstUserInSession() {
 	var api = {
 		onuserfound : onuserfound,
 		onuserlost : onuserlost,
+		onlistenerattach : onlistenerattach,
+		onlistenerdetach : onlistenerdetach,
 		engagedUser : null,
 		engagedHSD : null,
 		bboxBounds : [1000, 500, 500],
@@ -1131,10 +1160,14 @@ function EngageFirstUserInSession() {
 	}
 	events.eventify(api);
 	var engagedUserId = 0;
+	var inSession = false;
+	var focusPosition = [0,0,0];
 
-	function onsessionstart(user, focusPosition, detector) {
+	function onsessionstart(user, fp, detector) {
 		if (engagedUserId != 0) return;
 
+		inSession = true;
+		focusPosition = fp
 		engagedUserId = user.id;
 		api.engagedUser = user;
 		api.engagedHSD = detector;
@@ -1182,6 +1215,18 @@ function EngageFirstUserInSession() {
 	function onuserlost(lostUser) {
 		if (lostUser.id == engagedUserId) {
 			onsessionend(lostUser);
+		}
+	}
+
+	function onlistenerattach(listener) {
+		if (inSession) {
+			events.fireEvent("sessionstart", focusPosition, listener);
+		}
+	}
+
+	function onlistenerdetach(listener) {
+		if (inSession) {
+			events.fireEvent("sessionend", null, listener);
 		}
 	}
 
