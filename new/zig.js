@@ -645,7 +645,7 @@ function Fader2D(width, height) {
 // Click
 //-----------------------------------------------------------------------------
 function PushDetector(size) {
-	size = size || 200;
+	size = size || 160;
 
 	var api = {
 		// property: isPushed
