@@ -47,6 +47,7 @@ function loaded() {
 	ce = cursorElem = document.getElementById("cursor");
 
 	pushslider = zig.controls.Fader(zig.Orientation.Y, 400);
+	
 	zig.singleUserSession.addListener(pushslider);
 
 	// 1. show/hide cursor on session start/end
@@ -93,6 +94,11 @@ function loaded() {
 		$(".pushable").removeClass("pushed");
 	});
 	 
+	pushslider.addEventListener("edge", function(val) {
+		console.log("omercy");
+		c.pushDetector.release();
+	});
+
 	// 4. Simulate mouse click on our virtual cursor
 	c.addEventListener('click', function(c) {
 		var xpos = c.x * window.innerWidth;
@@ -264,6 +270,10 @@ function hysteresis(classname, pixelsize, container) {
 	border : solid 2px grey;
 }
 
+.mylist.pushed {
+	-webkit-transform: scale(1);
+}
+
 .iscrolllist {
 	height : 600px;
 	overflow:hidden;
@@ -320,7 +330,7 @@ function hysteresis(classname, pixelsize, container) {
 
 <body>
 
-<div class="mylist">
+<div class="mylist pushable">
 	<div class="scrollerheader pushable">List Header</div>
 	<div class="iscrolllist" id="testlist">
 		<ul>
