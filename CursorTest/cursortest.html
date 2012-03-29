@@ -16,18 +16,27 @@
 }
 </style>
 
-<script src="iscroll.js"></script>
-<script src="jquery.min.js"></script>
+<script src="js/iscroll.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.easing.1.2.js"></script>
+<script src="js/jquery.anythingslider.min.js"></script>
+<link href="css/anythingslider.css" rel="stylesheet">
+
 <script src="../new/zig.js"></script>
 
 <script>
 
 var h;
-var testlist;
+var testlist1;
+var testlist2;
+var testlist3;
 var listelem;
 var pushed;
 var outtadeadzone = false;
 var pushslider;
+
+var myslider;
+
 function loaded() {
 	// force external hand point only
 	zig.singleUserSession.startOnWave = false;
@@ -131,8 +140,17 @@ function loaded() {
 	
 
 	// iscroll stuff
-	testlist = new iScroll("testlist");
-	listelem = document.getElementById("testlist");
+	//testlist1 = new iScroll("testlist1");
+	//testlist2 = new iScroll("testlist2");
+	//testlist3 = new iScroll("testlist3");
+	listelem = document.getElementById("testlist1");
+
+	$('#mymainslideromercy').anythingSlider({
+			resizeContents      : true,
+			//autoPlay			: false,
+			//buildStartStop		: true,
+		});
+	//testing = new iScroll("testing");
 }
 
 document.addEventListener('DOMContentLoaded', setTimeout(loaded, 200), false);
@@ -279,12 +297,17 @@ function hysteresis(classname, pixelsize, container) {
 
 </script>
 
+<script>
+
+</script>
+
 <style>
 
 .mylist {
 	margin: auto;
 	width : 50%;
 	border : solid 2px grey;
+	position:relative;
 
 	transition : all 0.2s ease-in-out;
 	-webkit-transition: all 0.2s ease-in-out;
@@ -299,12 +322,13 @@ function hysteresis(classname, pixelsize, container) {
 }
 
 .iscrolllist {
-	height : 600px;
+	display:block;
+	height : 400px;
 	overflow:hidden;
 	position:relative;
 }
 
-.mylist .scrollerheader {
+.iscrolllist .scrollerheader {
 	top:0; left:0;
 	width:100%;
 	height:45px;
@@ -319,14 +343,14 @@ function hysteresis(classname, pixelsize, container) {
 	text-align:center;
 }
 
-.mylist .scrollerheader.pushed {
+.iscrolllist .scrollerheader.pushed {
 	background-color:#007A00;
 	background-image:-webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #fe96c9), color-stop(0.05, #007A00), color-stop(1, #00CC00));
 	background-image:-moz-linear-gradient(top, #fe96c9, #007A00 5%, #00CC00);
 	background-image:-o-linear-gradient(top, #fe96c9, #007A00 5%, #00CC00);
 }
 
-.mylist ul {
+.iscrolllist ul {
 	list-style:none;
 	padding:0;
 	margin:0;
@@ -334,7 +358,7 @@ function hysteresis(classname, pixelsize, container) {
 	text-align:left;
 }
 
-.mylist li {
+.iscrolllist li {
 	padding:0 10px;
 	height:80px;
 	line-height:80px;
@@ -344,7 +368,7 @@ function hysteresis(classname, pixelsize, container) {
 	font-size:34px;
 }
 
-.mylist li.hovering {
+.iscrolllist li.hovering {
 	background-color:green;
 }
 
@@ -353,17 +377,106 @@ function hysteresis(classname, pixelsize, container) {
 </head>
 
 <body>
-
+<!--
 <div class="mylist pushable">
 	<div class="scrollerheader pushable">List Header</div>
-	<div class="iscrolllist" id="testlist">
-		<ul>
-		<script>
-		for (var i=0; i<100; i++) document.write('<li class="hoverable">[' + i + '] Hello World ' + i +'!</li>');
-		</script>
-		</ul>
-		<div id="cursor"></div>
-	</div>
+
+	<ul id="mymainslideromercy1">
+		<li id="panel1">
+			<div class="iscrolllist" id="testlist1">
+				<ul>
+				<script>
+				for (var i=0; i<100; i++) document.write('<li class="hoverable">[' + i + '] Hello World ' + i +'!</li>');
+				</script>
+				</ul>
+			</div>
+		</li>
+		<li id="panel2">
+			<div class="iscrolllist" id="testlist2">
+				<ul>
+				<script>
+				for (var i=0; i<100; i++) document.write('<li class="hoverable">[' + i + '] Fuck you, World ' + i +'!</li>');
+				</script>
+				</ul>
+			</div>
+		</li>
+		<li id="panel3">
+			<div class="iscrolllist" id="testlist3">
+				<ul>
+				<script>
+				for (var i=0; i<100; i++) document.write('<li class="hoverable">[' + i + '] Yadda yadda, World ' + i +'!</li>');
+				</script>
+				</ul>
+			</div>
+		</li>
+	</ul>
+</div>
+-->
+<div class="mylist pushable">
+	<div class="scrollerheader pushable">List Header</div>
+	<ul id="mymainslideromercy">
+		<li><div  class="iscrolllist" id="testing1">
+
+		
+			<ul id="craplist1">
+				<script>
+				var l = document.getElementById("craplist1");
+				for (var i=0; i<50; i++) {
+					var e = document.createElement('li');
+					//e.classList.addClass("hoverable");
+					e.innerHTML = '[' + i + '] Yadda yadda, World ' + i +'!';
+					l.appendChild(e);
+				}
+				
+				var crap = new iScroll("testing1");
+					
+				</script>
+			</ul>
+		
+
+		</div></li>
+		<li><div class="iscrolllist" id="testing2">
+
+		
+			<ul id="craplist2">
+				<script>
+				var l = document.getElementById("craplist2");
+				for (var i=0; i<50; i++) {
+					var e = document.createElement('li');
+					//e.classList.addClass("hoverable");
+					e.innerHTML = '[' + i + '] Yadda yadda, World ' + i +'!';
+					l.appendChild(e);
+				}
+				
+				var crap = new iScroll("testing2");
+					
+				</script>
+			</ul>
+		
+
+		</div></li>
+
+		<li><div class="iscrolllist" id="testing3">
+
+		
+			<ul id="craplist3">
+				<script>
+				var l = document.getElementById("craplist3");
+				for (var i=0; i<50; i++) {
+					var e = document.createElement('li');
+					//e.classList.addClass("hoverable");
+					e.innerHTML = '[' + i + '] Yadda yadda, World ' + i +'!';
+					l.appendChild(e);
+				}
+				
+				var crap = new iScroll("testing3");
+					
+				</script>
+			</ul>
+		
+
+		</div></li>
+	</ul>
 </div>
 
 </body>

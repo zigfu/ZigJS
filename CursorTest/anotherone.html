@@ -1,0 +1,227 @@
+<html>
+
+<head>
+
+<script src="js/iscroll.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.easing.1.2.js"></script>
+<script src="js/jquery.anythingslider.min.js"></script>
+<link href="css/anythingslider.css" rel="stylesheet">
+
+<script src="../new/zig.js"></script>
+
+<script>
+
+var mainslider;
+
+var theiscroll1;
+var theiscroll2;
+var theiscroll3;
+
+function loaded() {
+	$("#mainslider").anythingSlider({
+		buildArrows : false,
+		buildStartStop : false,
+		buildNavigation : false,
+		infiniteSlides	: false,
+		expand  : false,
+	});
+
+	theiscroll1 = new iScroll("iscrollme1");
+	theiscroll2 = new iScroll("iscrollme2");
+	theiscroll3 = new iScroll("iscrollme3");
+}
+
+document.addEventListener('DOMContentLoaded', setTimeout(loaded, 200), false);
+
+</script>
+
+<style>
+
+.viewer {
+	margin: auto;
+	width : 50%;
+	border : solid 2px grey;
+	position:relative;
+
+	transition : all 0.2s ease-in-out;
+	-webkit-transition: all 0.2s ease-in-out;
+    -moz-transition: all 0.2s ease-in-out;
+    -o-transition: all 0.2s ease-in-out;
+    -ms-transition: all 0.2s ease-in-out;
+}
+
+.viewer.pushed {
+	-webkit-transform: scale(0.95);
+	border: solid 1px lightgrey;
+}
+
+.viewer .header {
+	top:0; left:0;
+	width:100%;
+	height:45px;
+	line-height:45px;
+	background-color:#d51875;
+	background-image:-webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #fe96c9), color-stop(0.05, #d51875), color-stop(1, #7b0a2e));
+	background-image:-moz-linear-gradient(top, #fe96c9, #d51875 5%, #7b0a2e);
+	background-image:-o-linear-gradient(top, #fe96c9, #d51875 5%, #7b0a2e);
+	padding:0;
+	color:#eee;
+	font-size:20px;
+	text-align:center;
+}
+
+.viewer .scrollerheader.pushed {
+	background-color:#007A00;
+	background-image:-webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #fe96c9), color-stop(0.05, #007A00), color-stop(1, #00CC00));
+	background-image:-moz-linear-gradient(top, #fe96c9, #007A00 5%, #00CC00);
+	background-image:-o-linear-gradient(top, #fe96c9, #007A00 5%, #00CC00);
+}
+
+.nicelist {
+	display:block;
+	height : 400px;
+	overflow:hidden;
+	position:relative;
+}
+
+.nicelist ul {
+	list-style:none;
+	padding:0;
+	margin:0;
+	width:100%;
+	text-align:left;
+}
+
+.nicelist li {
+	padding:0 10px;
+	height:80px;
+	line-height:80px;
+	border-bottom:1px solid #ccc;
+	border-top:1px solid #fff;
+	background-color:#fafafa;
+	font-size:34px;
+}
+
+.nicelist li.hovering {
+	background-color:green;
+}
+
+.viewer .contents {
+	width : 100%;
+	height : 500px;
+}
+
+.anythingsliderlist {
+	width : 100%;
+	height : 100%;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="mainviewer" class="viewer">
+
+	<div class="header">Header</div>
+
+	<div class="contents">
+
+		<ul id="mainslider" class="anythingsliderlist">
+			<li>
+				<div id="iscrollme1" class="nicelist">
+					<div>
+						<ul>
+							<li>Moshe 1</li>
+							<li>Moshe 2</li>
+							<li>Moshe 3</li>
+							<li>Moshe 4</li>
+							<li>Moshe 5</li>
+							<li>Moshe 1</li>
+							<li>Moshe 2</li>
+							<li>Moshe 3</li>
+							<li>Moshe 4</li>
+							<li>Moshe 5</li>
+							<li>Moshe 1</li>
+							<li>Moshe 2</li>
+							<li>Moshe 3</li>
+							<li>Moshe 4</li>
+							<li>Moshe 5</li>
+							<li>Moshe 1</li>
+							<li>Moshe 2</li>
+							<li>Moshe 3</li>
+							<li>Moshe 4</li>
+							<li>Moshe 5</li>
+						</ul>
+					</div>
+				</div>
+			</li>
+
+			<li>
+				<div id="iscrollme2" class="nicelist">
+					<div>
+						<ul>
+							<li>Shmulik 1</li>
+							<li>Shmulik 2</li>
+							<li>Shmulik 3</li>
+							<li>Shmulik 4</li>
+							<li>Shmulik 5</li>
+							<li>Shmulik 1</li>
+							<li>Shmulik 2</li>
+							<li>Shmulik 3</li>
+							<li>Shmulik 4</li>
+							<li>Shmulik 5</li>
+							<li>Shmulik 1</li>
+							<li>Shmulik 2</li>
+							<li>Shmulik 3</li>
+							<li>Shmulik 4</li>
+							<li>Shmulik 5</li>
+							<li>Shmulik 1</li>
+							<li>Shmulik 2</li>
+							<li>Shmulik 3</li>
+							<li>Shmulik 4</li>
+							<li>Shmulik 5</li>
+						</ul>
+					</div>
+				</div>
+			</li>
+
+			<li>
+				<div id="iscrollme3" class="nicelist">
+					<div>
+						<ul>
+							<li>Yitzchak 1</li>
+							<li>Yitzchak 2</li>
+							<li>Yitzchak 3</li>
+							<li>Yitzchak 4</li>
+							<li>Yitzchak 5</li>
+							<li>Yitzchak 1</li>
+							<li>Yitzchak 2</li>
+							<li>Yitzchak 3</li>
+							<li>Yitzchak 4</li>
+							<li>Yitzchak 5</li>
+							<li>Yitzchak 1</li>
+							<li>Yitzchak 2</li>
+							<li>Yitzchak 3</li>
+							<li>Yitzchak 4</li>
+							<li>Yitzchak 5</li>
+							<li>Yitzchak 1</li>
+							<li>Yitzchak 2</li>
+							<li>Yitzchak 3</li>
+							<li>Yitzchak 4</li>
+							<li>Yitzchak 5</li>
+						</ul>
+					</div>
+				</div>
+			</li>
+		</ul>
+
+	</div>
+
+</div>
+
+</body>
+
+</html>
