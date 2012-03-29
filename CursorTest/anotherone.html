@@ -18,6 +18,11 @@ var theiscroll1;
 var theiscroll2;
 var theiscroll3;
 
+function setHeaderText(slider) {
+	var txt = slider.$currentPage.attr("data-caption") || slider.currentPage;
+	$("#headerlbl").text(txt)
+}
+
 function loaded() {
 	$("#mainslider").anythingSlider({
 		buildArrows : false,
@@ -25,6 +30,8 @@ function loaded() {
 		buildNavigation : false,
 		infiniteSlides	: false,
 		expand  : false,
+		onInitialized : function(event, slider) { setHeaderText(slider); },
+		onSlideComplete : function(slider) { setHeaderText(slider); },
 	});
 
 	theiscroll1 = new iScroll("iscrollme1");
@@ -125,12 +132,12 @@ document.addEventListener('DOMContentLoaded', setTimeout(loaded, 200), false);
 
 <div id="mainviewer" class="viewer">
 
-	<div class="header">Header</div>
+	<div class="header"><span id="headerlbl">Header</span></div>
 
 	<div class="contents">
 
 		<ul id="mainslider" class="anythingsliderlist">
-			<li>
+			<li data-caption="This is the caption for panel 1">
 				<div id="iscrollme1" class="nicelist">
 					<div>
 						<ul>
@@ -159,7 +166,7 @@ document.addEventListener('DOMContentLoaded', setTimeout(loaded, 200), false);
 				</div>
 			</li>
 
-			<li>
+			<li data-caption="test2">
 				<div id="iscrollme2" class="nicelist">
 					<div>
 						<ul>
@@ -188,7 +195,7 @@ document.addEventListener('DOMContentLoaded', setTimeout(loaded, 200), false);
 				</div>
 			</li>
 
-			<li>
+			<li data-caption="test3">
 				<div id="iscrollme3" class="nicelist">
 					<div>
 						<ul>
