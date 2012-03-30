@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<!-- saved from url=(0065)http://desandro.github.com/3dtransforms/examples/carousel-01.html -->
+<html lang="en" class=" js csstransforms3d"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  
+  <!-- disable zooming -->
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=0">
+  
+  <title>Carousel 1 · Intro to CSS 3D transforms › Examples</title>
+  <script src='http://cdn.zigfu.com/zigjs/zig.min.js'></script>
+  <link rel="stylesheet" href="http://desandro.github.com/3dtransforms/css/style.css" media="screen">
+
+
+    <style media="screen">
+    
+    .container {
+      width: 210px;
+      height: 140px;
+      position: relative;
+      margin: 0 auto 40px;
+      border: 1px solid #CCC;
+      -webkit-perspective: 1100px;
+         -moz-perspective: 1100px;
+          -ms-perspective: 1100px;
+           -o-perspective: 1100px;
+              perspective: 1100px;
+    }
+    
+    #carousel {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      -webkit-transform: translateZ( -288px );
+         -moz-transform: translateZ( -288px );
+          -ms-transform: translateZ( -288px );
+           -o-transform: translateZ( -288px );
+              transform: translateZ( -288px );
+      -webkit-transform-style: preserve-3d;
+         -moz-transform-style: preserve-3d;
+          -ms-transform-style: preserve-3d;
+           -o-transform-style: preserve-3d;
+              transform-style: preserve-3d;
+      -webkit-transition: -webkit-transform 1s;
+         -moz-transition: -moz-transform 1s;
+          -ms-transition: -ms-transform 1s;
+           -o-transition: -o-transform 1s;
+              transition: transform 1s;
+    }
+    
+    #carousel figure {
+      display: block;
+      position: absolute;
+      width: 186px;
+      height: 116px;
+      left: 10px;
+      top: 10px;
+      border: 2px solid black;
+      line-height: 116px;
+      font-size: 80px;
+      font-weight: bold;
+      color: white;
+      text-align: center;
+    }
+    
+    #carousel figure:nth-child(1) { background: hsla(   0, 100%, 50%, 0.8 ); }
+    #carousel figure:nth-child(2) { background: hsla(  40, 100%, 50%, 0.8 ); }
+    #carousel figure:nth-child(3) { background: hsla(  80, 100%, 50%, 0.8 ); }
+    #carousel figure:nth-child(4) { background: hsla( 120, 100%, 50%, 0.8 ); }
+    #carousel figure:nth-child(5) { background: hsla( 160, 100%, 50%, 0.8 ); }
+    #carousel figure:nth-child(6) { background: hsla( 200, 100%, 50%, 0.8 ); }
+    #carousel figure:nth-child(7) { background: hsla( 240, 100%, 50%, 0.8 ); }
+    #carousel figure:nth-child(8) { background: hsla( 280, 100%, 50%, 0.8 ); }
+    #carousel figure:nth-child(9) { background: hsla( 320, 100%, 50%, 0.8 ); }
+
+    #carousel figure:nth-child(1) {
+      -webkit-transform: rotateY(   0deg ) translateZ( 288px );
+         -moz-transform: rotateY(   0deg ) translateZ( 288px );
+          -ms-transform: rotateY(   0deg ) translateZ( 288px );
+           -o-transform: rotateY(   0deg ) translateZ( 288px );
+              transform: rotateY(   0deg ) translateZ( 288px );
+    }
+    #carousel figure:nth-child(2) {
+      -webkit-transform: rotateY(  40deg ) translateZ( 288px );
+         -moz-transform: rotateY(  40deg ) translateZ( 288px );
+          -ms-transform: rotateY(  40deg ) translateZ( 288px );
+           -o-transform: rotateY(  40deg ) translateZ( 288px );
+              transform: rotateY(  40deg ) translateZ( 288px );
+    }
+    #carousel figure:nth-child(3) {
+      -webkit-transform: rotateY(  80deg ) translateZ( 288px );
+         -moz-transform: rotateY(  80deg ) translateZ( 288px );
+          -ms-transform: rotateY(  80deg ) translateZ( 288px );
+           -o-transform: rotateY(  80deg ) translateZ( 288px );
+              transform: rotateY(  80deg ) translateZ( 288px );
+    }
+    #carousel figure:nth-child(4) {
+      -webkit-transform: rotateY( 120deg ) translateZ( 288px );
+         -moz-transform: rotateY( 120deg ) translateZ( 288px );
+          -ms-transform: rotateY( 120deg ) translateZ( 288px );
+           -o-transform: rotateY( 120deg ) translateZ( 288px );
+              transform: rotateY( 120deg ) translateZ( 288px );
+    }
+    #carousel figure:nth-child(5) {
+      -webkit-transform: rotateY( 160deg ) translateZ( 288px );
+         -moz-transform: rotateY( 160deg ) translateZ( 288px );
+          -ms-transform: rotateY( 160deg ) translateZ( 288px );
+           -o-transform: rotateY( 160deg ) translateZ( 288px );
+              transform: rotateY( 160deg ) translateZ( 288px );
+    }
+    #carousel figure:nth-child(6) {
+      -webkit-transform: rotateY( 200deg ) translateZ( 288px );
+         -moz-transform: rotateY( 200deg ) translateZ( 288px );
+          -ms-transform: rotateY( 200deg ) translateZ( 288px );
+           -o-transform: rotateY( 200deg ) translateZ( 288px );
+              transform: rotateY( 200deg ) translateZ( 288px );
+    }
+    #carousel figure:nth-child(7) {
+      -webkit-transform: rotateY( 240deg ) translateZ( 288px );
+         -moz-transform: rotateY( 240deg ) translateZ( 288px );
+          -ms-transform: rotateY( 240deg ) translateZ( 288px );
+           -o-transform: rotateY( 240deg ) translateZ( 288px );
+              transform: rotateY( 240deg ) translateZ( 288px );
+    }
+    #carousel figure:nth-child(8) {
+      -webkit-transform: rotateY( 280deg ) translateZ( 288px );
+         -moz-transform: rotateY( 280deg ) translateZ( 288px );
+          -ms-transform: rotateY( 280deg ) translateZ( 288px );
+           -o-transform: rotateY( 280deg ) translateZ( 288px );
+              transform: rotateY( 280deg ) translateZ( 288px );
+    }
+    #carousel figure:nth-child(9) {
+      -webkit-transform: rotateY( 320deg ) translateZ( 288px );
+         -moz-transform: rotateY( 320deg ) translateZ( 288px );
+          -ms-transform: rotateY( 320deg ) translateZ( 288px );
+           -o-transform: rotateY( 320deg ) translateZ( 288px );
+              transform: rotateY( 320deg ) translateZ( 288px );
+    }
+
+  </style>
+
+<script src="chrome-extension://lifbcibllhkdhoafpjfnlhfpfgnpldfl/document_iterator.js"></script><script src="chrome-extension://lifbcibllhkdhoafpjfnlhfpfgnpldfl/find_proxy.js"></script><script src="chrome-extension://lifbcibllhkdhoafpjfnlhfpfgnpldfl/get_html_text.js"></script><script src="chrome-extension://lifbcibllhkdhoafpjfnlhfpfgnpldfl/global_constants.js"></script><script src="chrome-extension://lifbcibllhkdhoafpjfnlhfpfgnpldfl/name_injection_builder.js"></script><script src="chrome-extension://lifbcibllhkdhoafpjfnlhfpfgnpldfl/number_injection_builder.js"></script><script src="chrome-extension://lifbcibllhkdhoafpjfnlhfpfgnpldfl/string_finder.js"></script><script src="chrome-extension://lifbcibllhkdhoafpjfnlhfpfgnpldfl/change_sink.js"></script><meta name="document_iterator.js"><meta name="find_proxy.js"><meta name="get_html_text.js"><meta name="global_constants.js"><meta name="name_injection_builder.js"><meta name="number_injection_builder.js"><meta name="string_finder.js"><meta name="change_sink.js"></head>
+<body>
+
+  <h1>Carousel 1</h1>
+  
+  <section class="container">
+    <div id="carousel" style="-webkit-transform: translateZ(-288px) rotateY(-1280deg); ">
+      <figure>1</figure>
+      <figure>2</figure>
+      <figure>3</figure>
+      <figure>4</figure>
+      <figure>5</figure>
+      <figure>6</figure>
+      <figure>7</figure>
+      <figure>8</figure>
+      <figure>9</figure>
+    </div>
+  </section>
+  
+  <section id="options">
+    <p id="navigation">
+      <button id="previous" data-increment="-1">Previous</button>
+      <button id="next" data-increment="1">Next</button>
+    </p>
+    
+  </section>
+  
+  <script src="./index_files/utils.js"></script>
+  <script>
+  zig.embed();
+  var swipeDetector = zig.controls.SwipeDetector();
+  zig.singleUserSession.addListener(swipeDetector);
+  
+  
+    var init = function() {
+      var carousel = document.getElementById('carousel'),
+          navButtons = document.querySelectorAll('#navigation button'),
+          panelCount = carousel.children.length,
+          transformProp = Modernizr.prefixed('transform'),
+          theta = 0,
+          
+          onNavButtonClick = function( event ){
+            var increment = parseInt( event.target.getAttribute('data-increment') );
+            theta += ( 360 / panelCount ) * increment * -1;
+            carousel.style[ transformProp ] = 'translateZ( -288px ) rotateY(' + theta + 'deg)';
+          };
+
+		  swipeDetector.addEventListener('swipeleft', function(pd) {
+	console.log('SwipeDetector: Swipe Left');
+	var increment = -1;
+            theta += ( 360 / panelCount ) * increment * -1;
+            carousel.style[ transformProp ] = 'translateZ( -288px ) rotateY(' + theta + 'deg)';
+});
+	  swipeDetector.addEventListener('swiperight', function(pd) {
+	console.log('SwipeDetector: Swipe Right');
+	var increment = 1;
+            theta += ( 360 / panelCount ) * increment * -1;
+            carousel.style[ transformProp ] = 'translateZ( -288px ) rotateY(' + theta + 'deg)';
+});
+		  
+		  
+      for (var i=0; i < 2; i++) {
+        navButtons[i].addEventListener( 'click', onNavButtonClick, false);
+      }
+      
+    };
+      
+    window.addEventListener( 'DOMContentLoaded', init, false);
+  </script>
+
+  
+  <footer>
+    <p id="disclaimer">Sorry, your browser does not support CSS 3D transforms. Try viewing this page in <a href="http://www.apple.com/safari/">Safari</a>, <a href="http://www.google.com/chrome">Chrome</a>, <a href="http://www.mozilla.org/en-US/firefox/channel/">Firefox Aurora</a>, or on an iOS device.</p>
+    <p>Example for <a href="http://desandro.github.com/3dtransforms/">Intro to CSS 3D transforms</a> by David DeSandro</p>
+  </footer>
+
+
+</body><span id="skype_highlighting_settings" display="none" autoextractnumbers="1"></span><object id="skype_plugin_object" location.href="http://desandro.github.com/3dtransforms/examples/carousel-01.html" location.hostname="desandro.github.com" style="position: absolute; visibility: hidden; left: -100px; top: -100px; " width="0" height="0" type="application/x-vnd.skype.click2call.chrome.5.7.0"></object></html>
