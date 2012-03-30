@@ -391,16 +391,25 @@ var searchkeywords = [
 	"O'mercy",
 ];
 
-function makeMenu(caption, cls) {
+function addToSlider(child, caption) {
+	var c = $("li")
+		.attr("data-caption", caption)
+		.append(child)
+	$("#mainslider")
+		.append(c)
+		.anythingSlider()
+		.data('AnythingSlider').goForward();
+}
+
+function makeMenu(cls) {
 	if (undefined === cls) {
 		cls = "nicemenu";
 	}
 
 	var menu = $("div")
-		.attr('data-caption', caption)
-		.addClass(cls);
+		.addClass(cls)
 
-	return menu;
+	return menu.context;
 }
 
 function makeMenuChild(text, action) {
