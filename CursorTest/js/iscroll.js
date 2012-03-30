@@ -106,12 +106,19 @@ var m = Math,
 			onDestroy: null,
 			onZoomStart: null,
 			onZoom: null,
-			onZoomEnd: null
+			onZoomEnd: null,
+
+			// TODO: unhack
+			positionBufferDuration : 300 // milliseconds
 		};
 
 		// User defined options
 		for (i in options) that.options[i] = options[i];
 		
+		// create position buffer for better momentum scrolling and great justice
+		that.positionBufferDuration = that.options.positionBufferDuration;
+		that.positionBuffer = [];
+
 		// Set starting position
 		that.x = that.options.x;
 		that.y = that.options.y;
@@ -307,6 +314,19 @@ iScroll.prototype = {
 		that[dir + 'ScrollbarWrapper'].style.opacity = hidden && that.options.hideScrollbar ? '0' : '1';
 		that[dir + 'ScrollbarIndicator'].style[vendor + 'Transform'] = trnOpen + (dir == 'h' ? pos + 'px,0' : '0,' + pos + 'px') + trnClose;
 	},
+	_updateBuffer : function(x,y,time) {
+		var that = this;
+		that.positionBuffer.push({x : x, y : y, time : time});
+		// clear too-old points
+		if (that.positionBuffer.length > 2) {
+			var buffer = that.positionBuffer;
+			var minDuration = that.positionBufferDuration;
+			// we want at least positionBufferDuration delta-t between the first 
+			// and last points in the buffer, 
+			while (time - buffer[1].time > minDuration) buffer.shift();
+
+		}
+	},
 	
 	_start: function (e) {
 		var that = this,
@@ -370,6 +390,8 @@ iScroll.prototype = {
 		that.pointY = point.pageY;
 
 		that.startTime = e.timeStamp || Date.now();
+		// reset point buffer to contain only the start point
+		that.positionBuffer = [{x : that.startX, y : that.startY, time : that.startTime}]
 
 		if (that.options.onScrollStart) that.options.onScrollStart.call(that, e);
 
@@ -455,6 +477,8 @@ iScroll.prototype = {
 			that.startX = that.x;
 			that.startY = that.y;
 		}
+		// append to point buffer
+		that._updateBuffer(that.x, that.y, timestamp);
 		
 		if (that.options.onScrollMove) that.options.onScrollMove.call(that, e);
 	},
@@ -541,7 +565,22 @@ iScroll.prototype = {
 			return;
 		}
 
-		if (duration < 300 && that.options.momentum) {
+		//if (duration < 300 && that.options.momentum) {
+		if (that.options.momentum) {
+			//TODO: my hack o'doom
+			//console.log(this.positionBuffer);
+			var currentTime = duration + that.startTime;
+			var idx = 0;
+			var buffer = that.positionBuffer;
+			var minDuration = that.positionBufferDuration;
+			while ((idx < buffer.length - 1) && (currentTime - buffer[idx + 1].time > minDuration)) {
+				idx++;
+			}
+			that.startX = buffer[idx].x;
+			that.startY = buffer[idx].y;
+			duration = currentTime - buffer[idx].time;
+			//console.log("time(%d): start(%f,%f), dt(%d)", currentTime, that.startX, that.startY, duration);
+			// end o'hack
 			momentumX = newPosX ? that._momentum(newPosX - that.startX, duration, -that.x, that.scrollerW - that.wrapperW + that.x, that.options.bounce ? that.wrapperW : 0) : momentumX;
 			momentumY = newPosY ? that._momentum(newPosY - that.startY, duration, -that.y, (that.maxScrollY < 0 ? that.scrollerH - that.wrapperH + that.y - that.minScrollY : 0), that.options.bounce ? that.wrapperH : 0) : momentumY;
 
