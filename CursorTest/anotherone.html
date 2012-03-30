@@ -410,6 +410,7 @@ body {
 	height:80px;
 	line-height:80px;
 	color: #FFF;
+	width: 100%;
 	text-shadow: 0.5px 1px 0px rgba(0,0,0,0.5);
 	font-family: 'Arimo';
 	font-weight: 700;
@@ -420,6 +421,7 @@ body {
 }
 .nicelist li.hovering {
 	background-color: rgba(76,174,164,0.7);
+	-webkit-transition: background-color .05s linear .05s;
 }
 .viewer .contents {
 	width : 100%;
@@ -432,13 +434,21 @@ body {
 	width : 100%;
 	height : 100%;
 }
+#caption {
+	width: 50%;
+	height: 100px;
+	margin: 0 auto;
+	border-radius: 8px;
+	margin-bottom: 50px;
+	background-color: rgba(0,0,0,0.5);
+}
 </style>
 
 </head>
 
 <body>
 
-	<div id="mainviewer" class="viewer">
+	<div id="mainviewer" class="viewer pushable">
 
 		<div class="header pushable"><span id="headerlbl">Header</span></div>
 
