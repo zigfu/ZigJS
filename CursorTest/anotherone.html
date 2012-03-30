@@ -186,6 +186,11 @@ function GestureableiScroll() {
 
 	var inSession = false;
 
+	var pointHistory = [];
+	var pointsToSave = 60;
+	var velocityTime = 100; // 300 ms lower bound
+	var deceleration = 0.0006;
+
 	var api = {
 		onattach : onattach,
 		ondetach : ondetach,
@@ -216,7 +221,16 @@ function GestureableiScroll() {
 			h.updateNormalized(0.5/*currCursor[0]*/, currCursor[1]);
 		} else {
 			var val = (pushslider.value * 2) - 1;
+
+			// save point for velocity calculation
+			pointHistory.push([val, (+new Date())]);
+			while (pointHistory.length > pointsToSave) {
+				pointHistory.shift();
+			}
+
+			// scale for feel
 			val *= 0.6;
+
 			iscrollMouseMove(boundiScroll, 0.5 * boundiScroll.wrapperW, (0.5 + val) * boundiScroll.wrapperH);
 		}
 		
@@ -231,6 +245,9 @@ function GestureableiScroll() {
 
 		pushslider.moveTo(pd.pushPosition, 0.5);
 
+		// reset point buffer
+		pointHistory = [];
+
 		iscrollMouseDown(boundiScroll, 0.5 * boundiScroll.wrapperW, 0.5 * boundiScroll.wrapperH);
 	});
 
@@ -239,6 +256,41 @@ function GestureableiScroll() {
 		h.start();
 
 		iscrollMouseUp(boundiScroll, 0.5 * boundiScroll.wrapperW, 0.5 * boundiScroll.wrapperH);
+
+		//do velocity calculation
+
+		var endPoint = pointHistory[pointHistory.length - 1];
+		var endTime = endPoint[1],
+			endValue = endPoint[0];
+		for (var i = pointHistory.length - 2; i >= 0; i--) {
+			var pt = pointHistory[i];
+			var dt = endTime - pt[1];
+			if (dt > velocityTime) {
+				// dt is big enough for reliable velocity calculation
+				var velocity = (endValue - pt[0]) / dt;
+				console.log('velocity is: ' + velocity);
+				var sign = velocity < 0 ? 1 : -1;
+				velocity = Math.abs(velocity);
+				// calculate speed in pixels
+				// then use v(t)= v0 + a*t to find the time when the
+				// motion will stop (v(t) = 0 => t = v0/a)
+				// and then stick that into x(t) = x0 + v0*t + 0.5*a*(t^2)
+				// (we're using constant deceleration for great justice)
+				var time = velocity / deceleration,
+					distance = (velocity*velocity) / deceleration;
+				
+
+				//console.log("pixelVelocity: " + pixelInitialVelocity);
+				//console.log("motion time: " + time);
+				//console.log("total distance: " + distance);
+				var scrollData = boundiScroll._momentum(velocity*boundiScroll.wrapperH, 1, 1000000, 1000000, 12341234);
+				//boundiScroll.scrollTo(0, scrollData.dist * sign, scrollData.time, true);
+
+				break;
+			}
+		}
+		console.log('final dt:' + dt);
+		console.log(pointHistory);
 	});
 
 	pd.addEventListener('click', function() {
@@ -384,6 +436,66 @@ function GestureableiScroll() {
 				<div id="iscrollme1" class="nicelist">
 					<div>
 						<ul>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
 							<li class="hoverable">Moshe 1</li>
 							<li class="hoverable">Moshe 1</li>
 							<li class="hoverable">Moshe 1</li>
