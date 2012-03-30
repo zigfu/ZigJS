@@ -48,6 +48,10 @@ function slideLoaded($slide) {
 }
 
 function loaded() {
+	zig.singleUserSession.startOnWave = false;
+	zig.singleUserSession.startOnSteady = false;
+	zig.singleUserSession.startOnExternalHandpoint = true;
+
  	iscrollController = GestureableiScroll();
 	zig.singleUserSession.addListener(iscrollController);
 
@@ -283,8 +287,8 @@ function GestureableiScroll() {
 				//console.log("pixelVelocity: " + pixelInitialVelocity);
 				//console.log("motion time: " + time);
 				//console.log("total distance: " + distance);
-				var scrollData = boundiScroll._momentum(velocity*boundiScroll.wrapperH, 1, 1000000, 1000000, 12341234);
-				//boundiScroll.scrollTo(0, scrollData.dist * sign, scrollData.time, true);
+				var scrollData = boundiScroll._momentum(velocity*boundiScroll.wrapperH, 1, -boundiScroll.y, (boundiScroll.maxScrollY < 0 ? boundiScroll.scrollerH - boundiScroll.wrapperH + boundiScroll.y - boundiScroll.minScrollY : 0), boundiScroll.wrapperH);
+				boundiScroll.scrollTo(0, scrollData.dist * sign, scrollData.time, true);
 
 				break;
 			}
