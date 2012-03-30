@@ -12,34 +12,277 @@
 
 <script>
 
-var mainslider;
+if (!window.requestAnimationFrame) {
+	window.requestAnimationFrame = (function() {
+		return window.webkitRequestAnimationFrame ||
+		window.mozRequestAnimationFrame ||
+		window.oRequestAnimationFrame ||
+		window.msRequestAnimationFrame ||
+		function(callback, element) {
+			window.setTimeout(callback, 1000 / 60);
+		};
+	})();
+}
 
 var theiscroll1;
 var theiscroll2;
 var theiscroll3;
 
+var iscrollController;// = GestureableiScroll();
+
+var iscrollLookup = {};
+
 function setHeaderText(slider) {
 	var txt = slider.$currentPage.attr("data-caption") || slider.currentPage;
-	$("#headerlbl").text(txt)
+	$("#headerlbl").text(txt);
+}
+
+function slideLoaded($slide) {
+	// set caption text
+	var txt = $slide.attr("data-caption") || $slide;
+	$("#headerlbl").text(txt);
+
+	// bind the iscoll associated with this slide
+	var iscroll = iscrollLookup[$slide.children().eq(0).attr("id")];
+	iscrollController.bindTo(iscroll);
 }
 
 function loaded() {
+ 	iscrollController = GestureableiScroll();
+	zig.singleUserSession.addListener(iscrollController);
+
+	theiscroll1 = new iScroll("iscrollme1");
+	theiscroll2 = new iScroll("iscrollme2");
+	theiscroll3 = new iScroll("iscrollme3");
+
+	iscrollLookup = {
+		iscrollme1 : theiscroll1,
+		iscrollme2 : theiscroll2,
+		iscrollme3 : theiscroll3,
+	};
+
 	$("#mainslider").anythingSlider({
 		buildArrows : false,
 		buildStartStop : false,
 		buildNavigation : false,
 		infiniteSlides	: false,
 		expand  : false,
-		onInitialized : function(event, slider) { setHeaderText(slider); },
-		onSlideComplete : function(slider) { setHeaderText(slider); },
+		onInitialized : function(event, slider) { slideLoaded(slider.$currentPage); },
+		onSlideComplete : function(slider) { slideLoaded(slider.$currentPage); },
 	});
 
-	theiscroll1 = new iScroll("iscrollme1");
-	theiscroll2 = new iScroll("iscrollme2");
-	theiscroll3 = new iScroll("iscrollme3");
+
 }
 
 document.addEventListener('DOMContentLoaded', setTimeout(loaded, 200), false);
+
+// TODO: Allow specifying a pixelSize func
+function hysteresis(classname, pixelsize, container) {
+  var cls = classname;
+  var size = pixelsize; //TODO: separate X, Y sizes?
+  var items;
+  var currentItem = null;
+
+  if (undefined === container) {
+    container = document.body;
+  }
+
+  function refreshItems(newcontainer) {
+  	if (undefined !== newcontainer) {
+  		container = newcontainer;
+  	}
+    items = document.getElementsByClassName(cls);
+  }
+  function start() {
+    currentItem = null;
+  }
+  function stop() {
+    if (currentItem) {
+      currentItem.classList.remove("hovering");
+    }
+  }
+  function inItem(item, x, y) {
+    var rect = item.getBoundingClientRect();
+    return (rect.left <= x) && (x <= rect.right) && (rect.top <= y) && (y <= rect.bottom);
+  }
+  function stillIn(item, x, y) {
+    var rect = item.getBoundingClientRect();
+    return ((rect.left-size) <= x) && (x <= (rect.right+size)) && ((rect.top-size) <= y) && (y <= (rect.bottom+size));
+  }
+  function updateNormalized(x,y) {
+    update(container.offsetWidth * x, container.offsetHeight * y);
+  }
+  function update(x,y) {
+    //TODO: something similar to jQuery .offset() instead - this can probably
+    //      break in some ways I don't know when using borders, padding and margins
+    var rect = container.getBoundingClientRect();
+    x += rect.left;
+    y += rect.top;
+    if (currentItem) {
+      if (stillIn(currentItem, x, y)) return;
+      // we left the current item
+      //TODO: not special case
+      currentItem.classList.remove("hovering");
+      currentItem = null;
+    }
+    for (var i = 0; i < items.length; i++) {
+      if (inItem(items[i], x, y)) {
+        currentItem = items[i];
+        currentItem.classList.add("hovering");
+        break;
+      }
+    }
+  }
+  refreshItems();
+  return { refreshItems : refreshItems,
+       start : start,
+       stop : stop,
+       update : update,
+       updateNormalized : updateNormalized,
+    };
+}
+
+function iscrollMouseMove(iscroll, x,y) {
+  iscroll.handleEvent({
+      type:"mousemove", 
+      pageX : x, 
+      pageY : y,
+      });
+}
+
+function iscrollMouseDown(iscroll, x,y) {
+  iscroll.handleEvent({
+      type:"mousedown", 
+      pageX : x, 
+      pageY : y,
+      button : 0,
+      preventDefault : function() {} });
+}
+
+function iscrollMouseUp(iscroll, x,y) {
+  iscroll.handleEvent({
+      type:"mouseup", 
+      pageX : x, 
+      pageY : y,
+      button : 0});
+}
+
+function GestureableiScroll() {
+	var fader2d = zig.controls.Fader2D();
+	var pd = zig.controls.PushDetector();
+	var pushslider = zig.controls.Fader(zig.Orientation.Y, 400);
+	var h = hysteresis("hoverable", 20);
+	var boundiScroll = null;
+
+	// these are both normalized
+	var currCursor = [0,0];
+	var targetCursor = [0,0];
+
+	var childControls = [
+		fader2d,
+		pd,
+		pushslider,
+	];
+
+	var inSession = false;
+
+	var api = {
+		onattach : onattach,
+		ondetach : ondetach,
+		onsessionstart : onsessionstart,
+		onsessionend : onsessionend,
+		bindTo : bindTo,
+	}
+
+	function bindTo(iscroll) {
+		boundiScroll = iscroll;
+		h.refreshItems(iscroll.wrapper);
+	}
+
+	function lerp(from, to, amount) {
+		return from + ((to - from) * amount);
+	}
+
+	function frame() {
+		if (!inSession) return;
+		
+		// update current cursor position
+		currCursor[0] = lerp(currCursor[0], targetCursor[0], 0.5);
+		currCursor[1] = lerp(currCursor[1], targetCursor[1], 0.5);
+
+		// propegate to DOM if not pushed
+		if (!pd.isPushed) {
+			// always use x=0.5 for vertical menu
+			h.updateNormalized(0.5/*currCursor[0]*/, currCursor[1]);
+		} else {
+			var val = (pushslider.value * 2) - 1;
+			val *= 0.6;
+			iscrollMouseMove(boundiScroll, 0.5 * boundiScroll.wrapperW, (0.5 + val) * boundiScroll.wrapperH);
+		}
+		
+		requestAnimationFrame(frame);
+	}
+
+	// event handlers
+
+	pd.addEventListener('push', function() {
+		$(".pushable").addClass("pushed");
+		h.stop();
+
+		pushslider.moveTo(pd.pushPosition, 0.5);
+
+		iscrollMouseDown(boundiScroll, 0.5 * boundiScroll.wrapperW, 0.5 * boundiScroll.wrapperH);
+	});
+
+	pd.addEventListener('release', function() {
+		$(".pushable").removeClass("pushed");
+		h.start();
+
+		iscrollMouseUp(boundiScroll, 0.5 * boundiScroll.wrapperW, 0.5 * boundiScroll.wrapperH);
+	});
+
+	pd.addEventListener('click', function() {
+		
+	});
+
+	fader2d.addEventListener('valuechange', function() {
+		// flip y axis to match screen coords
+		targetCursor[0] = fader2d.value[0];
+		targetCursor[1] = 1 - fader2d.value[1];
+	});
+
+	pushslider.addEventListener("edge", function(val) {
+		pd.release();
+	});
+
+	function onattach(sessiondetector) {
+		childControls.forEach(function(control) {
+			sessiondetector.addListener(control);
+		});
+	}
+
+	function ondetach(sessiondetector) {
+		childControls.forEach(function(control) {
+			sessiondetector.removeListener(control);
+		});
+	}
+
+	function onsessionstart(focusPosition) {
+		console.log("Session started");
+		inSession = true;
+		h.start();
+		frame();
+	}
+
+	function onsessionend() {
+		console.log("Session ended");
+		// this will stop the frame() loop
+		inSession = false;
+		h.stop();
+	}
+
+	return api;
+}
 
 </script>
 
@@ -78,7 +321,7 @@ document.addEventListener('DOMContentLoaded', setTimeout(loaded, 200), false);
 	text-align:center;
 }
 
-.viewer .scrollerheader.pushed {
+.viewer .header.pushed {
 	background-color:#007A00;
 	background-image:-webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #fe96c9), color-stop(0.05, #007A00), color-stop(1, #00CC00));
 	background-image:-moz-linear-gradient(top, #fe96c9, #007A00 5%, #00CC00);
@@ -87,7 +330,7 @@ document.addEventListener('DOMContentLoaded', setTimeout(loaded, 200), false);
 
 .nicelist {
 	display:block;
-	height : 400px;
+	height : 100%;
 	overflow:hidden;
 	position:relative;
 }
@@ -132,7 +375,7 @@ document.addEventListener('DOMContentLoaded', setTimeout(loaded, 200), false);
 
 <div id="mainviewer" class="viewer">
 
-	<div class="header"><span id="headerlbl">Header</span></div>
+	<div class="header pushable"><span id="headerlbl">Header</span></div>
 
 	<div class="contents">
 
@@ -141,26 +384,26 @@ document.addEventListener('DOMContentLoaded', setTimeout(loaded, 200), false);
 				<div id="iscrollme1" class="nicelist">
 					<div>
 						<ul>
-							<li>Moshe 1</li>
-							<li>Moshe 2</li>
-							<li>Moshe 3</li>
-							<li>Moshe 4</li>
-							<li>Moshe 5</li>
-							<li>Moshe 1</li>
-							<li>Moshe 2</li>
-							<li>Moshe 3</li>
-							<li>Moshe 4</li>
-							<li>Moshe 5</li>
-							<li>Moshe 1</li>
-							<li>Moshe 2</li>
-							<li>Moshe 3</li>
-							<li>Moshe 4</li>
-							<li>Moshe 5</li>
-							<li>Moshe 1</li>
-							<li>Moshe 2</li>
-							<li>Moshe 3</li>
-							<li>Moshe 4</li>
-							<li>Moshe 5</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
+							<li class="hoverable">Moshe 1</li>
 						</ul>
 					</div>
 				</div>
@@ -170,26 +413,28 @@ document.addEventListener('DOMContentLoaded', setTimeout(loaded, 200), false);
 				<div id="iscrollme2" class="nicelist">
 					<div>
 						<ul>
-							<li>Shmulik 1</li>
-							<li>Shmulik 2</li>
-							<li>Shmulik 3</li>
-							<li>Shmulik 4</li>
-							<li>Shmulik 5</li>
-							<li>Shmulik 1</li>
-							<li>Shmulik 2</li>
-							<li>Shmulik 3</li>
-							<li>Shmulik 4</li>
-							<li>Shmulik 5</li>
-							<li>Shmulik 1</li>
-							<li>Shmulik 2</li>
-							<li>Shmulik 3</li>
-							<li>Shmulik 4</li>
-							<li>Shmulik 5</li>
-							<li>Shmulik 1</li>
-							<li>Shmulik 2</li>
-							<li>Shmulik 3</li>
-							<li>Shmulik 4</li>
-							<li>Shmulik 5</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+							<li class="hoverable">ksjdhf 1</li>
+
 						</ul>
 					</div>
 				</div>
@@ -199,26 +444,24 @@ document.addEventListener('DOMContentLoaded', setTimeout(loaded, 200), false);
 				<div id="iscrollme3" class="nicelist">
 					<div>
 						<ul>
-							<li>Yitzchak 1</li>
-							<li>Yitzchak 2</li>
-							<li>Yitzchak 3</li>
-							<li>Yitzchak 4</li>
-							<li>Yitzchak 5</li>
-							<li>Yitzchak 1</li>
-							<li>Yitzchak 2</li>
-							<li>Yitzchak 3</li>
-							<li>Yitzchak 4</li>
-							<li>Yitzchak 5</li>
-							<li>Yitzchak 1</li>
-							<li>Yitzchak 2</li>
-							<li>Yitzchak 3</li>
-							<li>Yitzchak 4</li>
-							<li>Yitzchak 5</li>
-							<li>Yitzchak 1</li>
-							<li>Yitzchak 2</li>
-							<li>Yitzchak 3</li>
-							<li>Yitzchak 4</li>
-							<li>Yitzchak 5</li>
+							<li class="hoverable">Yitzchak 1</li>
+							<li class="hoverable">Yitzchak 1</li>
+							<li class="hoverable">Yitzchak 1</li>
+							<li class="hoverable">Yitzchak 1</li>
+							<li class="hoverable">Yitzchak 1</li>
+							<li class="hoverable">Yitzchak 1</li>
+							<li class="hoverable">Yitzchak 1</li>
+							<li class="hoverable">Yitzchak 1</li>
+							<li class="hoverable">Yitzchak 1</li>
+							<li class="hoverable">Yitzchak 1</li>
+							<li class="hoverable">Yitzchak 1</li>
+							<li class="hoverable">Yitzchak 1</li>
+							<li class="hoverable">Yitzchak 1</li>
+							<li class="hoverable">Yitzchak 1</li>
+							<li class="hoverable">Yitzchak 1</li>
+							<li class="hoverable">Yitzchak 1</li>
+							<li class="hoverable">Yitzchak 1</li>
+							<li class="hoverable">Yitzchak 1</li>
 						</ul>
 					</div>
 				</div>
