@@ -350,7 +350,15 @@ function GestureableiScroll() {
 
 <style>
 body {
-	background: #19364f url(i/bg.jpg);
+	background: #33706a; /* Old browsers */
+background: -moz-radial-gradient(center, ellipse cover,  #33706a 0%, #1a364f 100%); /* FF3.6+ */
+background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#33706a), color-stop(100%,#1a364f)); /* Chrome,Safari4+ */
+background: -webkit-radial-gradient(top, ellipse cover,  #33706a 0%,#1a364f 100%); /* Chrome10+,Safari5.1+ */
+background: -o-radial-gradient(center, ellipse cover,  #33706a 0%,#1a364f 100%); /* Opera 12+ */
+background: -ms-radial-gradient(center, ellipse cover,  #33706a 0%,#1a364f 100%); /* IE10+ */
+background: radial-gradient(center, ellipse cover,  #33706a 0%,#1a364f 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', endColorstr='#1a364f',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+
 	padding-top: 100px;
 }
 .viewer {
