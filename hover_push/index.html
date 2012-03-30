@@ -1,0 +1,57 @@
+<html>
+<head>
+
+<script src="jsDraw2D.js" type="text/javascript"></script>
+
+
+</head>
+<body>
+<script type="text/javascript">
+var canvasDiv=document.getElementById("canvas");
+var gr=new jsGraphics(canvasDiv);
+point = new jsPoint(50,50);
+function fillArc(start,total)
+{
+    var width=90;
+    var height=90;
+    var startAngle=start;
+    var swapAngle=total;
+    col=new jsColor("blue");
+	pen=new jsPen(col,20);
+    
+	d1=(new Date()).getTime();
+
+	gr.fillArc(col,point,width,height,startAngle,swapAngle);
+
+	d2=(new Date()).getTime();
+
+	console.log(d2-d1);
+
+}
+var pos = 0;
+var del = 20;
+var amt = 10;
+function fillCircle()
+{
+		
+	fillArc(pos,amt+1);
+	pos += amt;
+	if (pos < 360)
+	{
+		window.setTimeout(fillCircle,del);
+	}
+	else
+	{
+		pos = 0;
+		window.setTimeout(end,del);
+	}
+}
+function end()
+{
+	alert("DONE");
+}
+
+</script>
+<div id="canvas" style="overflow:hidden;position:relative;width:100px;height:100px;border: 0px;"></div>
+</body>
+</html>
