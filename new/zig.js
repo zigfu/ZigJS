@@ -52,8 +52,7 @@ function Events() {
 			try {
 				target[eventName].call(target, arg);
 			} catch (e) { 
-				console.log("Error calling callback for " + eventName + ": "); 
-				console.log(e);
+				console.error("Error calling callback for " + eventName + ":\n" + e.stack); 
 			}
 		}
 	}
@@ -74,8 +73,7 @@ function Events() {
 				try {
 					cb.call(null, arg);
 				} catch (e) { 
-					console.log("Error calling callback for " + eventName + ": "); 
-					console.log(e); 
+					console.error("Error calling callback for " + eventName + ":\n" + e.stack); 
 				}
 			});
 		}
