@@ -77,6 +77,7 @@ function loaded() {
 		buildNavigation : false,
 		infiniteSlides	: false,
 		expand  : false,
+		hashTags : false,
 		onInitialized : function(event, slider) { slideLoaded(slider.$currentPage); },
 		onSlideComplete : function(slider) { slideLoaded(slider.$currentPage); },
 	});
@@ -144,12 +145,13 @@ function hysteresis(classname, pixelsize, container) {
     }
   }
   refreshItems();
-  return { refreshItems : refreshItems,
-       start : start,
-       stop : stop,
-       update : update,
-       updateNormalized : updateNormalized,
-    };
+  return { 
+	refreshItems : refreshItems,
+	start : start,
+	stop : stop,
+	update : update,
+	updateNormalized : updateNormalized,
+   };
 }
 
 function iscrollMouseMove(iscroll, x,y) {
@@ -181,6 +183,7 @@ function GestureableiScroll() {
 	var fader2d = zig.controls.Fader2D();
 	var pd = zig.controls.PushDetector();
 	var pushslider = zig.controls.Fader(zig.Orientation.Y, 400);
+	var selectswipe = zig.controls.SwipeDetector();
 	var h = hysteresis("hoverable", 20);
 	var boundiScroll = null;
 
@@ -307,6 +310,14 @@ function GestureableiScroll() {
 		
 	});
 
+	selectswipe.addEventListener('swipeleft', function() {
+		// back
+	});
+
+	selectswipe.addEventListener('swiperight', function() {
+		// select
+	});
+
 	fader2d.addEventListener('valuechange', function() {
 		// flip y axis to match screen coords
 		targetCursor[0] = fader2d.value[0];
@@ -347,6 +358,77 @@ function GestureableiScroll() {
 }
 
 </script>
+
+<script>
+
+var searchkeywords = [
+	'Zigfu',
+	'Monkeys',
+	'Salad',
+	'Thailand',
+	'Paper cup',
+	'Splume',
+	'Burning man',
+	'Sublime Text',
+	"O'mercy",
+	'Zigfu',
+	'Monkeys',
+	'Salad',
+	'Thailand',
+	'Paper cup',
+	'Splume',
+	'Burning man',
+	'Sublime Text',
+	"O'mercy",
+	'Zigfu',
+	'Monkeys',
+	'Salad',
+	'Thailand',
+	'Paper cup',
+	'Splume',
+	'Burning man',
+	'Sublime Text',
+	"O'mercy",
+];
+
+function makeMenu(caption, cls) {
+	if (undefined === cls) {
+		cls = "nicemenu";
+	}
+
+	var menu = $("div")
+		.attr('data-caption', caption)
+		.addClass(cls);
+
+	return menu;
+}
+
+function makeMenuChild(text, action) {
+	var child = $("li")
+		.addClass("hoverable")
+		.text(text)
+		.click(action)
+
+	return child;
+}
+
+function makeSearchMenu(items) {
+	var m = makeMenu('Search for images');
+	items.forEach(function(item){
+		m.append(makeMenuChild(item), (function(i){ return doImageSearch(i)})(item));
+	});
+}
+
+function doImageSearch(item) {
+	var m = makeMenu("Results for '" + item + "'");
+}
+
+function navigateToMenu(menu) {
+	
+}
+
+</script>
+
 
 <style>
 body {
