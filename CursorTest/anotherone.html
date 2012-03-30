@@ -8,6 +8,12 @@
 <script src="js/jquery.anythingslider.min.js"></script>
 <link href="css/anythingslider.css" rel="stylesheet">
 
+<link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
+
+<link href='http://fonts.googleapis.com/css?family=Oleo+Script:400,700' rel='stylesheet' type='text/css'>
+
+<link href='http://fonts.googleapis.com/css?family=Arimo:400,700' rel='stylesheet' type='text/css'>
+
 <script src="../new/zig.js"></script>
 
 <script>
@@ -343,250 +349,253 @@ function GestureableiScroll() {
 </script>
 
 <style>
-
+body {
+	background: #19364f url(i/bg.jpg);
+	padding-top: 100px;
+}
 .viewer {
 	margin: auto;
 	width : 50%;
-	border : solid 2px grey;
-	position:relative;
-
+	border : solid 1px rgba(255,255,255,0.4);
+	position: relative;
+	border-radius: 8px;
+	box-shadow: inset 0px -1px 5px rgba(255,255,255,0.3), 0px -1px 5px rgba(0,0,0,0.5);
 	transition : all 0.2s ease-in-out;
 	-webkit-transition: all 0.2s ease-in-out;
     -moz-transition: all 0.2s ease-in-out;
     -o-transition: all 0.2s ease-in-out;
     -ms-transition: all 0.2s ease-in-out;
 }
-
 .viewer.pushed {
 	-webkit-transform: scale(0.95);
-	border: solid 1px lightgrey;
+	border: solid 1px rgba(255,255,255,0.3);
 }
-
 .viewer .header {
 	top:0; left:0;
 	width:100%;
 	height:45px;
+	border-top-right-radius: 8px;
+	border-top-left-radius: 8px;
+	font-family: 'Oleo Script';
+	font-weight: 400;
 	line-height:45px;
-	background-color:#d51875;
-	background-image:-webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #fe96c9), color-stop(0.05, #d51875), color-stop(1, #7b0a2e));
-	background-image:-moz-linear-gradient(top, #fe96c9, #d51875 5%, #7b0a2e);
-	background-image:-o-linear-gradient(top, #fe96c9, #d51875 5%, #7b0a2e);
+	background-color: rgba(255,255,255,0.3);
 	padding:0;
-	color:#eee;
-	font-size:20px;
+	color:#FFF;
+	font-size: 2em;
+	text-shadow: 0px 0px 5px rgba(0,0,0,0.3);
 	text-align:center;
 }
-
 .viewer .header.pushed {
-	background-color:#007A00;
-	background-image:-webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #fe96c9), color-stop(0.05, #007A00), color-stop(1, #00CC00));
-	background-image:-moz-linear-gradient(top, #fe96c9, #007A00 5%, #00CC00);
-	background-image:-o-linear-gradient(top, #fe96c9, #007A00 5%, #00CC00);
+	background-color: rgba(255,255,255,0.7);
+	-webkit-transition: background-color .15s ease-in-out .15s;
 }
-
 .nicelist {
 	display:block;
 	height : 100%;
 	overflow:hidden;
 	position:relative;
 }
-
 .nicelist ul {
 	list-style:none;
 	padding:0;
 	margin:0;
 	width:100%;
 	text-align:left;
+	border-bottom-right-radius: 8px;
+	border-bottom-left-radius: 8px;
 }
-
 .nicelist li {
 	padding:0 10px;
 	height:80px;
 	line-height:80px;
-	border-bottom:1px solid #ccc;
-	border-top:1px solid #fff;
-	background-color:#fafafa;
+	color: #FFF;
+	text-shadow: 0.5px 1px 0px rgba(0,0,0,0.5);
+	font-family: 'Arimo';
+	font-weight: 700;
+	border-bottom:1px solid rgba(0,0,0,0.5);
+	border-top:1px solid rgba(255,255,255,0.3);
 	font-size:34px;
+	overflow: hidden;
 }
-
 .nicelist li.hovering {
-	background-color:green;
+	background-color: rgba(76,174,164,0.7);
 }
-
 .viewer .contents {
 	width : 100%;
 	height : 500px;
+	border-bottom-right-radius: 8px;
+	border-bottom-left-radius: 8px;
 }
 
 .anythingsliderlist {
 	width : 100%;
 	height : 100%;
 }
-
 </style>
 
 </head>
 
 <body>
 
-<div id="mainviewer" class="viewer">
+	<div id="mainviewer" class="viewer">
 
-	<div class="header pushable"><span id="headerlbl">Header</span></div>
+		<div class="header pushable"><span id="headerlbl">Header</span></div>
 
-	<div class="contents">
+		<div class="contents">
 
-		<ul id="mainslider" class="anythingsliderlist">
-			<li data-caption="This is the caption for panel 1">
-				<div id="iscrollme1" class="nicelist">
-					<div>
-						<ul>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-							<li class="hoverable">Moshe 1</li>
-						</ul>
+			<ul id="mainslider" class="anythingsliderlist">
+				<li data-caption="This is the caption for panel 1">
+					<div id="iscrollme1" class="nicelist">
+						<div>
+							<ul>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+								<li class="hoverable">Moshe 1</li>
+							</ul>
+						</div>
 					</div>
-				</div>
-			</li>
+				</li>
 
-			<li data-caption="test2">
-				<div id="iscrollme2" class="nicelist">
-					<div>
-						<ul>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
-							<li class="hoverable">ksjdhf 1</li>
+				<li data-caption="test2">
+					<div id="iscrollme2" class="nicelist">
+						<div>
+							<ul>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
+								<li class="hoverable">ksjdhf 1</li>
 
-						</ul>
+							</ul>
+						</div>
 					</div>
-				</div>
-			</li>
+				</li>
 
-			<li data-caption="test3">
-				<div id="iscrollme3" class="nicelist">
-					<div>
-						<ul>
-							<li class="hoverable">Yitzchak 1</li>
-							<li class="hoverable">Yitzchak 1</li>
-							<li class="hoverable">Yitzchak 1</li>
-							<li class="hoverable">Yitzchak 1</li>
-							<li class="hoverable">Yitzchak 1</li>
-							<li class="hoverable">Yitzchak 1</li>
-							<li class="hoverable">Yitzchak 1</li>
-							<li class="hoverable">Yitzchak 1</li>
-							<li class="hoverable">Yitzchak 1</li>
-							<li class="hoverable">Yitzchak 1</li>
-							<li class="hoverable">Yitzchak 1</li>
-							<li class="hoverable">Yitzchak 1</li>
-							<li class="hoverable">Yitzchak 1</li>
-							<li class="hoverable">Yitzchak 1</li>
-							<li class="hoverable">Yitzchak 1</li>
-							<li class="hoverable">Yitzchak 1</li>
-							<li class="hoverable">Yitzchak 1</li>
-							<li class="hoverable">Yitzchak 1</li>
-						</ul>
+				<li data-caption="test3">
+					<div id="iscrollme3" class="nicelist">
+						<div>
+							<ul>
+								<li class="hoverable">Yitzchak 1</li>
+								<li class="hoverable">Yitzchak 1</li>
+								<li class="hoverable">Yitzchak 1</li>
+								<li class="hoverable">Yitzchak 1</li>
+								<li class="hoverable">Yitzchak 1</li>
+								<li class="hoverable">Yitzchak 1</li>
+								<li class="hoverable">Yitzchak 1</li>
+								<li class="hoverable">Yitzchak 1</li>
+								<li class="hoverable">Yitzchak 1</li>
+								<li class="hoverable">Yitzchak 1</li>
+								<li class="hoverable">Yitzchak 1</li>
+								<li class="hoverable">Yitzchak 1</li>
+								<li class="hoverable">Yitzchak 1</li>
+								<li class="hoverable">Yitzchak 1</li>
+								<li class="hoverable">Yitzchak 1</li>
+								<li class="hoverable">Yitzchak 1</li>
+								<li class="hoverable">Yitzchak 1</li>
+								<li class="hoverable">Yitzchak 1</li>
+							</ul>
+						</div>
 					</div>
-				</div>
-			</li>
-		</ul>
+				</li>
+			</ul>
+
+		</div>
 
 	</div>
-
-</div>
 
 </body>
 
