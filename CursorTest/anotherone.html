@@ -392,7 +392,7 @@ var searchkeywords = [
 ];
 
 function addToSlider(child, caption) {
-	var c = $("li")
+	var c = $("<li>")
 		.attr("data-caption", caption)
 		.append(child)
 	$("#mainslider")
@@ -403,33 +403,46 @@ function addToSlider(child, caption) {
 
 function makeMenu(cls) {
 	if (undefined === cls) {
-		cls = "nicemenu";
+		cls = "nicelist";
 	}
 
-	var menu = $("div")
-		.addClass(cls)
+	var innerlist = $("<ul>");
+	var menu = $("<div>")
+		.append($("<div>").append(innerlist))
+		.addClass(cls);
 
-	return menu.context;
-}
+	var is = new iScroll(menu.get(0))
 
-function makeMenuChild(text, action) {
-	var child = $("li")
-		.addClass("hoverable")
-		.text(text)
-		.click(action)
+	menu.data('menu', {
+		iScroll : is,
+		addChild : function (text, action) {
+		  	innerlist.append($("<li>")
+				.addClass("hoverable")
+				.text(text)
+				.click(action)
+			);
+		},
+		refresh : function() {
+			setTimeout(function () {
+				is.refresh();
+			}, 0);}
+	});
 
-	return child;
+	return menu.get(0);
 }
 
 function makeSearchMenu(items) {
-	var m = makeMenu('Search for images');
+	var m = makeMenu();
 	items.forEach(function(item){
-		m.append(makeMenuChild(item), (function(i){ return doImageSearch(i)})(item));
+		$(m).data('menu').addChild(item, (function(i){ return function(){doImageSearch(i);};})(item));
 	});
+	$(m).data('menu').refresh();
+	
+	addToSlider(m, "Search for images");
 }
 
 function doImageSearch(item) {
-	var m = makeMenu("Results for '" + item + "'");
+	console.log("Searching for images: " + item);
 }
 
 function navigateToMenu(menu) {
