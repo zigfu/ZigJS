@@ -21,8 +21,16 @@
 	height: 200px;
 	background-color: #FFCCCC;
 }
+a:hover
+{
+	color: #FF0000;
+}
 </style>
+
+
 </head>
+
+
 <body>
 
 
@@ -35,9 +43,26 @@
 <td><div id="Cclickdiv" class="clickdiv" onclick="divclick(this);" onmousedown="divdown(this);" onmouseup="divup(this);" onmouseover="divover(this);" onmouseout="divout(this);">C</div></td>
 </table>
 <div id="output">OUT</div>
-
+<div><h1><a id="hovertest" class="foo" href="http://google.com">KILLER LINK CLICK</a></h1></div>
 
 <script type="text/javascript">
+
+
+function hasClass(ele,cls) {
+    return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
+}
+
+function addClass(ele,cls) {
+    if (!this.hasClass(ele,cls)) ele.className += " "+cls;
+}
+
+function removeClass(ele,cls) {
+    if (hasClass(ele,cls)) {
+        var reg = new RegExp('(\\s|^)'+cls+'(\\s|$)');
+        ele.className=ele.className.replace(reg,'');
+    }
+}
+
 function divdown(t)
 {
 console.log("down: " + t.id);
@@ -82,8 +107,8 @@ window.onload = function(){
     context.lineWidth = 10;
 	
 window.onmousemove = function(e){
-	//target[0] = e.clientX / window.innerWidth;
-	//target[1] = e.clientY / window.innerHeight;
+	target[0] = e.clientX / window.innerWidth;
+	target[1] = e.clientY / window.innerHeight;
 };
 	
 window.setInterval(moveCursor,15);
@@ -195,23 +220,33 @@ function setCursor(x,y)
 			else
 			{
 				el.style.zIndex = parseInt(el.style.zIndex||0)-(1000+k);
-				var evt = document.createEvent("MouseEvents");				
-				evt.initMouseEvent("mousemove", true, true, window, 1, xpos, ypos, xpos, ypos, false, false, false, false, 0, null);
-				el.dispatchEvent(evt);
+				//var evt = document.createEvent("MouseEvents");				
+				//evt.initMouseEvent("mousemove", true, true, window, 1, xpos, ypos, xpos, ypos, false, false, false, false, 0, null);
+				//el.dispatchEvent(evt);
 				if (el != mouseovertarget)
 				{
 					if (mouseovertarget)
 					{
+						console.log("CLASS: " + mouseovertarget.classList);
+						//mouseovertarget.classList.remove("zigHover");
+						removeClass(mouseovertarget, "zigHover");
+						console.log("REMOVE zigHover class from " + mouseovertarget.id );
+						console.log("CLASS: " + mouseovertarget.classList);
 						var evt = document.createEvent("MouseEvents");				
 						evt.initMouseEvent("mouseout", true, true, window, 1, xpos, ypos, xpos, ypos, false, false, false, false, 0, null);
 						console.log("mouseout: " + mouseovertarget.id);
 						mouseovertarget.dispatchEvent(evt);
+						
+
 					}
 					mouseovertarget = el;
 					console.log("mouseover: " + mouseovertarget.id);
 					var evt = document.createEvent("MouseEvents");				
 					evt.initMouseEvent("mouseover", true, true, window, 1, xpos, ypos, xpos, ypos, false, false, false, false, 0, null);					
 					mouseovertarget.dispatchEvent(evt);		
+					//mouseovertarget.classList.add("zigHover");
+					addClass(mouseovertarget, "zigHover");
+					console.log("ADD zigHover class to " + mouseovertarget.id );
 				}
 			}
 			//console.log("next");
@@ -219,7 +254,7 @@ function setCursor(x,y)
 			el = document.elementFromPoint(xpos, ypos);
 			//console.log(el);//console.log(el.id);
 			k++;
-		} while(el!=n && el!=r && k<3);
+		} while(el!=n && el!=r && k<2);
 		//console.log(elems.length);
 		elems.toString=function(){
 			var buf=[];
@@ -247,7 +282,7 @@ function setCursor(x,y)
 // 3. Add/remove 'pushed' class on cursor push/release
 c.addEventListener('push', function(c) {
 	
-	console.log("mousedown: " + mouseovertarget.id);
+	//console.log("mousedown: " + mouseovertarget.id);
 	ce.classList.add('pushed');
 	xpos = c.x * window.innerWidth;
 	ypos = c.y * window.innerHeight; 
@@ -260,7 +295,7 @@ c.addEventListener('push', function(c) {
 });
 c.addEventListener('release', function(c) {
 	ce.classList.remove('pushed');
-	console.log("mouseup: " + mouseovertarget.id);
+	//console.log("mouseup: " + mouseovertarget.id);
 	xpos = c.x * window.innerWidth;
 	ypos = c.y * window.innerHeight; 
 	var evt = document.createEvent("MouseEvents");				
@@ -278,7 +313,7 @@ c.addEventListener('click', function(c) {
 	
 	
 	elem = document.elementFromPoint(xpos,ypos);
-	console.log("xpos: " + xpos + " y: " + ypos);
+	//console.log("xpos: " + xpos + " y: " + ypos);
 	
 	
 	if (elem)
@@ -298,7 +333,7 @@ c.addEventListener('click', function(c) {
 			}
 			else
 			{
-				console.log("click");
+				//console.log("click");
 				evt.initMouseEvent("click", true, true, el, 1, xpos, ypos, xpos, ypos, false, false, false, false, 0, null);
 				el.dispatchEvent(evt);
 				el.style.zIndex = parseInt(el.style.zIndex||0)-(1000+k);	
@@ -309,7 +344,7 @@ c.addEventListener('click', function(c) {
 			//console.log(el);//console.log(el.id);
 			k++;
 		} while(el!=n && el!=r && k<3);
-		console.log(elems.length);
+		//console.log(elems.length);
 		elems.toString=function(){
 			var buf=[];
 			for(var ii=0; ii<this.length; ii++)
@@ -347,6 +382,28 @@ zig.singleUserSession.addListener(c);
 
 
 
+</script>
+
+<script type="text/javascript">
+for (var i = 0; i < document.styleSheets.length; i++)
+{
+	console.log("stylesheet " + i);
+	ss = document.styleSheets[i];
+	for (var r = 0; r < ss.rules.length; r++)
+	{
+		console.log(ss.rules[r].selectorText);
+		if (ss.rules[r].selectorText.search(":hover") > 0)
+		{
+			console.log("add hover");			
+			txt = ss.rules[r].cssText;
+			newstyle = txt.replace(":hover", ".zigHover");
+			console.log(newstyle);
+			ss.insertRule(newstyle);
+			r++;
+		}
+	}
+	
+}
 </script>
 
 </body>
