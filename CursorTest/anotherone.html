@@ -50,7 +50,8 @@ function slideLoaded($slide) {
 	$("#headerlbl").text(txt);
 
 	// bind the iscoll associated with this slide
-	var iscroll = iscrollLookup[$slide.children().eq(0).attr("id")];
+	var iscroll = iscrollLookup[$slide.children().eq(0).attr("id")] ||
+		$slide.children().eq(0).data('menu').iScroll;
 	iscrollController.bindTo(iscroll);
 }
 
@@ -403,8 +404,9 @@ function addToSlider(child, caption) {
 		.append(child)
 	$("#mainslider")
 		.append(c)
-		.anythingSlider()
-		.data('AnythingSlider').goForward();
+		.anythingSlider();
+
+	$("#mainslider").anythingSlider(c);
 }
 
 function makeMenu(cls) {
