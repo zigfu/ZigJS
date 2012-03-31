@@ -45,7 +45,6 @@ function setHeaderText(slider) {
 }
 
 function slideLoaded($slide) {
-
 	if (undefined === $slide) return;
 
 	// set caption text
@@ -55,6 +54,7 @@ function slideLoaded($slide) {
 	// bind the iscoll associated with this slide
 	var iscroll = iscrollLookup[$slide.children().eq(0).attr("id")] ||
 		$slide.children().eq(0).data('menu').iScroll;
+
 	iscrollController.bindTo(iscroll);
 }
 
@@ -65,17 +65,6 @@ function loaded() {
 
  	iscrollController = GestureableiScroll();
 	zig.singleUserSession.addListener(iscrollController);
-
-	/*
-	theiscroll1 = new iScroll("iscrollme1");
-	theiscroll2 = new iScroll("iscrollme2");
-	theiscroll3 = new iScroll("iscrollme3");
-
-	iscrollLookup = {
-		iscrollme1 : theiscroll1,
-		iscrollme2 : theiscroll2,
-		iscrollme3 : theiscroll3,
-	};*/
 
 	$("#mainslider").anythingSlider({
 		buildArrows : false,
@@ -413,7 +402,12 @@ function addToSlider(child, caption) {
 		.append(c)
 		.anythingSlider();
 
-	$("#mainslider").anythingSlider($("#mainslider").data('AnythingSlider').pages);
+	if ($("#mainslider").data('AnythingSlider').pages == 1) {
+		// first page, callback doesn't get called. lets do it manually
+		slideLoaded($("#mainslider").data('AnythingSlider').$currentPage);
+	} else {
+		$("#mainslider").anythingSlider($("#mainslider").data('AnythingSlider').pages);
+	}
 }
 
 function doBack() {
@@ -601,6 +595,11 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 .showInSession {
 	display: none;
 }
+
+#mainviewer {
+	top : 150px;
+}
+
 </style>
 
 </head>
