@@ -54,6 +54,9 @@ function loaded() {
 	zig.singleUserSession.startOnWave = false;
 	zig.singleUserSession.startOnSteady = false;
 	zig.singleUserSession.startOnExternalHandpoint = true;
+	zig.singleUserSession.bboxBounds = [1200, 5000, 1000];
+	zig.singleUserSession.bboxOffset = [0, 400, -400];
+
 
  	iscrollController = GestureableiScroll();
 	zig.singleUserSession.addListener(iscrollController);
@@ -61,15 +64,20 @@ function loaded() {
 	$("#mainslider").anythingSlider({
 		buildArrows : false,
 		buildStartStop : false,
-		buildNavigation : false,
+		buildNavigation : true,
 		infiniteSlides	: false,
 		expand  : false,
 		hashTags : false,
 		onInitialized : function(event, slider) { slideLoaded(slider.$currentPage); },
 		onSlideComplete : function(slider) { slideLoaded(slider.$currentPage); },
+		navigationFormatter : function(index, panel){
+			return $(panel).attr('data-caption');
+		},
+		appendNavigationTo : "#mainviewer #breadcrumbs",
 	});
 
 	makeSearchMenu(searchkeywords);
+	makeAMenu("Bryce", [123,234,345,456,567,678,789]);
 
 }
 
@@ -234,6 +242,7 @@ function GestureableiScroll() {
 
 	pd.addEventListener('push', function() {
 		$(".pushable").addClass("pushed");
+		$(".hidewhenpushed").fadeOut(300);
 		h.stop();
 		pushslider.moveTo(pd.pushPosition, 0.5);
 		iscrollMouseDown(boundiScroll, 0.5 * boundiScroll.wrapperW, 0.5 * boundiScroll.wrapperH);
@@ -241,7 +250,10 @@ function GestureableiScroll() {
 
 	pd.addEventListener('release', function() {
 		$(".pushable").removeClass("pushed");
-		h.start();
+		if (inSession) {
+			$(".hidewhenpushed").fadeIn(300);
+			h.start();
+		}
 		iscrollMouseUp(boundiScroll, 0.5 * boundiScroll.wrapperW, 0.5 * boundiScroll.wrapperH);
 	});
 
@@ -387,6 +399,16 @@ function makeMenu(cls) {
 	return menu.get(0);
 }
 
+function makeAMenu(caption, items) {
+	var m = makeMenu();
+	items.forEach(function(item){
+		$(m).data('menu').addChild(item, (function(i){ return function(){console.log(i);};})(item));
+	});
+	$(m).data('menu').refresh();
+	
+	addToSlider(m, caption);
+}
+
 function makeSearchMenu(items) {
 	var m = makeMenu();
 	items.forEach(function(item){
@@ -399,10 +421,6 @@ function makeSearchMenu(items) {
 
 function doImageSearch(item) {
 	console.log("Searching for images: " + item);
-}
-
-function navigateToMenu(menu) {
-	
 }
 
 </script>
@@ -489,6 +507,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 .nicelist li.hovering {
 	background-color: rgba(76,174,164,0.7);
 }
+.nicelist li:hover {
+	background-color: rgba(76,174,164,0.7);
+}
+
 .viewer .contents {
 	width : 100%;
 	height : 500px;
@@ -539,7 +561,9 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 
 	<div id="mainviewer" class="viewer pushable">
 
-			<div id="buttons" class="showInSession">
+			<div id="breadcrumbs"></div>
+
+			<div id="buttons" class="showInSession hidewhenpushed">
 
 				<a href=""><div id="leftBut"></div></a>
 
