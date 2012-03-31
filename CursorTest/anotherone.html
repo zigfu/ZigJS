@@ -31,13 +31,7 @@ if (!window.requestAnimationFrame) {
 	})();
 }
 
-var theiscroll1;
-var theiscroll2;
-var theiscroll3;
-
-var iscrollController;// = GestureableiScroll();
-
-var iscrollLookup = {};
+var iscrollController;
 
 function setHeaderText(slider) {
 	var txt = slider.$currentPage.attr("data-caption") || slider.currentPage;
@@ -52,9 +46,7 @@ function slideLoaded($slide) {
 	$("#headerlbl").text(txt);
 
 	// bind the iscoll associated with this slide
-	var iscroll = iscrollLookup[$slide.children().eq(0).attr("id")] ||
-		$slide.children().eq(0).data('menu').iScroll;
-
+	var iscroll = $slide.children().eq(0).data('menu').iScroll;
 	iscrollController.bindTo(iscroll);
 }
 
@@ -235,16 +227,8 @@ function GestureableiScroll() {
 			h.updateNormalized(0.5/*currCursor[0]*/, currCursor[1]);
 		} else {
 			var val = (pushslider.value * 2) - 1;
-
-			// save point for velocity calculation
-			pointHistory.push([val, (+new Date())]);
-			while (pointHistory.length > pointsToSave) {
-				pointHistory.shift();
-			}
-
 			// scale for feel
 			val *= 0.6;
-
 			iscrollMouseMove(boundiScroll, 0.5 * boundiScroll.wrapperW, (0.5 + val) * boundiScroll.wrapperH);
 		}
 		
@@ -256,55 +240,14 @@ function GestureableiScroll() {
 	pd.addEventListener('push', function() {
 		$(".pushable").addClass("pushed");
 		h.stop();
-
 		pushslider.moveTo(pd.pushPosition, 0.5);
-
-		// reset point buffer
-		pointHistory = [];
-
 		iscrollMouseDown(boundiScroll, 0.5 * boundiScroll.wrapperW, 0.5 * boundiScroll.wrapperH);
 	});
 
 	pd.addEventListener('release', function() {
 		$(".pushable").removeClass("pushed");
 		h.start();
-
 		iscrollMouseUp(boundiScroll, 0.5 * boundiScroll.wrapperW, 0.5 * boundiScroll.wrapperH);
-
-		//do velocity calculation
-/*
-		var endPoint = pointHistory[pointHistory.length - 1];
-		var endTime = endPoint[1],
-			endValue = endPoint[0];
-		for (var i = pointHistory.length - 2; i >= 0; i--) {
-			var pt = pointHistory[i];
-			var dt = endTime - pt[1];
-			if (dt > velocityTime) {
-				// dt is big enough for reliable velocity calculation
-				var velocity = (endValue - pt[0]) / dt;
-				console.log('velocity is: ' + velocity);
-				var sign = velocity < 0 ? 1 : -1;
-				velocity = Math.abs(velocity);
-				// calculate speed in pixels
-				// then use v(t)= v0 + a*t to find the time when the
-				// motion will stop (v(t) = 0 => t = v0/a)
-				// and then stick that into x(t) = x0 + v0*t + 0.5*a*(t^2)
-				// (we're using constant deceleration for great justice)
-				var time = velocity / deceleration,
-					distance = (velocity*velocity) / deceleration;
-				
-
-				//console.log("pixelVelocity: " + pixelInitialVelocity);
-				//console.log("motion time: " + time);
-				//console.log("total distance: " + distance);
-				var scrollData = boundiScroll._momentum(velocity*boundiScroll.wrapperH, 1, -boundiScroll.y, (boundiScroll.maxScrollY < 0 ? boundiScroll.scrollerH - boundiScroll.wrapperH + boundiScroll.y - boundiScroll.minScrollY : 0), boundiScroll.wrapperH);
-				boundiScroll.scrollTo(0, scrollData.dist * sign, scrollData.time, true);
-
-				break;
-			}
-		}
-		console.log('final dt:' + dt);
-		console.log(pointHistory);*/
 	});
 
 	pd.addEventListener('click', function() {
@@ -562,14 +505,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 	width : 100%;
 	height : 100%;
 }
-/*#caption {
-	width: 50%;
-	height: 100px;
-	margin: 0 auto;
-	border-radius: 8px;
-	margin-bottom: 50px;
-	background-color: rgba(0,0,0,0.5);
-}*/
+
 #buttons {
 	position: absolute;
 	width: 125%;
@@ -622,154 +558,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 
 
 			<ul id="mainslider" class="anythingsliderlist">
-				<!--
-				<li data-caption="This is the caption for panel 1">
-					<div id="iscrollme1" class="nicelist">
-						<div>
-							<ul>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-							</ul>
-						</div>
-					</div>
-				</li>
-
-				<li data-caption="test2">
-					<div id="iscrollme2" class="nicelist">
-						<div>
-							<ul>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-
-							</ul>
-						</div>
-					</div>
-				</li>
-
-				<li data-caption="test3">
-					<div id="iscrollme3" class="nicelist">
-						<div>
-							<ul>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-							</ul>
-						</div>
-					</div>
-				</li>
-				-->
+				
 			</ul>
 
 		</div>
