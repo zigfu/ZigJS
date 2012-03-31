@@ -45,6 +45,9 @@ function setHeaderText(slider) {
 }
 
 function slideLoaded($slide) {
+
+	if (undefined === $slide) return;
+
 	// set caption text
 	var txt = $slide.attr("data-caption") || $slide;
 	$("#headerlbl").text(txt);
@@ -63,6 +66,7 @@ function loaded() {
  	iscrollController = GestureableiScroll();
 	zig.singleUserSession.addListener(iscrollController);
 
+	/*
 	theiscroll1 = new iScroll("iscrollme1");
 	theiscroll2 = new iScroll("iscrollme2");
 	theiscroll3 = new iScroll("iscrollme3");
@@ -71,7 +75,7 @@ function loaded() {
 		iscrollme1 : theiscroll1,
 		iscrollme2 : theiscroll2,
 		iscrollme3 : theiscroll3,
-	};
+	};*/
 
 	$("#mainslider").anythingSlider({
 		buildArrows : false,
@@ -84,6 +88,7 @@ function loaded() {
 		onSlideComplete : function(slider) { slideLoaded(slider.$currentPage); },
 	});
 
+	makeSearchMenu(searchkeywords);
 
 }
 
@@ -352,6 +357,7 @@ function GestureableiScroll() {
 		inSession = true;
 		h.start();
 		frame();
+		$(".showInSession").show();
 	}
 
 	function onsessionend() {
@@ -359,6 +365,7 @@ function GestureableiScroll() {
 		// this will stop the frame() loop
 		inSession = false;
 		h.stop();
+		$(".showInSession").hide();
 	}
 
 	return api;
@@ -406,7 +413,16 @@ function addToSlider(child, caption) {
 		.append(c)
 		.anythingSlider();
 
-	$("#mainslider").anythingSlider(c);
+	$("#mainslider").anythingSlider($("#mainslider").data('AnythingSlider').pages);
+}
+
+function doBack() {
+	var currentPage = $("#mainslider").data('AnythingSlider').currentPage;
+	if (currentPage > 1) {
+		$("#mainslider").anythingSlider(currentPage-1, function(slider) {
+			$("#mainslider li.panel:not(.cloned)").last().remove();
+		});
+	}
 }
 
 function makeMenu(cls) {
@@ -582,6 +598,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 	float: right;
 	background-color: rgba(255,0,0,0.5);
 }
+
+.showInSession {
+	display: none;
+}
 </style>
 
 </head>
@@ -604,6 +624,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 
 
 			<ul id="mainslider" class="anythingsliderlist">
+				<!--
 				<li data-caption="This is the caption for panel 1">
 					<div id="iscrollme1" class="nicelist">
 						<div>
@@ -750,6 +771,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 						</div>
 					</div>
 				</li>
+				-->
 			</ul>
 
 		</div>
