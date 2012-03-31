@@ -555,12 +555,13 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 	background-color: rgba(0,0,0,0.5);
 }*/
 #buttons {
-	position: relative;
-	width: 65%;
+	position: absolute;
+	width: 125%;
 	height: 100px;
 	margin: 0 auto;
 	z-index: 0;
-	top: 325px;
+	top: 225px;
+	right: -120px;
 }
 #leftBut {
 	width: 100px;
@@ -580,6 +581,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 
 <body>
 
+	<div id="mainviewer" class="viewer pushable">
+
 			<div id="buttons" class="showInSession">
 
 				<a href=""><div id="leftBut"></div></a>
@@ -587,8 +590,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 				<a href=""><div id="rightBut"></div></a>
 
 			</div>
-
-	<div id="mainviewer" class="viewer pushable">
 
 		<div class="header pushable"><span id="headerlbl">Header</span></div>
 
