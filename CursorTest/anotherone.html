@@ -192,11 +192,6 @@ function GestureableiScroll() {
 
 	var inSession = false;
 
-	var pointHistory = [];
-	var pointsToSave = 60;
-	var velocityTime = 100; // 300 ms lower bound
-	var deceleration = 0.0006;
-
 	var api = {
 		onattach : onattach,
 		ondetach : ondetach,
