@@ -88,10 +88,10 @@ function loaded() {
 
 document.addEventListener('DOMContentLoaded', setTimeout(loaded, 200), false);
 
-// TODO: Allow specifying a pixelSize func
 function hysteresis(classname, pixelsize, container) {
   var cls = classname;
-  var size = pixelsize; //TODO: separate X, Y sizes?
+  var sizeFunction = (pixelsize == parseFloat(pixelsize)) ? function(currentItem){ return {x:pixelsize, y:pixelsize};} : pixelsize;
+  var sizeX, sizeY;
   var items;
   var currentItem = null;
 
@@ -119,12 +119,14 @@ function hysteresis(classname, pixelsize, container) {
   }
   function stillIn(item, x, y) {
     var rect = item.getBoundingClientRect();
-    return ((rect.left-size) <= x) && (x <= (rect.right+size)) && ((rect.top-size) <= y) && (y <= (rect.bottom+size));
+    return ((rect.left-sizeX) <= x) && (x <= (rect.right+sizeX)) && ((rect.top-sizeY) <= y) && (y <= (rect.bottom+sizeY));
   }
   function updateNormalized(x,y) {
     update(container.offsetWidth * x, container.offsetHeight * y);
   }
   function update(x,y) {
+  	var size = sizeFunction(currentItem);
+  	sizeX = size.x; sizeY = size.y;
     //TODO: something similar to jQuery .offset() instead - this can probably
     //      break in some ways I don't know when using borders, padding and margins
     var rect = container.getBoundingClientRect();
@@ -144,15 +146,18 @@ function hysteresis(classname, pixelsize, container) {
         break;
       }
     }
+    api.currentItem = currentItem;
   }
   refreshItems();
-  return { 
+  var api = {
 	refreshItems : refreshItems,
 	start : start,
 	stop : stop,
 	update : update,
 	updateNormalized : updateNormalized,
+	currentItem : currentItem,
    };
+  return api;
 }
 
 function iscrollMouseMove(iscroll, x,y) {
@@ -185,7 +190,7 @@ function GestureableiScroll() {
 	var pd = zig.controls.PushDetector();
 	var pushslider = zig.controls.Fader(zig.Orientation.Y, 400);
 	var selectswipe = zig.controls.SwipeDetector();
-	var h = hysteresis("hoverable", 20);
+	var h = hysteresis("hoverable", function(currentItem) {return {x:20, y:20};});
 	var boundiScroll = null;
 
 	// these are both normalized
