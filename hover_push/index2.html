@@ -38,12 +38,12 @@ a:hover
 
 
 <table><tr>
-<td><div id="Aclickdiv" class="clickdiv" onclick="divclick(this);" onmousedown="divdown(this);" onmouseup="divup(this);" onmouseover="divover(this);" onmouseout="divout(this);">A</div></td>
+<td><div id="Aclickdiv" class="hoverable clickdiv" onclick="divclick(this);" onmousedown="divdown(this);" onmouseup="divup(this);" onmouseover="divover(this);" onmouseout="divout(this);">A</div></td>
 <td><div id="Bclickdiv" class="clickdiv" onclick="divclick(this);" onmousedown="divdown(this);" onmouseup="divup(this);" onmouseover="divover(this);" onmouseout="divout(this);">B</div></td>
 <td><div id="Cclickdiv" class="clickdiv" onclick="divclick(this);" onmousedown="divdown(this);" onmouseup="divup(this);" onmouseover="divover(this);" onmouseout="divout(this);">C</div></td>
 </table>
 <div id="output">OUT</div>
-<div><h1><a id="hovertest" class="foo" href="http://google.com">KILLER LINK CLICK</a></h1></div>
+<div><h1><a id="hovertest" class="hoverable" href="http://google.com">KILLER LINK CLICK</a></h1></div>
 
 <script type="text/javascript">
 
@@ -125,31 +125,52 @@ function fillArc(start,total)
 var pos = 0;
 var del = 20;
 var amt = 10;
+var endHover = false;
 function clear()
 {
+	endHover = true;
 	canvas.width = canvas.width;
+}
+function startHoverClick()
+{
+	console.log("START HOVER CLICK " + mouseovertarget.id);
+	pos = 0;
+	endHover = false;
+	fillCircle();	
+	
 }
 function fillCircle()
 {
-	context.lineWidth = 10;
-	fillArc(pos,amt);
-	pos += amt;
-	if (pos < 360)
+	if (!endHover)
 	{
-		window.setTimeout(fillCircle,del);
-	}
-	else
-	{
-		pos = 0;
-		window.setTimeout(end,del);
+		context.lineWidth = 10;
+		fillArc(pos,amt);
+		pos += amt;
+		if (pos < 360)
+		{
+			window.setTimeout(fillCircle,del);
+		}
+		else
+		{
+			pos = 0;
+			window.setTimeout(end,del);
+		}
 	}
 }
 function end()
 {
+	console.log("HOVER CLICK " + mouseovertarget.id);
 	context.lineWidth = 17;
     context.strokeStyle = "green"; // line color
     
 	fillArc(0,360);
+	xpos = c.x * window.innerWidth;
+	ypos = c.y * window.innerHeight; 
+	var evt = document.createEvent("MouseEvents");				
+	evt.initMouseEvent("click", true, true, window, 1, xpos, ypos, xpos, ypos, false, false, false, false, 0, null);	
+	mouseovertarget.dispatchEvent(evt);
+	
+	
 }
 
 
@@ -225,6 +246,7 @@ function setCursor(x,y)
 				//el.dispatchEvent(evt);
 				if (el != mouseovertarget)
 				{
+					clear();
 					if (mouseovertarget)
 					{
 						console.log("CLASS: " + mouseovertarget.classList);
@@ -236,7 +258,7 @@ function setCursor(x,y)
 						evt.initMouseEvent("mouseout", true, true, window, 1, xpos, ypos, xpos, ypos, false, false, false, false, 0, null);
 						console.log("mouseout: " + mouseovertarget.id);
 						mouseovertarget.dispatchEvent(evt);
-						
+					
 
 					}
 					mouseovertarget = el;
@@ -247,6 +269,10 @@ function setCursor(x,y)
 					//mouseovertarget.classList.add("zigHover");
 					addClass(mouseovertarget, "zigHover");
 					console.log("ADD zigHover class to " + mouseovertarget.id );
+						if (hasClass(mouseovertarget, "hoverable"))						
+						{
+							startHoverClick();
+						}
 				}
 			}
 			//console.log("next");
@@ -283,7 +309,7 @@ function setCursor(x,y)
 c.addEventListener('push', function(c) {
 	
 	//console.log("mousedown: " + mouseovertarget.id);
-	ce.classList.add('pushed');
+	addClass(ce,'pushed');
 	xpos = c.x * window.innerWidth;
 	ypos = c.y * window.innerHeight; 
 	var evt = document.createEvent("MouseEvents");				
@@ -294,7 +320,7 @@ c.addEventListener('push', function(c) {
 	
 });
 c.addEventListener('release', function(c) {
-	ce.classList.remove('pushed');
+	removeClass(ce,'pushed');
 	//console.log("mouseup: " + mouseovertarget.id);
 	xpos = c.x * window.innerWidth;
 	ypos = c.y * window.innerHeight; 
