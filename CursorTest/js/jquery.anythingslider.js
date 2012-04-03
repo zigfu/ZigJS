@@ -195,8 +195,8 @@
 				.add(base.$nav)
 				.add(base.$startStop)
 				.add(base.$forward)
-				.add(base.$back)[(base.pages <= 1) ? 'hide' : 'show']();
-			if (base.pages > 1) {
+				.add(base.$back)[(base.pages < 1) ? 'hide' : 'show']();
+			if (base.pages >= 1) {
 				// Build/update navigation tabs
 				base.buildNavigation();
 			}
@@ -249,7 +249,7 @@
 
 		// Creates the numbered navigation links
 		base.buildNavigation = function() {
-			if (o.buildNavigation && (base.pages > 1)) {
+			if (o.buildNavigation && (base.pages >= 1)) {
 				var a, c, i, t, $li;
 				base.$items.filter(':not(.cloned)').each(function(j){
 					$li = $('<li/>');
@@ -803,10 +803,9 @@
 	};
 
 	$.fn.anythingSlider = function(options, callback) {
-
 		return this.each(function(){
 			var page, anySlide = $(this).data('AnythingSlider');
-
+			
 			// initialize the slider but prevent multiple initializations
 			if ((typeof(options)).match('object|undefined')){
 				if (!anySlide) {

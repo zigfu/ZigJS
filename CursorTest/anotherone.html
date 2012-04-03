@@ -5,7 +5,8 @@
 <script src="js/iscroll.js"></script>
 <script src="js/jquery.min.js"></script>
 <script src="js/jquery.easing.1.2.js"></script>
-<script src="js/jquery.anythingslider.min.js"></script>
+<script src="js/jquery.anythingslider.js"></script>
+<script src="js/sylvester.js"></script>
 
 <link href="css/anythingslider.css" rel="stylesheet">
 
@@ -57,7 +58,6 @@ function loaded() {
 	zig.singleUserSession.bboxBounds = [1200, 5000, 1000];
 	zig.singleUserSession.bboxOffset = [0, 400, -400];
 
-
  	iscrollController = GestureableiScroll();
 	zig.singleUserSession.addListener(iscrollController);
 
@@ -77,8 +77,35 @@ function loaded() {
 	});
 
 	makeSearchMenu(searchkeywords);
-	makeAMenu("Bryce", [123,234,345,456,567,678,789]);
+	//makeAMenu("Bryce", [123,234,345,456,567,678,789]);
 
+	window.addEventListener('mousemove', function(e) {
+		$(".lookatcursor").each(function(i, el) {
+			var rect = el.getBoundingClientRect();
+			var source = [rect.left + (rect.width/2), rect.top + (rect.height/2), 0];
+			var target = [e.x, e.y, 700];
+			var rot = lookAt(source, target);
+			$(el).css("-webkit-transform", "rotateY(" + rot.yaw + "deg) rotateX(" + rot.pitch + "deg)");
+		});		
+		//$("#mainviewer .contents").css("-webkit-transform", "rotateY(" + rot.yaw + "deg) rotateX(" + rot.pitch + "deg)");
+	});
+}
+
+function rad2deg(radians)
+{
+   degrees = 360 * radians/(2 * Math.PI);
+   return degrees;
+}
+
+function lookAt(source, target) {
+	var v = $V(target).subtract($V(source));
+	var r = Math.sqrt(v.e(1)*v.e(1) + v.e(3)*v.e(3));
+	var yaw = Math.atan2(v.e(1), v.e(3));
+	var pitch = Math.atan2(-v.e(2), r);
+	return {
+		yaw : rad2deg(yaw),
+		pitch : rad2deg(pitch)
+	};
 }
 
 document.addEventListener('DOMContentLoaded', setTimeout(loaded, 200), false);
@@ -351,6 +378,7 @@ function addToSlider(child, caption) {
 	$("#mainslider")
 		.append(c)
 		.anythingSlider();
+	$("#mainslider").data('AnythingSlider').updateSlider();
 
 	if ($("#mainslider").data('AnythingSlider').pages == 1) {
 		// first page, callback doesn't get called. lets do it manually
@@ -365,6 +393,7 @@ function doBack() {
 	if (currentPage > 1) {
 		$("#mainslider").anythingSlider(currentPage-1, function(slider) {
 			$("#mainslider li.panel:not(.cloned)").last().remove();
+			$("#mainslider").anythingSlider();
 		});
 	}
 }
@@ -409,18 +438,22 @@ function makeAMenu(caption, items) {
 	addToSlider(m, caption);
 }
 
-function makeSearchMenu(items) {
+function makeSearchMenu(items, caption) {
+	if (undefined === caption) {
+		caption = "Search for images"
+	}
+
 	var m = makeMenu();
 	items.forEach(function(item){
 		$(m).data('menu').addChild(item, (function(i){ return function(){doImageSearch(i);};})(item));
 	});
 	$(m).data('menu').refresh();
 	
-	addToSlider(m, "Search for images");
+	addToSlider(m, caption);
 }
 
 function doImageSearch(item) {
-	console.log("Searching for images: " + item);
+	makeSearchMenu(searchkeywords, "Search results for '" + item + "'");
 }
 
 </script>
@@ -450,6 +483,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
     -moz-transition: all 0.2s ease-in-out;
     -o-transition: all 0.2s ease-in-out;
     -ms-transition: all 0.2s ease-in-out;
+
 }
 
 .viewer.pushed {
@@ -572,12 +606,30 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 	color: #000;
 	text-decoration: none;
 }
+
+.box {
+	display: block;
+	float: left;
+	width:100px;
+	height:100px;
+	padding : 40px;
+	background-color:yellow;
+}
+
+.lookatparent {
+	perspective: 1000;
+    -webkit-perspective: 1000;*/
+}
+
+.lookatcursor {
+	
+}
+
 </style>
 
 </head>
 
 <body>
-
 	<div id="mainviewer" class="viewer pushable">
 
 			<div id="breadcrumbs"></div>
@@ -592,7 +644,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 
 		<div class="header pushable"><span id="headerlbl">Header</span></div>
 
-		<div class="contents">
+		<div class="contents lookatcursor">
 
 
 			<ul id="mainslider" class="anythingsliderlist">
