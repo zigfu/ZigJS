@@ -223,6 +223,7 @@ function GestureableiScroll() {
 		fader2d,
 		pd,
 		pushslider,
+		selectswipe,
 	];
 
 	var inSession = false;
@@ -242,6 +243,16 @@ function GestureableiScroll() {
 
 	function lerp(from, to, amount) {
 		return from + ((to - from) * amount);
+	}
+
+	function clamp(val, min, max) {
+		if (val > max) return max;
+		if (val < min) return min;
+		return val;
+	}
+
+	function clamp01(val) {
+		return clamp(val, 0, 1);
 	}
 
 	function frame() {
@@ -285,15 +296,27 @@ function GestureableiScroll() {
 	});
 
 	pd.addEventListener('click', function() {
-		
+		//if (h.currentItem) $(h.currentItem).click();
 	});
 
 	selectswipe.addEventListener('swipeleft', function() {
-		// back
+		if (pd.isPushed) return;
+		doBack();
 	});
 
 	selectswipe.addEventListener('swiperight', function() {
-		// select
+		if (pd.isPushed) return;
+		if (h.currentItem) $(h.currentItem).click();
+	});
+
+	selectswipe.horizontalFader.addEventListener('valuechange', function(f) {
+		// 0-0.3
+		var backAmount = 1 - clamp01(f.value / 0.3);
+		// 0.7-1.0
+		var selectAmount = clamp01((f.value - 0.7) / 0.3);
+
+		leftBut.style.opacity = 0.2 + (backAmount * 0.8);
+		rightBut.style.opacity = 0.2 + (selectAmount * 0.8);
 	});
 
 	fader2d.addEventListener('valuechange', function() {
@@ -324,6 +347,7 @@ function GestureableiScroll() {
 		h.start();
 		frame();
 		$(".showInSession").show();
+		$(".insessionable").addClass("insession");
 	}
 
 	function onsessionend() {
@@ -332,6 +356,7 @@ function GestureableiScroll() {
 		inSession = false;
 		h.stop();
 		$(".showInSession").hide();
+		$(".insessionable").removeClass("insession");
 	}
 
 	return api;
@@ -462,13 +487,13 @@ function doImageSearch(item) {
 <style>
 body {
 	background: #33706a; /* Old browsers */
-background: -moz-radial-gradient(center, ellipse cover,  #33706a 0%, #1a364f 100%); /* FF3.6+ */
-background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#33706a), color-stop(100%,#1a364f)); /* Chrome,Safari4+ */
-background: -webkit-radial-gradient(top, ellipse cover,  #33706a 0%,#1a364f 100%); /* Chrome10+,Safari5.1+ */
-background: -o-radial-gradient(center, ellipse cover,  #33706a 0%,#1a364f 100%); /* Opera 12+ */
-background: -ms-radial-gradient(center, ellipse cover,  #33706a 0%,#1a364f 100%); /* IE10+ */
-background: radial-gradient(center, ellipse cover,  #33706a 0%,#1a364f 100%); /* W3C */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', endColorstr='#1a364f',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+/*background: -moz-radial-gradient(center, ellipse cover,  #33706a 0%, #1a364f 100%);
+background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#33706a), color-stop(100%,#1a364f));
+background: -webkit-radial-gradient(top, ellipse cover,  #33706a 0%,#1a364f 100%);
+background: -o-radial-gradient(center, ellipse cover,  #33706a 0%,#1a364f 100%); 
+background: -ms-radial-gradient(center, ellipse cover,  #33706a 0%,#1a364f 100%);
+background: radial-gradient(center, ellipse cover,  #33706a 0%,#1a364f 100%); 
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', endColorstr='#1a364f',GradientType=1 );*/
 }
 .viewer {
 	margin: auto;
@@ -482,28 +507,33 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 	-webkit-transition: all 0.2s ease-in-out;
     -moz-transition: all 0.2s ease-in-out;
     -o-transition: all 0.2s ease-in-out;
-    -ms-transition: all 0.2s ease-in-out;
+    -ms-transition: all 0.2s ease-in-out;*/
 
 }
 
 .viewer.pushed {
-	-webkit-transform: scale(0.95);
+	/*-webkit-transform: scale(0.95);*/
+	-webkit-transform: scale3d(0.95,0.95,1);
 }
 .viewer .header {
 	top:0; left:0;
 	width:100%;
-	height:45px;
+	height:65px;
 	border-top-right-radius: 8px;
 	border-top-left-radius: 8px;
 	font-family: 'Oleo Script';
 	font-weight: 400;
-	line-height:45px;
+	line-height:65px;
 	background-color: rgba(255,255,255,0.3);
 	padding:0;
 	color:#FFF;
 	font-size: 4em;
 	text-shadow: 0px 0px 5px rgba(0,0,0,0.3);
 	text-align:center;
+}
+
+.viewer .header.insession {
+	background-color: rgba(0,255,255,0.7);
 }
 
 .viewer .header.pushed {
@@ -553,6 +583,19 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 	border-bottom-left-radius: 8px;
 }
 
+.viewer .footer {
+	background-color: rgba(255,255,255,0.3);
+	width:100%;
+	height:45px;
+	border-bottom-right-radius: 8px;
+	border-bottom-left-radius: 8px;
+	line-height:45px;
+}
+
+.viewer .footer.insession {
+	background-color: rgba(0,255,255,0.3);
+}
+
 .anythingsliderlist {
 	width : 100%;
 	height : 100%;
@@ -564,20 +607,28 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 	height: 100px;
 	margin: 0 auto;
 	z-index: 0;
-	top: 225px;
+	top: 50%;
+	margin-top: -50px;
 	right: -120px;
 }
 #leftBut {
 	width: 100px;
 	height: 100px;
 	float: left;
-	background-color: rgba(255,0,0,0.5);
+	background-image:url('i/arrow_right_white.png');
+	-webkit-transform : rotate(180deg);
+	background-repeat: no-repeat;
+	background-size: contain;
+	opacity:0.6;
 }
 #rightBut {
 	width: 100px;
 	height: 100px;
 	float: right;
-	background-color: rgba(255,0,0,0.5);
+	background-image:url('i/arrow_right_white.png');
+	background-repeat: no-repeat;
+	background-size: contain;
+	opacity:0.6;
 }
 
 .showInSession {
@@ -585,7 +636,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 }
 
 #mainviewer {
-	top : 150px;
+	/*top : 150px;*/
 }
 .thumbNav {
 	list-style-type: none;
@@ -630,21 +681,19 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 </head>
 
 <body>
-	<div id="mainviewer" class="viewer pushable lookatparent">
+	<div id="mainviewer" class="viewer pushable">
 
-			<div id="breadcrumbs"></div>
+			<div id="buttons" class="hidewhenpushed showInSession">
 
-			<div id="buttons" class="showInSession hidewhenpushed">
+				<div id="leftBut"></div>
 
-				<a href=""><div id="leftBut"></div></a>
-
-				<a href=""><div id="rightBut"></div></a>
+				<div id="rightBut"></div>
 
 			</div>
 
-		<div class="header pushable"><span id="headerlbl">Header</span></div>
+		<div class="header pushable insessionable"><span id="headerlbl">Header</span></div>
 
-		<div class="contents lookatcursor">
+		<div class="contents">
 
 
 			<ul id="mainslider" class="anythingsliderlist">
@@ -652,6 +701,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 			</ul>
 
 		</div>
+
+		<div class="footer insessionable" id="breadcrumbs"></div>
 
 	</div>
 
