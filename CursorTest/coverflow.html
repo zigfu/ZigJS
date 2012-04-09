@@ -64,12 +64,9 @@ function loaded() {
 
 function center(el) {
 	var rect = el.getBoundingClientRect();
-	//console.log(rect);
 	return {
 		x : rect.left + (rect.width/2),
 		y : rect.top + (rect.height/2),
-		//x : $(el).offset().left + ($(el).width() / 2),
-		//y : $(el).offset().top + ($(el).height() / 2)
 	}
 }
 
@@ -81,6 +78,8 @@ function frame() {
 		var source = [center(el).x, center(el).y, 0];
 		var rot = lookAt(source, target);
 		$(el).css("-webkit-transform", "rotateY(" + rot.yaw + "deg) rotateX(" + rot.pitch + "deg)");
+		var deltax = Math.abs(source[0] - target[0]);
+		$(el).css("z-index", -deltax);
 	} );
 	$(".coverflow .lookatparent").css("-webkit-perspective-origin-x", -is.x + is.wrapperW/2 +"px");
 	requestAnimationFrame(frame);
@@ -492,6 +491,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 	border-right:1px solid #fff;
 	background-color:#fafafa;
 	font-size:14px;
+	-webkit-transform: translate3d(0px, 0px, 0px);
+	position:relative;
 }
 
 </style>
