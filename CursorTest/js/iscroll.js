@@ -108,8 +108,9 @@ var m = Math,
 			onZoom: null,
 			onZoomEnd: null,
 
+			scrollToElementCenter : false,
 			// TODO: unhack
-			positionBufferDuration : 300 // milliseconds
+			positionBufferDuration : 300, // milliseconds
 		};
 
 		// User defined options
@@ -440,8 +441,8 @@ iScroll.prototype = {
 		that.pointY = point.pageY;
 
 		// Slow down if outside of the boundaries
-		if (newX > 0 || newX < that.maxScrollX) {
-			newX = that.options.bounce ? that.x + (deltaX / 2) : newX >= 0 || that.maxScrollX >= 0 ? 0 : that.maxScrollX;
+		if (newX > that.minScrollX || newX < that.maxScrollX) {
+			newX = that.options.bounce ? that.x + (deltaX / 2) : newX >= that.minScrollX || that.maxScrollX >= 0 ? that.minScrollX : that.maxScrollX;
 		}
 		if (newY > that.minScrollY || newY < that.maxScrollY) { 
 			newY = that.options.bounce ? that.y + (deltaY / 2) : newY >= that.minScrollY || that.maxScrollY >= 0 ? that.minScrollY : that.maxScrollY;
@@ -583,11 +584,11 @@ iScroll.prototype = {
 			// end o'hack
 			momentumX = newPosX ? that._momentum(newPosX - that.startX, duration, -that.x, that.scrollerW - that.wrapperW + that.x, that.options.bounce ? that.wrapperW : 0) : momentumX;
 			momentumY = newPosY ? that._momentum(newPosY - that.startY, duration, -that.y, (that.maxScrollY < 0 ? that.scrollerH - that.wrapperH + that.y - that.minScrollY : 0), that.options.bounce ? that.wrapperH : 0) : momentumY;
-
+			
 			newPosX = that.x + momentumX.dist;
 			newPosY = that.y + momentumY.dist;
 
- 			if ((that.x > 0 && newPosX > 0) || (that.x < that.maxScrollX && newPosX < that.maxScrollX)) momentumX = { dist:0, time:0 };
+ 			if ((that.x > that.minScrollX && newPosX > that.minScrollX) || (that.x < that.maxScrollX && newPosX < that.maxScrollX)) momentumX = { dist:0, time:0 };
  			if ((that.y > that.minScrollY && newPosY > that.minScrollY) || (that.y < that.maxScrollY && newPosY < that.maxScrollY)) momentumY = { dist:0, time:0 };
 		}
 
@@ -633,7 +634,7 @@ iScroll.prototype = {
 	
 	_resetPos: function (time) {
 		var that = this,
-			resetX = that.x >= 0 ? 0 : that.x < that.maxScrollX ? that.maxScrollX : that.x,
+			resetX = that.x >= that.minScrollX ? that.minScrollX : that.x < that.maxScrollX ? that.maxScrollX : that.x,
 			resetY = that.y >= that.minScrollY || that.maxScrollY > 0 ? that.minScrollY : that.y < that.maxScrollY ? that.maxScrollY : that.y;
 
 		if (resetX == that.x && resetY == that.y) {
@@ -934,10 +935,23 @@ iScroll.prototype = {
 		that.wrapperW = that.wrapper.clientWidth || 1;
 		that.wrapperH = that.wrapper.clientHeight || 1;
 
-		that.minScrollY = -that.options.topOffset || 0;
-		that.scrollerW = mround(that.scroller.offsetWidth * that.scale);
+		if (that.options.scrollToElementCenter) {
+			that.minScrollY = that.wrapperH / 2;
+			that.minScrollX = that.wrapperW / 2;	
+		} else {
+			that.minScrollY = -that.options.topOffset || 0;
+			that.minScrollX = 0;	
+		}
+
+		that.scrollerW = mround((that.scroller.offsetWidth + that.minScrollX) * that.scale);
 		that.scrollerH = mround((that.scroller.offsetHeight + that.minScrollY) * that.scale);
-		that.maxScrollX = that.wrapperW - that.scrollerW;
+		
+		if (that.options.scrollToElementCenter)	{
+			that.scrollerH += that.wrapperH / 2;
+			that.scrollerW += that.wrapperW / 2;
+		}
+		
+		that.maxScrollX = that.wrapperW - that.scrollerW + that.minScrollX;
 		that.maxScrollY = that.wrapperH - that.scrollerH + that.minScrollY;
 		that.dirX = 0;
 		that.dirY = 0;
@@ -1022,7 +1036,12 @@ iScroll.prototype = {
 		pos.left += that.wrapperOffsetLeft;
 		pos.top += that.wrapperOffsetTop;
 
-		pos.left = pos.left > 0 ? 0 : pos.left < that.maxScrollX ? that.maxScrollX : pos.left;
+		if (that.options.scrollToElementCenter) {
+			pos.left += (that.wrapperW - el.offsetWidth) / 2;
+			pos.top += (that.wrapperH - el.offsetHeight) / 2;
+		}
+
+		pos.left = pos.left > that.minScrollX ? that.minScrollXd : pos.left < that.maxScrollX ? that.maxScrollX : pos.left;
 		pos.top = pos.top > that.minScrollY ? that.minScrollY : pos.top < that.maxScrollY ? that.maxScrollY : pos.top;
 		time = time === undefined ? m.max(m.abs(pos.left)*2, m.abs(pos.top)*2) : time;
 
@@ -1096,7 +1115,7 @@ iScroll.prototype = {
 		that.scale = scale;
 		that.refresh();
 
-		that.x = that.x > 0 ? 0 : that.x < that.maxScrollX ? that.maxScrollX : that.x;
+		that.x = that.x > that.minScrollX ? that.minScrollX : that.x < that.maxScrollX ? that.maxScrollX : that.x;
 		that.y = that.y > that.minScrollY ? that.minScrollY : that.y < that.maxScrollY ? that.maxScrollY : that.y;
 
 		that.scroller.style[vendor + 'TransitionDuration'] = time + 'ms';

@@ -58,7 +58,15 @@ function loaded() {
 		//$("#mainviewer .contents").css("-webkit-transform", "rotateY(" + rot.yaw + "deg) rotateX(" + rot.pitch + "deg)");
 	});*/
 
-	is = new iScroll("coverflowWrapper");
+	is = new iScroll("coverflowWrapper", { 
+		scrollToElementCenter : true,
+	});
+
+	$(".coverflow li").click(function(e) {
+		is.scrollToElement(e.target);
+	});
+
+
 	frame();
 }
 
