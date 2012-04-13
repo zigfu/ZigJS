@@ -5,7 +5,8 @@
 <script src="js/iscroll.js"></script>
 <script src="js/jquery.min.js"></script>
 <script src="js/jquery.easing.1.2.js"></script>
-<script src="js/jquery.anythingslider.min.js"></script>
+<script src="js/jquery.anythingslider.js"></script>
+<script src="js/sylvester.js"></script>
 
 <link href="css/anythingslider.css" rel="stylesheet">
 
@@ -31,13 +32,7 @@ if (!window.requestAnimationFrame) {
 	})();
 }
 
-var theiscroll1;
-var theiscroll2;
-var theiscroll3;
-
-var iscrollController;// = GestureableiScroll();
-
-var iscrollLookup = {};
+var iscrollController;
 
 function setHeaderText(slider) {
 	var txt = slider.$currentPage.attr("data-caption") || slider.currentPage;
@@ -45,7 +40,6 @@ function setHeaderText(slider) {
 }
 
 function slideLoaded($slide) {
-
 	if (undefined === $slide) return;
 
 	// set caption text
@@ -53,8 +47,7 @@ function slideLoaded($slide) {
 	$("#headerlbl").text(txt);
 
 	// bind the iscoll associated with this slide
-	var iscroll = iscrollLookup[$slide.children().eq(0).attr("id")] ||
-		$slide.children().eq(0).data('menu').iScroll;
+	var iscroll = $slide.children().eq(0).data('menu').iScroll;
 	iscrollController.bindTo(iscroll);
 }
 
@@ -62,34 +55,57 @@ function loaded() {
 	zig.singleUserSession.startOnWave = false;
 	zig.singleUserSession.startOnSteady = false;
 	zig.singleUserSession.startOnExternalHandpoint = true;
+	zig.singleUserSession.bboxBounds = [1200, 5000, 1000];
+	zig.singleUserSession.bboxOffset = [0, 400, -400];
 
  	iscrollController = GestureableiScroll();
 	zig.singleUserSession.addListener(iscrollController);
 
-	/*
-	theiscroll1 = new iScroll("iscrollme1");
-	theiscroll2 = new iScroll("iscrollme2");
-	theiscroll3 = new iScroll("iscrollme3");
-
-	iscrollLookup = {
-		iscrollme1 : theiscroll1,
-		iscrollme2 : theiscroll2,
-		iscrollme3 : theiscroll3,
-	};*/
-
 	$("#mainslider").anythingSlider({
 		buildArrows : false,
 		buildStartStop : false,
-		buildNavigation : false,
+		buildNavigation : true,
 		infiniteSlides	: false,
 		expand  : false,
 		hashTags : false,
 		onInitialized : function(event, slider) { slideLoaded(slider.$currentPage); },
 		onSlideComplete : function(slider) { slideLoaded(slider.$currentPage); },
+		navigationFormatter : function(index, panel){
+			return $(panel).attr('data-caption');
+		},
+		appendNavigationTo : "#mainviewer #breadcrumbs",
 	});
 
 	makeSearchMenu(searchkeywords);
+	//makeAMenu("Bryce", [123,234,345,456,567,678,789]);
 
+	window.addEventListener('mousemove', function(e) {
+		$(".lookatcursor").each(function(i, el) {
+			var rect = el.getBoundingClientRect();
+			var source = [rect.left + (rect.width/2), rect.top + (rect.height/2), 0];
+			var target = [e.x, e.y, 700];
+			var rot = lookAt(source, target);
+			$(el).css("-webkit-transform", "rotateY(" + rot.yaw + "deg) rotateX(" + rot.pitch + "deg)");
+		});		
+		//$("#mainviewer .contents").css("-webkit-transform", "rotateY(" + rot.yaw + "deg) rotateX(" + rot.pitch + "deg)");
+	});
+}
+
+function rad2deg(radians)
+{
+   degrees = 360 * radians/(2 * Math.PI);
+   return degrees;
+}
+
+function lookAt(source, target) {
+	var v = $V(target).subtract($V(source));
+	var r = Math.sqrt(v.e(1)*v.e(1) + v.e(3)*v.e(3));
+	var yaw = Math.atan2(v.e(1), v.e(3));
+	var pitch = Math.atan2(-v.e(2), r);
+	return {
+		yaw : rad2deg(yaw),
+		pitch : rad2deg(pitch)
+	};
 }
 
 document.addEventListener('DOMContentLoaded', setTimeout(loaded, 200), false);
@@ -207,14 +223,10 @@ function GestureableiScroll() {
 		fader2d,
 		pd,
 		pushslider,
+		selectswipe,
 	];
 
 	var inSession = false;
-
-	var pointHistory = [];
-	var pointsToSave = 60;
-	var velocityTime = 100; // 300 ms lower bound
-	var deceleration = 0.0006;
 
 	var api = {
 		onattach : onattach,
@@ -233,6 +245,16 @@ function GestureableiScroll() {
 		return from + ((to - from) * amount);
 	}
 
+	function clamp(val, min, max) {
+		if (val > max) return max;
+		if (val < min) return min;
+		return val;
+	}
+
+	function clamp01(val) {
+		return clamp(val, 0, 1);
+	}
+
 	function frame() {
 		if (!inSession) return;
 		
@@ -246,16 +268,8 @@ function GestureableiScroll() {
 			h.updateNormalized(0.5/*currCursor[0]*/, currCursor[1]);
 		} else {
 			var val = (pushslider.value * 2) - 1;
-
-			// save point for velocity calculation
-			pointHistory.push([val, (+new Date())]);
-			while (pointHistory.length > pointsToSave) {
-				pointHistory.shift();
-			}
-
 			// scale for feel
 			val *= 0.6;
-
 			iscrollMouseMove(boundiScroll, 0.5 * boundiScroll.wrapperW, (0.5 + val) * boundiScroll.wrapperH);
 		}
 		
@@ -266,68 +280,43 @@ function GestureableiScroll() {
 
 	pd.addEventListener('push', function() {
 		$(".pushable").addClass("pushed");
+		$(".hidewhenpushed").fadeOut(300);
 		h.stop();
-
 		pushslider.moveTo(pd.pushPosition, 0.5);
-
-		// reset point buffer
-		pointHistory = [];
-
 		iscrollMouseDown(boundiScroll, 0.5 * boundiScroll.wrapperW, 0.5 * boundiScroll.wrapperH);
 	});
 
 	pd.addEventListener('release', function() {
 		$(".pushable").removeClass("pushed");
-		h.start();
-
-		iscrollMouseUp(boundiScroll, 0.5 * boundiScroll.wrapperW, 0.5 * boundiScroll.wrapperH);
-
-		//do velocity calculation
-/*
-		var endPoint = pointHistory[pointHistory.length - 1];
-		var endTime = endPoint[1],
-			endValue = endPoint[0];
-		for (var i = pointHistory.length - 2; i >= 0; i--) {
-			var pt = pointHistory[i];
-			var dt = endTime - pt[1];
-			if (dt > velocityTime) {
-				// dt is big enough for reliable velocity calculation
-				var velocity = (endValue - pt[0]) / dt;
-				console.log('velocity is: ' + velocity);
-				var sign = velocity < 0 ? 1 : -1;
-				velocity = Math.abs(velocity);
-				// calculate speed in pixels
-				// then use v(t)= v0 + a*t to find the time when the
-				// motion will stop (v(t) = 0 => t = v0/a)
-				// and then stick that into x(t) = x0 + v0*t + 0.5*a*(t^2)
-				// (we're using constant deceleration for great justice)
-				var time = velocity / deceleration,
-					distance = (velocity*velocity) / deceleration;
-				
-
-				//console.log("pixelVelocity: " + pixelInitialVelocity);
-				//console.log("motion time: " + time);
-				//console.log("total distance: " + distance);
-				var scrollData = boundiScroll._momentum(velocity*boundiScroll.wrapperH, 1, -boundiScroll.y, (boundiScroll.maxScrollY < 0 ? boundiScroll.scrollerH - boundiScroll.wrapperH + boundiScroll.y - boundiScroll.minScrollY : 0), boundiScroll.wrapperH);
-				boundiScroll.scrollTo(0, scrollData.dist * sign, scrollData.time, true);
-
-				break;
-			}
+		if (inSession) {
+			$(".hidewhenpushed").fadeIn(300);
+			h.start();
 		}
-		console.log('final dt:' + dt);
-		console.log(pointHistory);*/
+		iscrollMouseUp(boundiScroll, 0.5 * boundiScroll.wrapperW, 0.5 * boundiScroll.wrapperH);
 	});
 
 	pd.addEventListener('click', function() {
-		
+		//if (h.currentItem) $(h.currentItem).click();
 	});
 
 	selectswipe.addEventListener('swipeleft', function() {
-		// back
+		if (pd.isPushed) return;
+		doBack();
 	});
 
 	selectswipe.addEventListener('swiperight', function() {
-		// select
+		if (pd.isPushed) return;
+		if (h.currentItem) $(h.currentItem).click();
+	});
+
+	selectswipe.horizontalFader.addEventListener('valuechange', function(f) {
+		// 0-0.3
+		var backAmount = 1 - clamp01(f.value / 0.3);
+		// 0.7-1.0
+		var selectAmount = clamp01((f.value - 0.7) / 0.3);
+
+		leftBut.style.opacity = 0.2 + (backAmount * 0.8);
+		rightBut.style.opacity = 0.2 + (selectAmount * 0.8);
 	});
 
 	fader2d.addEventListener('valuechange', function() {
@@ -358,6 +347,7 @@ function GestureableiScroll() {
 		h.start();
 		frame();
 		$(".showInSession").show();
+		$(".insessionable").addClass("insession");
 	}
 
 	function onsessionend() {
@@ -366,6 +356,7 @@ function GestureableiScroll() {
 		inSession = false;
 		h.stop();
 		$(".showInSession").hide();
+		$(".insessionable").removeClass("insession");
 	}
 
 	return api;
@@ -412,8 +403,14 @@ function addToSlider(child, caption) {
 	$("#mainslider")
 		.append(c)
 		.anythingSlider();
+	$("#mainslider").data('AnythingSlider').updateSlider();
 
-	$("#mainslider").anythingSlider($("#mainslider").data('AnythingSlider').pages);
+	if ($("#mainslider").data('AnythingSlider').pages == 1) {
+		// first page, callback doesn't get called. lets do it manually
+		slideLoaded($("#mainslider").data('AnythingSlider').$currentPage);
+	} else {
+		$("#mainslider").anythingSlider($("#mainslider").data('AnythingSlider').pages);
+	}
 }
 
 function doBack() {
@@ -421,6 +418,7 @@ function doBack() {
 	if (currentPage > 1) {
 		$("#mainslider").anythingSlider(currentPage-1, function(slider) {
 			$("#mainslider li.panel:not(.cloned)").last().remove();
+			$("#mainslider").anythingSlider();
 		});
 	}
 }
@@ -455,22 +453,32 @@ function makeMenu(cls) {
 	return menu.get(0);
 }
 
-function makeSearchMenu(items) {
+function makeAMenu(caption, items) {
+	var m = makeMenu();
+	items.forEach(function(item){
+		$(m).data('menu').addChild(item, (function(i){ return function(){console.log(i);};})(item));
+	});
+	$(m).data('menu').refresh();
+	
+	addToSlider(m, caption);
+}
+
+function makeSearchMenu(items, caption) {
+	if (undefined === caption) {
+		caption = "Search for images"
+	}
+
 	var m = makeMenu();
 	items.forEach(function(item){
 		$(m).data('menu').addChild(item, (function(i){ return function(){doImageSearch(i);};})(item));
 	});
 	$(m).data('menu').refresh();
 	
-	addToSlider(m, "Search for images");
+	addToSlider(m, caption);
 }
 
 function doImageSearch(item) {
-	console.log("Searching for images: " + item);
-}
-
-function navigateToMenu(menu) {
-	
+	makeSearchMenu(searchkeywords, "Search results for '" + item + "'");
 }
 
 </script>
@@ -479,13 +487,13 @@ function navigateToMenu(menu) {
 <style>
 body {
 	background: #33706a; /* Old browsers */
-background: -moz-radial-gradient(center, ellipse cover,  #33706a 0%, #1a364f 100%); /* FF3.6+ */
-background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#33706a), color-stop(100%,#1a364f)); /* Chrome,Safari4+ */
-background: -webkit-radial-gradient(top, ellipse cover,  #33706a 0%,#1a364f 100%); /* Chrome10+,Safari5.1+ */
-background: -o-radial-gradient(center, ellipse cover,  #33706a 0%,#1a364f 100%); /* Opera 12+ */
-background: -ms-radial-gradient(center, ellipse cover,  #33706a 0%,#1a364f 100%); /* IE10+ */
-background: radial-gradient(center, ellipse cover,  #33706a 0%,#1a364f 100%); /* W3C */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', endColorstr='#1a364f',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+/*background: -moz-radial-gradient(center, ellipse cover,  #33706a 0%, #1a364f 100%);
+background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#33706a), color-stop(100%,#1a364f));
+background: -webkit-radial-gradient(top, ellipse cover,  #33706a 0%,#1a364f 100%);
+background: -o-radial-gradient(center, ellipse cover,  #33706a 0%,#1a364f 100%); 
+background: -ms-radial-gradient(center, ellipse cover,  #33706a 0%,#1a364f 100%);
+background: radial-gradient(center, ellipse cover,  #33706a 0%,#1a364f 100%); 
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', endColorstr='#1a364f',GradientType=1 );*/
 }
 .viewer {
 	margin: auto;
@@ -499,28 +507,35 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 	-webkit-transition: all 0.2s ease-in-out;
     -moz-transition: all 0.2s ease-in-out;
     -o-transition: all 0.2s ease-in-out;
-    -ms-transition: all 0.2s ease-in-out;
+    -ms-transition: all 0.2s ease-in-out;*/
+
 }
+
 .viewer.pushed {
-	-webkit-transform: scale(0.95);
-	border: solid 1px rgba(255,255,255,0.3);
+	/*-webkit-transform: scale(0.95);*/
+	-webkit-transform: scale3d(0.95,0.95,1);
 }
 .viewer .header {
 	top:0; left:0;
 	width:100%;
-	height:45px;
+	height:65px;
 	border-top-right-radius: 8px;
 	border-top-left-radius: 8px;
 	font-family: 'Oleo Script';
 	font-weight: 400;
-	line-height:45px;
+	line-height:65px;
 	background-color: rgba(255,255,255,0.3);
 	padding:0;
 	color:#FFF;
-	font-size: 2em;
+	font-size: 4em;
 	text-shadow: 0px 0px 5px rgba(0,0,0,0.3);
 	text-align:center;
 }
+
+.viewer .header.insession {
+	background-color: rgba(0,255,255,0.7);
+}
+
 .viewer .header.pushed {
 	background-color: rgba(255,255,255,0.7);
 	-webkit-transition: background-color .15s ease-in-out .15s;
@@ -557,6 +572,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 .nicelist li.hovering {
 	background-color: rgba(76,174,164,0.7);
 }
+.nicelist li:hover {
+	background-color: rgba(76,174,164,0.7);
+}
+
 .viewer .contents {
 	width : 100%;
 	height : 500px;
@@ -564,216 +583,126 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', end
 	border-bottom-left-radius: 8px;
 }
 
+.viewer .footer {
+	background-color: rgba(255,255,255,0.3);
+	width:100%;
+	height:45px;
+	border-bottom-right-radius: 8px;
+	border-bottom-left-radius: 8px;
+	line-height:45px;
+}
+
+.viewer .footer.insession {
+	background-color: rgba(0,255,255,0.3);
+}
+
 .anythingsliderlist {
 	width : 100%;
 	height : 100%;
 }
-/*#caption {
-	width: 50%;
-	height: 100px;
-	margin: 0 auto;
-	border-radius: 8px;
-	margin-bottom: 50px;
-	background-color: rgba(0,0,0,0.5);
-}*/
+
 #buttons {
 	position: absolute;
 	width: 125%;
 	height: 100px;
 	margin: 0 auto;
 	z-index: 0;
-	top: 225px;
+	top: 50%;
+	margin-top: -50px;
 	right: -120px;
 }
 #leftBut {
 	width: 100px;
 	height: 100px;
 	float: left;
-	background-color: rgba(255,0,0,0.5);
+	background-image:url('i/arrow_right_white.png');
+	-webkit-transform : rotate(180deg);
+	background-repeat: no-repeat;
+	background-size: contain;
+	opacity:0.6;
 }
 #rightBut {
 	width: 100px;
 	height: 100px;
 	float: right;
-	background-color: rgba(255,0,0,0.5);
+	background-image:url('i/arrow_right_white.png');
+	background-repeat: no-repeat;
+	background-size: contain;
+	opacity:0.6;
 }
 
 .showInSession {
 	display: none;
 }
+
+#mainviewer {
+	/*top : 150px;*/
+}
+.thumbNav {
+	list-style-type: none;
+}
+.thumbNav li {
+	border-radius: 6px;
+	background-color: rgba(255,255,255,0.3);
+	margin-right: 10px;
+	padding: 5px;
+	font-family: Arial;
+	display: inline;
+}
+.thumbNav li a {
+	text-decoration: none;
+	color: #FFF;
+}
+.thumbNav li a:hover {
+	color: #000;
+	text-decoration: none;
+}
+
+.box {
+	display: block;
+	float: left;
+	width:100px;
+	height:100px;
+	padding : 40px;
+	background-color:yellow;
+}
+
+.lookatparent {
+	perspective: 1000;
+    -webkit-perspective: 1000;
+}
+
+.lookatcursor {
+	
+}
+
 </style>
 
 </head>
 
 <body>
-
 	<div id="mainviewer" class="viewer pushable">
 
-			<div id="buttons" class="showInSession">
+			<div id="buttons" class="hidewhenpushed showInSession">
 
-				<a href=""><div id="leftBut"></div></a>
+				<div id="leftBut"></div>
 
-				<a href=""><div id="rightBut"></div></a>
+				<div id="rightBut"></div>
 
 			</div>
 
-		<div class="header pushable"><span id="headerlbl">Header</span></div>
+		<div class="header pushable insessionable"><span id="headerlbl">Header</span></div>
 
 		<div class="contents">
 
 
 			<ul id="mainslider" class="anythingsliderlist">
-				<!--
-				<li data-caption="This is the caption for panel 1">
-					<div id="iscrollme1" class="nicelist">
-						<div>
-							<ul>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-								<li class="hoverable">Moshe 1</li>
-							</ul>
-						</div>
-					</div>
-				</li>
-
-				<li data-caption="test2">
-					<div id="iscrollme2" class="nicelist">
-						<div>
-							<ul>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-								<li class="hoverable">ksjdhf 1</li>
-
-							</ul>
-						</div>
-					</div>
-				</li>
-
-				<li data-caption="test3">
-					<div id="iscrollme3" class="nicelist">
-						<div>
-							<ul>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-								<li class="hoverable">Yitzchak 1</li>
-							</ul>
-						</div>
-					</div>
-				</li>
-				-->
+				
 			</ul>
 
 		</div>
+
+		<div class="footer insessionable" id="breadcrumbs"></div>
 
 	</div>
 

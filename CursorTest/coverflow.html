@@ -1,0 +1,554 @@
+<html>
+
+<head>
+
+<script src="js/iscroll.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.easing.1.2.js"></script>
+<script src="js/jquery.anythingslider.js"></script>
+<script src="js/sylvester.js"></script>
+
+<link href="css/anythingslider.css" rel="stylesheet">
+
+<link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
+
+<link href='http://fonts.googleapis.com/css?family=Oleo+Script:400,700' rel='stylesheet' type='text/css'>
+
+<link href='http://fonts.googleapis.com/css?family=Arimo:400,700' rel='stylesheet' type='text/css'>
+
+<script src="../new/zig.js"></script>
+
+<script>
+
+if (!window.requestAnimationFrame) {
+	window.requestAnimationFrame = (function() {
+		return window.webkitRequestAnimationFrame ||
+		window.mozRequestAnimationFrame ||
+		window.oRequestAnimationFrame ||
+		window.msRequestAnimationFrame ||
+		function(callback, element) {
+			window.setTimeout(callback, 1000 / 60);
+		};
+	})();
+}
+
+var iscrollController;
+
+var is;
+
+function loaded() {
+	zig.singleUserSession.startOnWave = false;
+	zig.singleUserSession.startOnSteady = false;
+	zig.singleUserSession.startOnExternalHandpoint = true;
+	zig.singleUserSession.bboxBounds = [1200, 5000, 1000];
+	zig.singleUserSession.bboxOffset = [0, 400, -400];
+
+ 	iscrollController = GestureableiScroll();
+	zig.singleUserSession.addListener(iscrollController);
+
+	/*
+	window.addEventListener('mousemove', function(e) {
+		$(".lookatcursor").each(function(i, el) {
+			var rect = el.getBoundingClientRect();
+			var source = [rect.left + (rect.width/2), rect.top + (rect.height/2), 0];
+			var target = [e.x, e.y, 700];
+			var rot = lookAt(source, target);
+			$(el).css("-webkit-transform", "rotateY(" + rot.yaw + "deg) rotateX(" + rot.pitch + "deg)");
+		});		
+		//$("#mainviewer .contents").css("-webkit-transform", "rotateY(" + rot.yaw + "deg) rotateX(" + rot.pitch + "deg)");
+	});*/
+
+	is = new iScroll("coverflowWrapper", { 
+		scrollToElementCenter : true,
+	});
+
+	$(".coverflow li").click(function(e) {
+		is.scrollToElement(e.target);
+	});
+
+
+	frame();
+}
+
+function center(el) {
+	var rect = el.getBoundingClientRect();
+	return {
+		x : rect.left + (rect.width/2),
+		y : rect.top + (rect.height/2),
+	}
+}
+
+function frame() {
+	var tarCenter = $("#coverflowWrapper").get(0);
+	var target = [center(tarCenter).x, center(tarCenter).y, 200];
+	//console.log(target);
+	$(".coverflow li").each( function(i, el) {
+		var source = [center(el).x, center(el).y, 0];
+		var rot = lookAt(source, target);
+		$(el).css("-webkit-transform", "rotateY(" + rot.yaw + "deg) rotateX(" + rot.pitch + "deg)");
+		var deltax = Math.abs(source[0] - target[0]);
+		$(el).css("z-index", -deltax);
+	} );
+	$(".coverflow .lookatparent").css("-webkit-perspective-origin-x", -is.x + is.wrapperW/2 +"px");
+	requestAnimationFrame(frame);
+}
+
+document.addEventListener('DOMContentLoaded', setTimeout(loaded, 200), false);
+
+function rad2deg(radians)
+{
+   degrees = 360 * radians/(2 * Math.PI);
+   return degrees;
+}
+
+function lookAt(source, target) {
+	var v = $V(target).subtract($V(source));
+	var r = Math.sqrt(v.e(1)*v.e(1) + v.e(3)*v.e(3));
+	var yaw = Math.atan2(v.e(1), v.e(3));
+	var pitch = Math.atan2(-v.e(2), r);
+	return {
+		yaw : rad2deg(yaw),
+		pitch : rad2deg(pitch)
+	};
+}
+
+function hysteresis(classname, pixelsize, container) {
+  var cls = classname;
+  var sizeFunction = (pixelsize == parseFloat(pixelsize)) ? function(currentItem){ return {x:pixelsize, y:pixelsize};} : pixelsize;
+  var sizeX, sizeY;
+  var items;
+  var currentItem = null;
+
+  if (undefined === container) {
+    container = document.body;
+  }
+
+  function refreshItems(newcontainer) {
+  	if (undefined !== newcontainer) {
+  		container = newcontainer;
+  	}
+    items = document.getElementsByClassName(cls);
+  }
+  function start() {
+    currentItem = null;
+  }
+  function stop() {
+    if (currentItem) {
+      currentItem.classList.remove("hovering");
+    }
+  }
+  function inItem(item, x, y) {
+    var rect = item.getBoundingClientRect();
+    return (rect.left <= x) && (x <= rect.right) && (rect.top <= y) && (y <= rect.bottom);
+  }
+  function stillIn(item, x, y) {
+    var rect = item.getBoundingClientRect();
+    return ((rect.left-sizeX) <= x) && (x <= (rect.right+sizeX)) && ((rect.top-sizeY) <= y) && (y <= (rect.bottom+sizeY));
+  }
+  function updateNormalized(x,y) {
+    update(container.offsetWidth * x, container.offsetHeight * y);
+  }
+  function update(x,y) {
+  	var size = sizeFunction(currentItem);
+  	sizeX = size.x; sizeY = size.y;
+    //TODO: something similar to jQuery .offset() instead - this can probably
+    //      break in some ways I don't know when using borders, padding and margins
+    var rect = container.getBoundingClientRect();
+    x += rect.left;
+    y += rect.top;
+    if (currentItem) {
+      if (stillIn(currentItem, x, y)) return;
+      // we left the current item
+      //TODO: not special case
+      currentItem.classList.remove("hovering");
+      currentItem = null;
+    }
+    for (var i = 0; i < items.length; i++) {
+      if (inItem(items[i], x, y)) {
+        currentItem = items[i];
+        currentItem.classList.add("hovering");
+        break;
+      }
+    }
+    api.currentItem = currentItem;
+  }
+  refreshItems();
+  var api = {
+	refreshItems : refreshItems,
+	start : start,
+	stop : stop,
+	update : update,
+	updateNormalized : updateNormalized,
+	currentItem : currentItem,
+   };
+  return api;
+}
+
+function iscrollMouseMove(iscroll, x,y) {
+  iscroll.handleEvent({
+      type:"mousemove", 
+      pageX : x, 
+      pageY : y,
+      });
+}
+
+function iscrollMouseDown(iscroll, x,y) {
+  iscroll.handleEvent({
+      type:"mousedown", 
+      pageX : x, 
+      pageY : y,
+      button : 0,
+      preventDefault : function() {} });
+}
+
+function iscrollMouseUp(iscroll, x,y) {
+  iscroll.handleEvent({
+      type:"mouseup", 
+      pageX : x, 
+      pageY : y,
+      button : 0});
+}
+
+function GestureableiScroll() {
+	var fader2d = zig.controls.Fader2D();
+	var pd = zig.controls.PushDetector();
+	var pushslider = zig.controls.Fader(zig.Orientation.Y, 400);
+	var selectswipe = zig.controls.SwipeDetector();
+	var h = hysteresis("hoverable", function(currentItem) {return {x:20, y:20};});
+	var boundiScroll = null;
+
+	// these are both normalized
+	var currCursor = [0,0];
+	var targetCursor = [0,0];
+
+	var childControls = [
+		fader2d,
+		pd,
+		pushslider,
+	];
+
+	var inSession = false;
+
+	var api = {
+		onattach : onattach,
+		ondetach : ondetach,
+		onsessionstart : onsessionstart,
+		onsessionend : onsessionend,
+		bindTo : bindTo,
+	}
+
+	function bindTo(iscroll) {
+		boundiScroll = iscroll;
+		h.refreshItems(iscroll.wrapper);
+	}
+
+	function lerp(from, to, amount) {
+		return from + ((to - from) * amount);
+	}
+
+	function oldframe() {
+		if (!inSession) return;
+		
+		// update current cursor position
+		currCursor[0] = lerp(currCursor[0], targetCursor[0], 0.5);
+		currCursor[1] = lerp(currCursor[1], targetCursor[1], 0.5);
+
+		// propegate to DOM if not pushed
+		if (!pd.isPushed) {
+			// always use x=0.5 for vertical menu
+			h.updateNormalized(0.5/*currCursor[0]*/, currCursor[1]);
+		} else {
+			var val = (pushslider.value * 2) - 1;
+			// scale for feel
+			val *= 0.6;
+			iscrollMouseMove(boundiScroll, 0.5 * boundiScroll.wrapperW, (0.5 + val) * boundiScroll.wrapperH);
+		}
+		
+		requestAnimationFrame(frame);
+	}
+
+	// event handlers
+
+	pd.addEventListener('push', function() {
+		$(".pushable").addClass("pushed");
+		$(".hidewhenpushed").fadeOut(300);
+		h.stop();
+		pushslider.moveTo(pd.pushPosition, 0.5);
+		iscrollMouseDown(boundiScroll, 0.5 * boundiScroll.wrapperW, 0.5 * boundiScroll.wrapperH);
+	});
+
+	pd.addEventListener('release', function() {
+		$(".pushable").removeClass("pushed");
+		if (inSession) {
+			$(".hidewhenpushed").fadeIn(300);
+			h.start();
+		}
+		iscrollMouseUp(boundiScroll, 0.5 * boundiScroll.wrapperW, 0.5 * boundiScroll.wrapperH);
+	});
+
+	pd.addEventListener('click', function() {
+		
+	});
+
+	selectswipe.addEventListener('swipeleft', function() {
+		// back
+	});
+
+	selectswipe.addEventListener('swiperight', function() {
+		// select
+	});
+
+	fader2d.addEventListener('valuechange', function() {
+		// flip y axis to match screen coords
+		targetCursor[0] = fader2d.value[0];
+		targetCursor[1] = 1 - fader2d.value[1];
+	});
+
+	pushslider.addEventListener("edge", function(val) {
+		pd.release();
+	});
+
+	function onattach(sessiondetector) {
+		childControls.forEach(function(control) {
+			sessiondetector.addListener(control);
+		});
+	}
+
+	function ondetach(sessiondetector) {
+		childControls.forEach(function(control) {
+			sessiondetector.removeListener(control);
+		});
+	}
+
+	function onsessionstart(focusPosition) {
+		console.log("Session started");
+		inSession = true;
+		h.start();
+		frame();
+		$(".showInSession").show();
+	}
+
+	function onsessionend() {
+		console.log("Session ended");
+		// this will stop the frame() loop
+		inSession = false;
+		h.stop();
+		$(".showInSession").hide();
+	}
+
+	return api;
+}
+
+</script>
+
+
+<style>
+body {
+	background: #33706a; /* Old browsers */
+background: -moz-radial-gradient(center, ellipse cover,  #33706a 0%, #1a364f 100%); /* FF3.6+ */
+background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#33706a), color-stop(100%,#1a364f)); /* Chrome,Safari4+ */
+background: -webkit-radial-gradient(top, ellipse cover,  #33706a 0%,#1a364f 100%); /* Chrome10+,Safari5.1+ */
+background: -o-radial-gradient(center, ellipse cover,  #33706a 0%,#1a364f 100%); /* Opera 12+ */
+background: -ms-radial-gradient(center, ellipse cover,  #33706a 0%,#1a364f 100%); /* IE10+ */
+background: radial-gradient(center, ellipse cover,  #33706a 0%,#1a364f 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#33706a', endColorstr='#1a364f',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+}
+.viewer {
+	margin: auto;
+	width : 50%;
+	border : solid 1px rgba(255,255,255,0.4);
+	background-color: rgba(255,255,255,0.2);
+	position: relative;
+	border-radius: 8px;
+	box-shadow: inset 0px -1px 5px rgba(255,255,255,0.3), 0px -1px 5px rgba(0,0,0,0.5);
+	transition : all 0.2s ease-in-out;
+	-webkit-transition: all 0.2s ease-in-out;
+    -moz-transition: all 0.2s ease-in-out;
+    -o-transition: all 0.2s ease-in-out;
+    -ms-transition: all 0.2s ease-in-out;
+
+}
+.viewer.pushed {
+	-webkit-transform: scale(0.95);
+	border: solid 1px rgba(255,255,255,0.3);
+}
+.viewer .header {
+	top:0; left:0;
+	width:100%;
+	height:45px;
+	border-top-right-radius: 8px;
+	border-top-left-radius: 8px;
+	font-family: 'Oleo Script';
+	font-weight: 400;
+	line-height:45px;
+	background-color: rgba(255,255,255,0.3);
+	padding:0;
+	color:#FFF;
+	font-size: 2em;
+	text-shadow: 0px 0px 5px rgba(0,0,0,0.3);
+	text-align:center;
+}
+.viewer .header.pushed {
+	background-color: rgba(255,255,255,0.7);
+	-webkit-transition: background-color .15s ease-in-out .15s;
+}
+.nicelist {
+	display:block;
+	height : 100%;
+	overflow:hidden;
+	position:relative;
+}
+.nicelist ul {
+	list-style:none;
+	padding:0;
+	margin:0;
+	width:100%;
+	text-align:left;
+	border-bottom-right-radius: 8px;
+	border-bottom-left-radius: 8px;
+}
+.nicelist li {
+	padding:0 10px;
+	height:80px;
+	line-height:80px;
+	color: #FFF;
+	width: 100%;
+	text-shadow: 0.5px 1px 0px rgba(0,0,0,0.5);
+	font-family: 'Arimo';
+	font-weight: 700;
+	border-bottom:1px solid rgba(0,0,0,0.5);
+	border-top:1px solid rgba(255,255,255,0.3);
+	font-size:34px;
+	overflow: hidden;
+}
+.nicelist li.hovering {
+	background-color: rgba(76,174,164,0.7);
+}
+.nicelist li:hover {
+	background-color: rgba(76,174,164,0.7);
+}
+
+.viewer .contents {
+	width : 100%;
+	height : 500px;
+	border-bottom-right-radius: 8px;
+	border-bottom-left-radius: 8px;
+}
+
+.anythingsliderlist {
+	width : 100%;
+	height : 100%;
+}
+
+.showInSession {
+	display: none;
+}
+
+.lookatparent {
+	perspective: 500;
+    -webkit-perspective: 500;
+}
+
+.lookatcursor {
+	
+}
+
+
+.coverflow {
+	margin: auto;
+	width : 50%;
+	height: 400px;
+	border : solid 1px rgba(255,255,255,0.4);
+	background-color: rgba(255,255,255,0.2);
+	position: relative;
+	border-radius: 8px;
+	box-shadow: inset 0px -1px 5px rgba(255,255,255,0.3), 0px -1px 5px rgba(0,0,0,0.5);
+	overflow:hidden;
+	white-space: nowrap;
+
+}
+
+.coverflow .scroller {
+	width: 6700px;
+}
+
+.coverflow .lookattarget {
+	display: none;
+}
+
+.coverflow ul {
+	list-style:none;
+	display:block;
+	float:left;
+	width:100%;
+	height:100%;
+	padding:0;
+	margin:0;
+	text-align:left;
+}
+
+.coverflow li {
+	display:block;
+	vertical-align:middle;
+	float:left;
+	padding:0 10px;
+	width:200px;
+	height:200px;
+	margin-top : 100px;
+	border-left:1px solid #ccc;
+	border-right:1px solid #fff;
+	background-color:#fafafa;
+	font-size:14px;
+	-webkit-transform: translate3d(0px, 0px, 0px);
+	position:relative;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="coverflowWrapper" class="coverflow">
+	<div id="scroller" class="scroller">
+		<div class="lookatparent">
+		<ul class="">
+			<li>Item 1</li>
+			<li>Item 2</li>
+			<li>Item 3</li>
+			<li>Item 4</li>
+			<li>Item 5</li>
+			<li>Item 6</li>
+			<li>Item 7</li>
+			<li>Item 8</li>
+			<li>Item 9</li>
+			<li>Item 10</li>
+			<li>Item 11</li>
+			<li>Item 12</li>
+			<li>Item 13</li>
+			<li>Item 14</li>
+			<li>Item 15</li>
+			<li>Item 16</li>
+			<li>Item 17</li>
+			<li>Item 18</li>
+			<li>Item 19</li>
+			<li>Item 20</li>
+			<li>Item 21</li>
+			<li>Item 22</li>
+			<li>Item 23</li>
+			<li>Item 24</li>
+			<li>Item 25</li>
+			<li>Item 26</li>
+			<li>Item 27</li>
+			<li>Item 28</li>
+			<li>Item 29</li>
+			<li>Item 30</li>
+		</ul>
+		</div>
+	</div>
+	<div id="coverflowTarget" class="lookattarget"></div>
+</div>
+
+</body>
+
+</html>
