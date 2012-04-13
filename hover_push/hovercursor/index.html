@@ -425,7 +425,7 @@ for (var i = 0; i < document.styleSheets.length; i++)
 			newstyle = txt.replace(":hover", ".zigHover");
 			console.log(newstyle);
 			ss.insertRule(newstyle);
-			r++;
+			r++; //make sure we don't do it for the same rule twice after inserting
 		}
 	}
 	
