@@ -1,5 +1,6 @@
 <html>
 <head>
+<title>hover cursor example</title>
 <script src='zig.js'></script>
 <style>
 #cursor {
@@ -43,7 +44,7 @@ a:hover
 <td><div id="Cclickdiv" class="clickdiv" onclick="divclick(this);" onmousedown="divdown(this);" onmouseup="divup(this);" onmouseover="divover(this);" onmouseout="divout(this);">C</div></td>
 </table>
 <div id="output">OUT</div>
-<div><h1><a id="hovertest" class="hoverable" href="http://google.com">KILLER LINK CLICK</a></h1></div>
+<div><h1><a id="hovertest" href="http://google.com">KILLER LINK CLICK</a></h1></div>
 
 <script type="text/javascript">
 
@@ -106,10 +107,10 @@ window.onload = function(){
     context.strokeStyle = "black"; // line color
     context.lineWidth = 10;
 	
-window.onmousemove = function(e){
-	target[0] = e.clientX / window.innerWidth;
-	target[1] = e.clientY / window.innerHeight;
-};
+//window.onmousemove = function(e){
+//	target[0] = e.clientX / window.innerWidth;
+//	target[1] = e.clientY / window.innerHeight;
+//};
 	
 window.setInterval(moveCursor,15);
 	
@@ -413,6 +414,14 @@ zig.singleUserSession.addListener(c);
 <script type="text/javascript">
 for (var i = 0; i < document.styleSheets.length; i++)
 {
+
+
+	els = document.getElementsByTagName("a");
+	for (var i = 0; i < els.length; i++)
+	{
+		addClass(els[i], "hoverable");
+	}
+	
 	console.log("stylesheet " + i);
 	ss = document.styleSheets[i];
 	for (var r = 0; r < ss.rules.length; r++)
