@@ -1984,7 +1984,7 @@ window.onload = function(){
 	ce.style.display = "block";
 	ce.style.width = "100px";
 	ce.style.height = "100px";
-	ce.style.backgroundImage = "url('zigcursor.png')";
+	ce.style.backgroundImage = "url('http://zig.tv/hover/zigcursor.png')";
 	ce.style.backgroundPosition = "center";
 	ce.style.backgroundRepeat = "no-repeat";
 	document.body.appendChild(ce);
