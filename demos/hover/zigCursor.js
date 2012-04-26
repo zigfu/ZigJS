@@ -1,52 +1,3 @@
-<html>
-<head>
-<script src='zig.js'></script>
-<style>
-#cursor {
-	position: fixed;
-	display: block;
-	width : 100px;
-	height : 100px;
-	background-image: url("zigcursor.png");
-	background-position: center;
-	background-repeat: no-repeat;
-
-}
-#output
-{
-	font-size: 24px;
-}
-.clickdiv {
-	width: 200px;
-	height: 200px;
-	background-color: #FFCCCC;
-}
-a:hover
-{
-	color: #FF0000;
-}
-</style>
-
-
-</head>
-
-
-<body>
-
-
-
-<div id="cursor"><canvas id="myCanvas" width="100" height="100" style="width:100px;height:100px"></canvas></div>
-
-<table><tr>
-<td><div id="Aclickdiv" class="hoverable clickdiv" onclick="divclick(this);" onmousedown="divdown(this);" onmouseup="divup(this);" onmouseover="divover(this);" onmouseout="divout(this);">A</div></td>
-<td><div id="Bclickdiv" class="clickdiv" onclick="divclick(this);" onmousedown="divdown(this);" onmouseup="divup(this);" onmouseover="divover(this);" onmouseout="divout(this);">B</div></td>
-<td><div id="Cclickdiv" class="clickdiv" onclick="divclick(this);" onmousedown="divdown(this);" onmouseup="divup(this);" onmouseover="divover(this);" onmouseout="divout(this);">C</div></td>
-</table>
-<div id="output">OUT</div>
-<div><h1><a id="hovertest" class="hoverable" href="http://google.com">KILLER LINK CLICK</a></h1></div>
-
-<script type="text/javascript">
-
 
 function hasClass(ele,cls) {
     return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
@@ -63,58 +14,11 @@ function removeClass(ele,cls) {
     }
 }
 
-function divdown(t)
-{
-console.log("down: " + t.id);
-	t.innerHTML = "DOWN";
-	t.style.backgroundColor = '#AAFFAA'; 
-}
-function divup(t)
-{
-console.log("up: " + t.id);
-	t.innerHTML = "UP";
-	t.style.backgroundColor = '#FFAAAA'; 
-}
-function divover(t)
-{
-	console.log("divover: " + t.id);
-	t.innerHTML = "OVER";
-	t.style.backgroundColor = '#FFAAAA'; 
-}
-function divout(t)
-{
-	console.log("divout: " + t.id);
-	t.innerHTML = "OUT";
-	t.style.backgroundColor = '#FFCCCC'; 
-}
-function divclick(t)
-{
-console.log("click: " + t.id);
-t.style.backgroundColor = '#00FFFF'; 
-setTimeout(function(){t.style.backgroundColor='#FFCCCC';}, 1000);
-}
 
-var context, canvas, centerX, centerY, radius, counterclockwise;
-window.onload = function(){
-    canvas = document.getElementById("myCanvas");
-    context = canvas.getContext("2d");
-    centerX = canvas.width / 2;
-    centerY = canvas.height / 2;
-    radius = 40;    
-    counterclockwise = false;
-	
-    context.strokeStyle = "black"; // line color
-    context.lineWidth = 10;
-	
-window.onmousemove = function(e){
-	target[0] = e.clientX / window.innerWidth;
-	target[1] = e.clientY / window.innerHeight;
-};
-	
-window.setInterval(moveCursor,15);
-	
-	
-}
+
+
+
+
 function fillArc(start,total)
 {
 	//console.log("start: " + start + " total: " + total);
@@ -122,6 +26,15 @@ function fillArc(start,total)
     context.stroke();
 
 }
+
+var context, canvas, centerX, centerY, radius, counterclockwise;
+var ce;
+
+var last = [0,0];
+var target = [0,0];
+var mouseovertarget = null;
+var c;
+
 var pos = 0;
 var del = 20;
 var amt = 10;
@@ -186,33 +99,6 @@ function vlerp(p1,p2,r)
 	return out;
 }
 
-// Create cursor and cursor dom element
-var c = zig.controls.Cursor();
-var ce = document.getElementById("cursor")
-
- // 1. show/hide cursor on session start/end
-zig.singleUserSession.addEventListener('sessionstart', function(focusPosition) {
-	ce.style.display = 'block';
-});
-zig.singleUserSession.addEventListener('sessionend', function() {
-	ce.style.display = 'block';
-});
- 
-// 2. move the cursor element on cursor move
-c.addEventListener('move', function(cursor) {
-	target[0] = c.x;
-	target[1] = c.y;
-});
-var last = [0,0];
-var target = [0,0];
-
-function moveCursor()
-{
-	//console.log(target);
-	last = vlerp(last,target,.3);
-	setCursor(last[0],last[1]);
-}
-var mouseovertarget = null;
 function setCursor(x,y)
  {
 	xpos = x * window.innerWidth;
@@ -232,7 +118,7 @@ function setCursor(x,y)
 		do {
 			
 			elems.push(el);	
-			if (el.id == "myCanvas")
+			if (el.tagName.toUpperCase() == "CANVAS")
 			{
 				//console.log("decrease canvas z");
 				//console.log(el.parentNode.id)
@@ -267,11 +153,12 @@ function setCursor(x,y)
 					evt.initMouseEvent("mouseover", true, true, window, 1, xpos, ypos, xpos, ypos, false, false, false, false, 0, null);					
 					mouseovertarget.dispatchEvent(evt);		
 					//mouseovertarget.classList.add("zigHover");
-					addClass(mouseovertarget, "zigHover");
+					
 					console.log("ADD zigHover class to " + mouseovertarget.id );
 						if (hasClass(mouseovertarget, "hoverable"))						
 						{
 							startHoverClick();
+							addClass(mouseovertarget, "zigHover");
 						}
 				}
 			}
@@ -291,7 +178,7 @@ function setCursor(x,y)
 		//console.log(elems);
 		for(var ii=0; ii<elems.length; ii++)
 		{
-			if (elems[ii].id == "myCanvas")
+			if (elems[ii].tagName.toUpperCase() == "CANVAS")
 			{
 			//console.log("increase canvas z: " + elems[ii].parentNode.style.zIndex);
 			elems[ii].parentNode.style.zIndex = parseInt(elems[ii].parentNode.style.zIndex) + (1000+ii);
@@ -305,6 +192,72 @@ function setCursor(x,y)
 	}
 }
 	
+
+
+
+
+window.onload = function(){
+    canvas = document.createElement("canvas");
+	ce = document.createElement("div");
+	ce.id="cursor";
+	ce.style.position = "fixed";
+	ce.style.display = "block";
+	ce.style.width = "100px";
+	ce.style.height = "100px";
+	ce.style.backgroundImage = "url('zigcursor.png')";
+	ce.style.backgroundPosition = "center";
+	ce.style.backgroundRepeat = "no-repeat";
+	document.body.appendChild(ce);
+	ce.appendChild(canvas);
+	
+	canvas.width = 100;
+	canvas.height = 100;
+	canvas.style.width = '100px';
+	canvas.style.height = '100px';
+    context = canvas.getContext("2d");
+    centerX = canvas.width / 2;
+    centerY = canvas.height / 2;
+    radius = 40;    
+    counterclockwise = false;
+	
+    context.strokeStyle = "black"; // line color
+    context.lineWidth = 10;
+	
+//window.onmousemove = function(e){
+//	target[0] = e.clientX / window.innerWidth;
+//	target[1] = e.clientY / window.innerHeight;
+//};
+	
+	window.setInterval(moveCursor,15);
+
+// Create cursor and cursor dom element
+  c = zig.controls.Cursor();
+
+	
+	
+ // 1. show/hide cursor on session start/end
+zig.singleUserSession.addEventListener('sessionstart', function(focusPosition) {
+	ce.style.display = 'block';
+});
+zig.singleUserSession.addEventListener('sessionend', function() {
+	ce.style.display = 'block';
+});
+ 
+// 2. move the cursor element on cursor move
+c.addEventListener('move', function(cursor) {
+	target[0] = c.x;
+	target[1] = c.y;
+});
+
+
+function moveCursor()
+{
+	//console.log(target);
+	last = vlerp(last,target,.3);
+	setCursor(last[0],last[1]);
+}
+
+
 // 3. Add/remove 'pushed' class on cursor push/release
 c.addEventListener('push', function(c) {
 	
@@ -351,7 +304,7 @@ c.addEventListener('click', function(c) {
 		do {
 			
 			elems.push(el);	
-			if (el.id == "myCanvas")
+			if (el.tagName.toUpperCase() == "CANVAS")
 			{
 				//console.log("decrease canvas z");
 				//console.log(el.parentNode.id)
@@ -380,7 +333,7 @@ c.addEventListener('click', function(c) {
 		//console.log(elems);
 		for(var ii=0; ii<elems.length; ii++)
 		{
-			if (elems[ii].id == "myCanvas")
+			if (elems[ii].tagName.toUpperCase() == "CANVAS")
 			{
 			//console.log("increase canvas z: " + elems[ii].parentNode.style.zIndex);
 			elems[ii].parentNode.style.zIndex = parseInt(elems[ii].parentNode.style.zIndex) + (1000+ii);
@@ -400,21 +353,20 @@ c.addEventListener('click', function(c) {
 zig.singleUserSession.addListener(c);
 
 
-
-
-
-
-
-
-
-
-</script>
-
-<script type="text/javascript">
+//modify style sheets to make :hover to .zigHover and make "a" elements hoverable
 for (var i = 0; i < document.styleSheets.length; i++)
 {
+
+
+	els = document.getElementsByTagName("a");
+	for (var j = 0; j < els.length; j++)
+	{
+		addClass(els[j], "hoverable");
+	}
+	
 	console.log("stylesheet " + i);
 	ss = document.styleSheets[i];
+
 	for (var r = 0; r < ss.rules.length; r++)
 	{
 		console.log(ss.rules[r].selectorText);
@@ -430,7 +382,10 @@ for (var i = 0; i < document.styleSheets.length; i++)
 	}
 	
 }
-</script>
 
-</body>
-</html>
+
+}
+
+
+
+
