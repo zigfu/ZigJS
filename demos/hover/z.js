@@ -1710,51 +1710,11 @@ zig.toys = (function() {
 		zig.addListener(r);
 	}
 
-	function injectCursor() {
-		var c = zig.controls.Cursor();
-		var ce = document.createElement('div');
-		ce.style.position = 'fixed';
-		ce.style.display = 'none';
-		ce.style.width = '50px';
-		ce.style.height = '50px';
-		ce.style.backgroundColor = 'blue';
-		document.body.appendChild(ce);
-
-		// show/hide cursor on session start/end
-		zig.singleUserSession.addEventListener('sessionstart', function(focusPosition) {
-			ce.style.display = 'block';
-		});
-		zig.singleUserSession.addEventListener('sessionend', function() {
-			ce.style.display = 'none';
-		});
-
-		// move the cursor element on cursor move
-		c.addEventListener('move', function(cursor) {
-			ce.style.left = (c.x * window.innerWidth - (ce.offsetWidth / 2)) + "px";
-			ce.style.top = (c.y * window.innerHeight - (ce.offsetHeight / 2)) + "px";
-		});
-
-		// add the cursor to our singleUserSession to make sure we get events
-		zig.singleUserSession.addListener(c);
-	}
-
-	return {
-		injectCursor : injectCursor,
-		injectRadar : injectRadar,
-	}
-}());
-
-}()); // zig.js closure
-} // if (undefined === zig)
-
-
-
-
-
-
-
-
-
+	function injectCursor() 
+	{
+	
+	
+	
 
 
 function hasClass(ele,cls) {
@@ -1966,17 +1926,25 @@ function setCursor(x,y)
 		}
 		//output.innerHTML = "xpos: " + xpos + " y: " + ypos + "<br>elems " + elems;
 	}
-
-
-
-
-}
+	}	
 	
-
-
-
-
-function load(){
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
     canvas = document.createElement("canvas");
 	ce = document.createElement("div");
 	ce.id="cursor";
@@ -2166,9 +2134,22 @@ for (var i = 0; i < document.styleSheets.length; i++)
 	}
 	
 }
-
-
-
 }
-zig.embed();
-load();
+
+	return {
+		injectCursor : injectCursor,
+		injectRadar : injectRadar,
+	}
+}());
+
+}()); // zig.js closure
+} // if (undefined === zig)
+
+
+
+
+
+
+
+
+
