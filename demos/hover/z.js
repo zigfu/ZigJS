@@ -1976,7 +1976,7 @@ function setCursor(x,y)
 
 
 
-window.onload = function(){
+function load(){
     canvas = document.createElement("canvas");
 	ce = document.createElement("div");
 	ce.id="cursor";
@@ -2170,17 +2170,4 @@ for (var i = 0; i < document.styleSheets.length; i++)
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+load();
