@@ -1884,7 +1884,7 @@ function setCursor(x,y)
 	
 	
 	elem = document.elementFromPoint(xpos,ypos);
-	output = document.getElementById("output");
+	//output = document.getElementById("output");
 	if (elem)
 	{
 		
@@ -1964,7 +1964,7 @@ function setCursor(x,y)
 			elems[ii].style.zIndex = parseInt(elems[ii].style.zIndex) + (1000+ii);	
 			}
 		}
-		output.innerHTML = "xpos: " + xpos + " y: " + ypos + "<br>elems " + elems;
+		//output.innerHTML = "xpos: " + xpos + " y: " + ypos + "<br>elems " + elems;
 	}
 
 
