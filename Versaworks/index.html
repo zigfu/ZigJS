@@ -1,0 +1,137 @@
+<html><head><title>Scrolling Test</title>
+
+<script type="text/javascript" src="zig.js"></script>
+
+<style>
+iframe
+{
+frameborder: 0;
+scrolling: no;
+height: 100%;
+width: 100%;
+}
+ul#container
+{
+overflow: hidden;
+//overflow-x: scroll;
+width: 500px; /* or whatever */
+height: 200px; /* or whatever */
+white-space: nowrap;
+}
+
+ul#container li
+{
+display: inline-block;
+width: 100px; /* or whatever */
+height: 200px; /* or whatever */
+margin: 20px;
+padding: 0px;
+background: blue;
+}
+</style>
+</head>
+<body>
+
+<table style="width: 100%; height: 100%">
+<tr style="height: 85%"><td><iframe src = "http://zigfu.com"></iframe></td></tr>
+<tr><td>
+<ul id="container">
+  <li>Item One</li>
+  <li>Item Two</li>
+  <li>Item three</li>
+  <li>Item Four</li>
+  <li>Item Five</li>
+  <li>Item Six</li>
+  <li>Item Seven</li>
+  <li>Item Eight</li>
+</ul>
+<script>
+var left = .1;
+var right = .9;
+var hyst = .1;
+
+var list = document.getElementById("container");
+var scrollAmt = 10;
+var scrollTime = 10;
+var intval = null;
+var scrolling = false;
+function startScroll(dir)
+{
+console.log("direction: " + dir);
+if (!scrolling){
+scrolling = true;
+	if (dir == 0)
+	{
+		intval = window.setInterval("list.scrollLeft-=scrollAmt",scrollTime)
+		
+	}
+	else
+	{
+		intval = window.setInterval("list.scrollLeft+=scrollAmt",scrollTime)
+	}	
+	}
+}
+function stopScroll()
+{
+	window.clearInterval(intval);
+	scrolling = false;
+}
+var ele;
+var fader = zig.controls.Fader(zig.Orientation.X);
+fader.addEventListener('valuechange', function (f) {
+	console.log('Fader value: ' + f.value);
+	rect = list.getBoundingClientRect();
+	el = document.elementFromPoint(rect.left + f.value*rect.width, rect.top + rect.height/2);
+	if ((el != ele) && (el.tagName.toUpperCase() == "LI"))
+	{
+		if (ele){ele.style.background = "";}
+		el.style.background = "red";
+		ele = el;
+		console.log(el.innerHTML);
+	}
+	
+	
+	
+	
+	if (f.value < right-hyst)
+	{
+		stopScroll();
+	}	
+	if (f.value > left+hyst)
+	{
+		stopScroll();
+	}
+	if (f.value < left)
+	{
+		startScroll(0);
+	}
+	
+	if (f.value > right)
+	{
+		startScroll(1);
+	}
+
+})
+
+zig.singleUserSession.addEventListener('userengaged', function(user) {
+	console.log('User started UI session: ' + user.id);
+});
+zig.singleUserSession.addEventListener('userdisengaged', function(user) {
+	console.log('User ended UI session: ' + user.id);
+});
+zig.singleUserSession.addEventListener('sessionstart', function(initialPosition) {
+	console.log('Session started at ' + initialPosition);
+});
+zig.singleUserSession.addEventListener('sessionend', function() {
+	console.log('Session ended')
+});
+
+zig.singleUserSession.addListener(fader);
+
+
+
+</script>
+
+</td></tr></table>
+</body>
+</html>
