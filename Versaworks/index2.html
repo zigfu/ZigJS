@@ -1,0 +1,198 @@
+<html><head><title>Scrolling Test</title>
+
+<script type="text/javascript" src="zig.js"></script>
+
+<style>
+
+div#overlay
+{
+position: absolute;
+top: 0px;
+left: 0px;
+width: 100%;
+height: 100%;
+background: -webkit-radial-gradient(top center, ellipse cover, rgba(255,255,255,0.2) 0%,rgba(0,0,0,0.5) 90%);
+z-index: 65536;
+margin: 0 auto;
+}
+iframe
+{
+frameborder: 0;
+scrolling: no;
+height: 100%;
+width: 100%;
+}
+div#hmenu
+{
+position: absolute;
+top: 50%;
+width: 100%;
+text-align: center;
+margin:0 auto;
+}
+div#vcenter
+{
+position: relative;
+top: -50%;
+}
+ul#container
+{
+position: relative;
+overflow: hidden;
+width: 80%; /* or whatever */
+height: 200px; /* or whatever */
+white-space: nowrap;
+text-align:center;
+margin:0 auto;
+}
+
+ul#container li
+{
+display: inline-block;
+width: 300px; /* or whatever */
+height: 200px; /* or whatever */
+margin: 20px;
+padding: 0px;
+background: blue;
+}
+</style>
+</head>
+<body>
+<div id="overlay">
+<div id="hmenu">
+<div id="vcenter">
+<ul id="container">
+  <li data-link="http://www.versaworks.net/go.ashx?l=n166z6h5aahw3mj3wphec6y5dh">Injury Diagram (SilverLight)</li>
+  <li data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=bf8cd70b-a124-4927-bd27-43d22dce54c9&Dd_ContentType=Dashboard">Injury Diagram (HTML5 dashboard)</li>
+  <li data-link="http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh">SF Area Diagram (SilverLight)</li>
+  <li data-link="http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh&t=h">SF Area Digram (HTML5, share)</li>
+  <li data-link="http://www.versaworks.net/go.ashx?l=nd84eir8myewtgjckptg4c5dwc">Census Trend (SilverLight)</li>
+  <li data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=f850e708-d86f-4c6b-97b5-f85e617bc0ec&Dd_ContentType=Dashboard">Censure Trend (HTML5 dashboard)</li>
+  <li data-link="http://www.versaworks.net/go.ashx?l=bnopojrq881rfq5ewk56h4rojw">Executive Dashboard (SilverLight)</li>
+  <li data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=7df3005e-96f1-4115-9c52-5afd35e43602&Dd_ContentType=Dashboard">Executive Dashboard (HTML5)</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<iframe id="pageView" src = "http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh&t=h"></iframe>
+
+
+
+<script>
+var left = .1;
+var right = .9;
+var hyst = .1;
+
+var list = document.getElementById("container");
+var scrollAmt = 10;
+var scrollTime = 10;
+var intval = null;
+var scrolling = false;
+
+function startScroll(dir)
+{
+//console.log("direction: " + dir);
+if (!scrolling){
+scrolling = true;
+	if (dir == 0)
+	{
+		intval = window.setInterval("list.scrollLeft-=scrollAmt; updateEl();",scrollTime)
+		
+	}
+	else
+	{
+		intval = window.setInterval("list.scrollLeft+=scrollAmt; updateEl();",scrollTime)
+	}	
+	}
+}
+function stopScroll()
+{
+	window.clearInterval(intval);
+	scrolling = false;
+}
+var ele;
+var pageView = document.getElementById("pageView");
+var fader = zig.controls.Fader(zig.Orientation.X);
+fader.addEventListener('valuechange', function (f) {
+	//console.log('Fader value: ' + f.value);
+	rect = list.getBoundingClientRect();
+	updateEl();
+	
+	
+	
+	
+	if (f.value < right-hyst)
+	{
+		stopScroll();
+	}	
+	if (f.value > left+hyst)
+	{
+		stopScroll();
+	}
+	if (f.value < left)
+	{
+		startScroll(0);
+	}
+	
+	if (f.value > right)
+	{
+		startScroll(1);
+	}
+
+})
+function updateEl()
+{
+//console.log("update EL");
+	el = document.elementFromPoint(rect.left+1 + fader.value*(rect.width-2), rect.top + rect.height/2);
+	
+	if (el && ((el != ele) && (el.tagName.toUpperCase() == "LI")))
+	{
+		if (ele){ele.style.background = "";}
+		el.style.background = "red";
+		ele = el;
+		console.log(el.innerHTML);
+	}
+	
+}
+
+// PushDetector
+var pushDetector = zig.controls.PushDetector();
+pushDetector.addEventListener('push', function(pd) {
+	console.log('PushDetector: Push');
+	ele.style.background = "green";
+});
+pushDetector.addEventListener('release', function(pd) {
+	console.log('PushDetector: Release');
+	ele.style.background = "blue";
+});
+pushDetector.addEventListener('click', function(pd) {
+	console.log('PushDetector: Click');
+	pageView.src = ele.getAttribute("data-link");
+	ele.style.background = "yellow";
+});
+zig.singleUserSession.addListener(pushDetector);
+
+
+zig.singleUserSession.addEventListener('userengaged', function(user) {
+	console.log('User started UI session: ' + user.id);
+});
+zig.singleUserSession.addEventListener('userdisengaged', function(user) {
+	console.log('User ended UI session: ' + user.id);
+});
+zig.singleUserSession.addEventListener('sessionstart', function(initialPosition) {
+	console.log('Session started at ' + initialPosition);
+});
+zig.singleUserSession.addEventListener('sessionend', function() {
+	console.log('Session ended')
+});
+
+zig.singleUserSession.addListener(fader);
+
+
+
+</script>
+
+</body>
+</html>
