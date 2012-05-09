@@ -3,17 +3,21 @@
 <script type="text/javascript" src="zig.js"></script>
 
 <style>
-
-div#overlay
+body
+{
+	margin: 0 auto;
+}
+#overlay
 {
 position: absolute;
 top: 0px;
 left: 0px;
 width: 100%;
 height: 100%;
-background: -webkit-radial-gradient(top center, ellipse cover, rgba(255,255,255,0.2) 0%,rgba(0,0,0,0.5) 90%);
-z-index: 65536;
+background: -webkit-radial-gradient(center center, ellipse cover, rgba(255,255,255,0.7) 0%,rgba(0,0,0,0.9) 90%);
+z-index: 65534;
 margin: 0 auto;
+
 }
 iframe
 {
@@ -21,23 +25,23 @@ frameborder: 0;
 scrolling: no;
 height: 100%;
 width: 100%;
+margin:0 auto;
+padding: 0;
+border: none;
 }
-div#hmenu
+#hmenu
 {
 position: absolute;
 top: 50%;
 width: 100%;
+height: 200px;
 text-align: center;
 margin:0 auto;
 }
-div#vcenter
+#container
 {
 position: relative;
 top: -50%;
-}
-ul#container
-{
-position: relative;
 overflow: hidden;
 width: 80%; /* or whatever */
 height: 200px; /* or whatever */
@@ -45,8 +49,7 @@ white-space: nowrap;
 text-align:center;
 margin:0 auto;
 }
-
-ul#container li
+#container li
 {
 display: inline-block;
 width: 300px; /* or whatever */
@@ -58,29 +61,27 @@ background: blue;
 </style>
 </head>
 <body>
-<div id="overlay">
-<div id="hmenu">
-<div id="vcenter">
-<ul id="container">
-  <li data-link="http://www.versaworks.net/go.ashx?l=n166z6h5aahw3mj3wphec6y5dh">Injury Diagram (SilverLight)</li>
-  <li data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=bf8cd70b-a124-4927-bd27-43d22dce54c9&Dd_ContentType=Dashboard">Injury Diagram (HTML5 dashboard)</li>
-  <li data-link="http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh">SF Area Diagram (SilverLight)</li>
-  <li data-link="http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh&t=h">SF Area Digram (HTML5, share)</li>
-  <li data-link="http://www.versaworks.net/go.ashx?l=nd84eir8myewtgjckptg4c5dwc">Census Trend (SilverLight)</li>
-  <li data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=f850e708-d86f-4c6b-97b5-f85e617bc0ec&Dd_ContentType=Dashboard">Censure Trend (HTML5 dashboard)</li>
-  <li data-link="http://www.versaworks.net/go.ashx?l=bnopojrq881rfq5ewk56h4rojw">Executive Dashboard (SilverLight)</li>
-  <li data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=7df3005e-96f1-4115-9c52-5afd35e43602&Dd_ContentType=Dashboard">Executive Dashboard (HTML5)</li>
+<div id="overlay"><div id="hmenu"><ul id="container">
+<li data-link="http://www.versaworks.net/go.ashx?l=n166z6h5aahw3mj3wphec6y5dh">Injury Diagram (SilverLight)</li>
+<li data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=bf8cd70b-a124-4927-bd27-43d22dce54c9&Dd_ContentType=Dashboard">Injury Diagram (HTML5 dashboard)</li>
+<li data-link="http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh">SF Area Diagram (SilverLight)</li>
+<li data-link="http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh&t=h">SF Area Digram (HTML5, share)</li>
+<li data-link="http://www.versaworks.net/go.ashx?l=nd84eir8myewtgjckptg4c5dwc">Census Trend (SilverLight)</li>
+<li data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=f850e708-d86f-4c6b-97b5-f85e617bc0ec&Dd_ContentType=Dashboard">Censure Trend (HTML5 dashboard)</li>
+<li data-link="http://www.versaworks.net/go.ashx?l=bnopojrq881rfq5ewk56h4rojw">Executive Dashboard (SilverLight)</li>
+<li data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=7df3005e-96f1-4115-9c52-5afd35e43602&Dd_ContentType=Dashboard">Executive Dashboard (HTML5)</li>
 </ul>
-</div>
 </div>
 </div>
 
 
 <iframe id="pageView" src = "http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh&t=h"></iframe>
 
-
-
 <script>
+
+//var hmenu = document.getElementById("hmenu");
+//hmenu.style.top = (window.innerHeight / 2) - 100 +'px';
+
 var left = .1;
 var right = .9;
 var hyst = .1;
@@ -189,10 +190,6 @@ zig.singleUserSession.addEventListener('sessionend', function() {
 });
 
 zig.singleUserSession.addListener(fader);
-
-
-
 </script>
-
 </body>
 </html>
