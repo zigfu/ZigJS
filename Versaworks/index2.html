@@ -9,6 +9,7 @@ body
 }
 #overlay
 {
+display: none;
 position: absolute;
 top: 0px;
 left: 0px;
@@ -86,14 +87,14 @@ background: blue;
 		<img id="arrow-left" src='arrow/arrowL.png' >
 		<div id="scrolling-content">
 			<ul id="thumbnail-list">
-				<li data-link="http://www.versaworks.net/go.ashx?l=n166z6h5aahw3mj3wphec6y5dh">Injury Diagram (SilverLight)</li>
-				<li data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=bf8cd70b-a124-4927-bd27-43d22dce54c9&Dd_ContentType=Dashboard">Injury Diagram (HTML5 dashboard)</li>
-				<li data-link="http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh">SF Area Diagram (SilverLight)</li>
-				<li data-link="http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh&t=h">SF Area Digram (HTML5, share)</li>
-				<li data-link="http://www.versaworks.net/go.ashx?l=nd84eir8myewtgjckptg4c5dwc">Census Trend (SilverLight)</li>
-				<li data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=f850e708-d86f-4c6b-97b5-f85e617bc0ec&Dd_ContentType=Dashboard">Censure Trend (HTML5 dashboard)</li>
-				<li data-link="http://www.versaworks.net/go.ashx?l=bnopojrq881rfq5ewk56h4rojw">Executive Dashboard (SilverLight)</li>
-				<li data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=7df3005e-96f1-4115-9c52-5afd35e43602&Dd_ContentType=Dashboard">Executive Dashboard (HTML5)</li>
+				<li data-overlay="false" data-link="http://www.versaworks.net/go.ashx?l=n166z6h5aahw3mj3wphec6y5dh">Injury Diagram (SilverLight)</li>
+				<li data-overlay="true" data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=bf8cd70b-a124-4927-bd27-43d22dce54c9&Dd_ContentType=Dashboard">Injury Diagram (HTML5 dashboard)</li>
+				<li data-overlay="false" data-link="http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh">SF Area Diagram (SilverLight)</li>
+				<li data-overlay="true" data-link="http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh&t=h">SF Area Digram (HTML5, share)</li>
+				<li data-overlay="false" data-link="http://www.versaworks.net/go.ashx?l=nd84eir8myewtgjckptg4c5dwc">Census Trend (SilverLight)</li>
+				<li data-overlay="true" data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=f850e708-d86f-4c6b-97b5-f85e617bc0ec&Dd_ContentType=Dashboard">Censure Trend (HTML5 dashboard)</li>
+				<li data-overlay="false" data-link="http://www.versaworks.net/go.ashx?l=bnopojrq881rfq5ewk56h4rojw">Executive Dashboard (SilverLight)</li>
+				<li data-overlay="true" data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=7df3005e-96f1-4115-9c52-5afd35e43602&Dd_ContentType=Dashboard">Executive Dashboard (HTML5)</li>
 			</ul>
 		</div> 
 		<img id="arrow-right" src='arrow/arrowR.png' >
@@ -102,18 +103,38 @@ background: blue;
 </div>
 
 
-<iframe id="pageView" src = "http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh&t=h"></iframe>
+<iframe data-overlay="true" id="pageView" src = "http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh&t=h"></iframe>
 
 <script>
+
+
+	var images = new Array()
+			function preload() {
+				for (i = 0; i < preload.arguments.length; i++) {
+					images[i] = new Image()
+					images[i].src = preload.arguments[i]
+				}
+			}
+			preload(
+				"arrow/arrowR.png",
+				"arrow/arrowL.png",
+				"arrow/arrowLG.png",
+				"arrow/arrowRG.png"
+			)
+
+
+
 
 //var hmenu = document.getElementById("hmenu");
 //hmenu.style.top = (window.innerHeight / 2) - 100 +'px';
 
 var left = .1;
 var right = .9;
-var hyst = .1;
+var hyst = .05;
 
 var list = document.getElementById("scrolling-content");
+var arrowLeft = document.getElementById("arrow-left");
+var arrowRight = document.getElementById("arrow-right");
 var scrollAmt = 10;
 var scrollTime = 10;
 var intval = null;
@@ -123,21 +144,30 @@ function startScroll(dir)
 {
 //console.log("direction: " + dir);
 if (!scrolling){
-scrolling = true;
+	scrolling = true;
+	if (ele)
+	{
+		ele.style.background = '';
+		ele = '';
+	}
+	
 	if (dir == 0)
 	{
-		intval = window.setInterval("list.scrollLeft-=scrollAmt; updateEl();",scrollTime)
-		
+		intval = window.setInterval("list.scrollLeft-=scrollAmt;",scrollTime)
+		arrowLeft.src = "arrow/arrowLG.png";
 	}
 	else
 	{
-		intval = window.setInterval("list.scrollLeft+=scrollAmt; updateEl();",scrollTime)
+		intval = window.setInterval("list.scrollLeft+=scrollAmt;",scrollTime)
+		arrowRight.src = "arrow/arrowRG.png";
 	}	
 	}
 }
 function stopScroll()
 {
 	window.clearInterval(intval);
+	arrowRight.src = "arrow/arrowR.png";
+	arrowLeft.src = "arrow/arrowL.png";
 	scrolling = false;
 }
 var ele;
@@ -146,8 +176,10 @@ var fader = zig.controls.Fader(zig.Orientation.X);
 fader.addEventListener('valuechange', function (f) {
 	//console.log('Fader value: ' + f.value);
 	rect = list.getBoundingClientRect();
-	updateEl();
-	
+	if (!scrolling)
+	{
+		updateEl();
+	}
 	
 	
 	
@@ -172,10 +204,10 @@ fader.addEventListener('valuechange', function (f) {
 })
 function updateEl()
 {
-//console.log("update EL");
-	el = document.elementFromPoint(rect.left+1 + fader.value*(rect.width-2), rect.top + rect.height/2);
+	//console.log("update El");
+	el = document.elementFromPoint(rect.left + fader.value*rect.width, rect.top + rect.height/2);
 	
-	if (el && ((el != ele) && (el.tagName.toUpperCase() == "LI")))
+	if (el && (el != ele) && (el.tagName.toUpperCase() == "LI"))
 	{
 		if (ele){ele.style.background = "";}
 		el.style.background = "red";
@@ -198,7 +230,10 @@ pushDetector.addEventListener('release', function(pd) {
 pushDetector.addEventListener('click', function(pd) {
 	console.log('PushDetector: Click');
 	pageView.src = ele.getAttribute("data-link");
+	pageView.setAttribute('data-overlay',ele.getAttribute("data-overlay"));
 	ele.style.background = "yellow";
+	window.setTimeout(killSession,500);
+	
 });
 zig.singleUserSession.addListener(pushDetector);
 
@@ -211,12 +246,37 @@ zig.singleUserSession.addEventListener('userdisengaged', function(user) {
 });
 zig.singleUserSession.addEventListener('sessionstart', function(initialPosition) {
 	console.log('Session started at ' + initialPosition);
+	document.getElementById("overlay").style.display='block';
+	if (pageView.getAttribute('data-overlay') == "false")
+	{
+		pageView.style.display='none';
+	}
+	
+	
 });
 zig.singleUserSession.addEventListener('sessionend', function() {
 	console.log('Session ended')
+	document.getElementById("overlay").style.display='none';
+	if (pageView.getAttribute('data-overlay') == "false")
+	{
+		pageView.style.display = 'block';
+	}
 });
 
 zig.singleUserSession.addListener(fader);
+function killSession()
+{
+	var sus = zig.singleUserSession.engagedHSD;
+	if (sus)
+	{
+		console.log("SuS ended by killSession ASDHKSAJHFKSUHFDSKFNKSJDHFBNDKSJHFBDSKJFBDSKJFBDS");
+		sus.stopSession();
+	}
+	else
+	{
+		console.log("non sus");
+	}
+}
 </script>
 </body>
 </html>
