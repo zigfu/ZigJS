@@ -96,9 +96,9 @@ height: 100%;
 #thumbnail-list li
 {
 display: inline-block;
-width: 240px; /* or whatever */
-height: 70%;  or whatever */
-margin: 40px;
+width: 240px;
+height: 70%; 
+/*margin: 40px;*/
 padding: 0px;
 background: blue;
 }
@@ -120,6 +120,17 @@ background: blue;
 	overflow:hidden;
 	width:80%;
 	height: 100%;
+}
+
+#usersDisplay {
+	position: absolute;
+	margin: 0px;
+	right: 10px;
+	bottom: 10px;
+	height: 180px;
+	opacity: 0.8;
+	-moz-opacity: 0.8;
+	filter:alpha(opacity=8);
 }
 </style>
 
@@ -156,6 +167,8 @@ background: blue;
 		<img id="arrow-right" src='arrow/arrowR.png' >
 	</div>
 </div>
+	<!-- see css - the dimensions aren't really what we specify here -->
+	<canvas id="usersDisplay" width="320" height="240"></canvas>
 </div>
 
 </div>
@@ -340,34 +353,113 @@ function killSession()
 }
 
 //label map drawing script
+var codexStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+var codexInt = [];
+for(var i = 0; i < 256; i++) {
+	var idx = codexStr.indexOf(String.fromCharCode(i));
+	codexInt[i] = idx;
+}
+var Base64 =
+{
+    // assuming that the input string encodes a number of bytes divisible by 3
+    decode : function (input)
+    {
+        var output = new Array(input.length*3/4);
+        var inLength = input.length;
+        var outIndex = 0;
+        for (var i = 0; i < inLength; i += 4) {
+            var enc1 = codexInt[input.charCodeAt(i)];
+            var enc2 = codexInt[input.charCodeAt(i+1)];
+            var enc3 = codexInt[input.charCodeAt(i+2)];
+            var enc4 = codexInt[input.charCodeAt(i+3)];
+
+            var chr1 = (enc1 << 2) | (enc2 >> 4);
+            var chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+            var chr3 = ((enc3 & 3) << 6) | enc4;
+            
+
+            output[outIndex] = chr1;
+            output[outIndex+1] = chr2;
+            output[outIndex+2] = chr3;
+            outIndex += 3;
+        }
+
+        return output;
+    }
+}
+
 function drawLM(plugin) {
-        var lm = plugin.labelMap;
-        if (lm.length == 0) return;
-        var canv = document.getElementById('labelMap');
-        var ctx = canv.getContext('2d');
-        var pix = ctx.createImageData(160,120);
-        var data = pix.data;
-        var srcData = Base64.decode(lm);
-        var pixel = 0;
-        var col = 0;
-        for(var i = 0; i < 160*120; i++) {
-            pixel = srcData[i*2] | (srcData[i*2 + 1] << 3);
-            if (pixel != 0) {
-                data[i*4] = 255;
-                col = pixel % 16;
-                data[i*4 + 1] = col*16;
-                data[i*4 + 2] = ((col+8) % 16)*16;
-                
-            }
-            data[i*4 + 3] = 255;
+    var lm = plugin.labelMap;
+    if (lm.length == 0) return;
+    var ctx = labelmapContext;
+    var pix = ctx.createImageData(160,120);
+    var data = pix.data;
+    var srcData = Base64.decode(lm);
+    var pixel = 0;
+    var col = 0;
+    for(var i = 0; i < 160*120; i++) {
+        pixel = srcData[i*2] | (srcData[i*2 + 1] << 8);
+        if (pixel != 0) {
+            data[i*4] = 255;
+            col = pixel % 16;
+            data[i*4 + 1] = col*16;
+            data[i*4 + 2] = ((col+8) % 16)*16;
             
         }
-        ctx.putImageData(pix, 0, 0);
+        data[i*4 + 3] = 255;
+        
     }
+    ctx.putImageData(pix, 0, 0);
+}
 
+function ZigPluginLoaded() {
 
+	pluginObj = document.getElementById("ZigPlugin");
+
+    pluginObj.requestStreams({updateDepth: false, updateImage: false, updateLabelMap : true});
+    zig.addEventListener('dataupdate', newData);
+}
+
+var glow = new Image();
+glow.src = 'im/cf.png';
+
+var labelmap = document.createElement('canvas');
+labelmap.width = 160;
+labelmap.height = 120;
+var labelmapContext = labelmap.getContext('2d');
+var jointsToDraw = [zig.Joint.LeftHand, zig.Joint.RightHand];
+function newData(obj) {
+    var users = obj.users;
+    if (users.length == 0) return;
+    var canv = document.getElementById('usersDisplay');
+    var ctx = canv.getContext('2d');
+    ctx.globalCompositeOperation = 'copy';
+    drawLM(pluginObj);
+    ctx.drawImage(labelmap, 0,0,320,240);
+    ctx.globalCompositeOperation = 'lighter';
+
+    for (var userid in users) if (users.hasOwnProperty(userid)) {
+        var user = users[userid];
+        if (!user.skeleton.hasOwnProperty(zig.Joint.Torso)) continue;
+        var torsoY = user.skeleton[zig.Joint.Torso].position[1];
+        for(var i = 0; i <jointsToDraw.length; i++) {
+            var jnt = jointsToDraw[i];
+            if (user.skeleton.hasOwnProperty(jnt)) {
+                if ((user.skeleton[jnt].confidence < 1) || (torsoY > user.skeleton[jnt].position[1])) continue;
+                var pixelpos = pluginObj.convertWorldToImageSpace(user.skeleton[jnt].position);
+                if ((pixelpos[0] >= 0) && (pixelpos[0] < 160) && (pixelpos[1] >= 0) && (pixelpos[1] < 120)) {
+                    ctx.drawImage(glow, pixelpos[0]*2 - glow.width/2, pixelpos[1]*2 - glow.height/2);
+                }
+            }
+        }
+    }
+}
 
 </script>
-
+<div id="pluginContainer">
+	<object id="ZigPlugin" type="application/x-zig" width="0" height="0">
+		<param name="onload" value="ZigPluginLoaded" />
+	</object>
+</div> 
 </body>
 </html>
