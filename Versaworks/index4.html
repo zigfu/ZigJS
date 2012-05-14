@@ -132,6 +132,28 @@ background: blue;
 	-moz-opacity: 0.8;
 	filter:alpha(opacity=8);
 }
+#handCue			
+{	
+display: block;			
+position: absolute;
+bottom: 25px;			
+text-align:center;			
+z-index: 65534;
+margin: 0 auto;
+height: 150px;
+width: 100%;	
+}
+#handCueOverlay
+{						
+background: -webkit-radial-gradient(center center, ellipse cover, rgba(0,0,0,1) 0%,rgba(0,0,0,0) 100%);		
+width: 150px;	
+-moz-border-radius: 15px;
+border-radius: 15px;			
+}			
+#handCueImg	
+{
+height: 100%;			
+}			
 </style>
 
 
@@ -178,7 +200,7 @@ background: blue;
 
 
 
-
+<div id="handCue"><center><div id="handCueOverlay"><img id="handCueImg" src="handimages/wave_gesture_1.png"></img></div></center></div>
 <script>
 
 
@@ -193,9 +215,33 @@ background: blue;
 				"arrow/arrowR.png",
 				"arrow/arrowL.png",
 				"arrow/arrowLG.png",
-				"arrow/arrowRG.png"
-			)
+				"arrow/arrowRG.png",
+				"handimages/wave_gesture_1.png",
+				"handimages/wave_gesture_2.png",
+				"handimages/wave_gesture_3.png"
+			);
 
+	var waveImages = [
+				"handimages/wave_gesture_1.png",
+				"handimages/wave_gesture_2.png",
+				"handimages/wave_gesture_3.png"
+			];
+	var imageDir = true; //right
+	var imageId = 0;
+	var handCueImage = document.getElementById("handCueImg");
+	var handCue = document.getElementById("handCue");
+	function pingpong()
+		{
+			handCueImage.src = waveImages[imageId];
+			
+			imageId = imageDir ? imageId+1 : imageId-1;
+			if ((imageId == 0) || (imageId == waveImages.length - 1))
+			{
+				imageDir = !imageDir;
+			}
+			
+		}
+	window.setInterval(pingpong,200);
 
 
 
@@ -320,7 +366,8 @@ zig.singleUserSession.addEventListener('userdisengaged', function(user) {
 });
 zig.singleUserSession.addEventListener('sessionstart', function(initialPosition) {
 	console.log('Session started at ' + initialPosition);
-	document.getElementById("overlay").style.display='block';
+	//document.getElementById("overlay").style.display='block';
+	document.getElementById("handCue").style.display = 'none';
 	if (pageView.getAttribute('data-overlay') == "false")
 	{
 	//	pageView.style.display='none';
@@ -330,14 +377,29 @@ zig.singleUserSession.addEventListener('sessionstart', function(initialPosition)
 });
 zig.singleUserSession.addEventListener('sessionend', function() {
 	console.log('Session ended')
-	document.getElementById("overlay").style.display='none';
-	if (pageView.getAttribute('data-overlay') == "false")
-	{
-		pageView.style.display = 'block';
-	}
+	//document.getElementById("overlay").style.display='none';
+	document.getElementById("handCue").style.display = 'block';	
+	defaultImages();
+
+	//if (pageView.getAttribute('data-overlay') == "false")
+	//{
+	//	pageView.style.display = 'block';
+	//}
 });
 
 zig.singleUserSession.addListener(fader);
+
+function defaultImages()			
+{			
+	if (ele)			
+	{
+		ele.style.background = '';
+	}
+	arrowRight.src = "arrow/arrowR.png";
+	arrowLeft.src = "arrow/arrowL.png";
+			
+}			
+
 function killSession()
 {
 	var sus = zig.singleUserSession.engagedHSD;
