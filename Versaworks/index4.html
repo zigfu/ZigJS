@@ -91,17 +91,19 @@ margin:0 auto;
 }
 #thumbnail-list
 {
-display: inline-block;
-height: 100%;
+	position:relative;
+	display: inline-block;
+	height: 100%;
 }
 #thumbnail-list li
 {
-display: inline-block;
-width: 240px;
-height: 70%; 
-/*margin: 40px;*/
-padding: 0px;
-background: blue;
+	position: relative;
+	display: inline-block;
+	width: 240px;
+	height: 70%; 
+	/*margin: 40px;*/
+	padding: 0px;
+	background: blue;
 }
 #arrow-left
 {
@@ -167,6 +169,13 @@ height: 100%;
 	height:100%;
 	-moz-border-radius: 15px;
 	border-radius: 15px;	
+}
+#hoverDiv {
+	position: absolute;
+	bottom: 0px;
+	width: 100%;
+	background-color: rgba(255,255,0,0.5);
+	height: 0px;
 }		
 </style>
 
@@ -189,7 +198,8 @@ height: 100%;
 	<div id="container">
 		<img id="arrow-left" src='arrow/arrowL.png' >
 		<div id="center-region">
-			<!-- dunno why I need this wrapper, but setting "left:0px" will cause the div to be at #container's beginning, instead of #center-region's beginning, ruining everything -->
+			<!-- dunno why I need this wrapper, but setting "left:0px" will cause the div to be at #container's beginning, instead of #center-region's beginning, ruining everything.
+			After more mucking around, this is related to being inside a table -->
 			<div style="height:100%;position:absolute;top:0px;">
 				<div id="slider-visualizer">
 				</div>
@@ -283,9 +293,12 @@ var scrollAmt = 10;
 var scrollTime = 10;
 var intval = null;
 var scrolling = false;
+var hoverTimeout;
+var hoverValue = 0;
 
 function startScroll(dir)
 {
+	stopHover();
 //console.log("direction: " + dir);
 	if (!scrolling){
 		scrolling = true;
@@ -316,6 +329,10 @@ function stopScroll()
 	scrolling = false;
 	visualizer.style.display = "inline-block";
 }
+var hoverTime = 2.0;
+var hoverDiv = document.createElement("div");
+hoverDiv.id = "hoverDiv"; // for styling
+
 var ele;
 var pageView = document.getElementById("pageView");
 var fader = zig.controls.Fader(zig.Orientation.X);
@@ -348,6 +365,32 @@ fader.addEventListener('valuechange', function (f) {
 	}
 
 });
+function startHovering(elem)
+{
+	hoverValue = 0;
+	hoverTimeout = setInterval(function(){doHover(elem);}, 1.0/30);
+	if (hoverDiv.parentNode) {
+		hoverDiv.parentNode.removeChild(hoverDiv);
+	}
+	elem.appendChild(hoverDiv);
+}
+function doHover(elem) {
+	hoverValue += 1.0 / 30;
+	if (hoverValue >= hoverTime) {
+		hoverDiv.style.height = "100%";
+		pageView.src = elem.getAttribute("data-link");
+		pageView.setAttribute('data-overlay',elem.getAttribute("data-overlay"));
+		elem.style.background = "yellow";
+		clearInterval(hoverTimeout);
+		//window.setTimeout(killSession,500);
+	} else {
+		hoverDiv.style.height = "" + (hoverValue*100) + "%";
+	}
+}
+function stopHover() {
+	clearInterval(hoverTimeout);
+	hoverDiv.style.height = "";
+}
 function updateEl()
 {
 	var faderX = rect.left + fader.value*rect.width;
@@ -361,6 +404,8 @@ function updateEl()
 		if (ele){ele.style.background = "";}
 		el.style.background = "red";
 		ele = el;
+		stopHover();
+		startHovering(el);
 		console.log(el.innerHTML);
 	}
 
@@ -416,6 +461,7 @@ zig.singleUserSession.addEventListener('sessionend', function() {
 	document.getElementById("handCue").style.display = 'block';	
 	visualizer.style.display = "none";
 	defaultImages();
+	stopHover();
 
 	//if (pageView.getAttribute('data-overlay') == "false")
 	//{
