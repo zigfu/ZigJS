@@ -353,6 +353,7 @@ function updateEl()
 	var faderX = rect.left + fader.value*rect.width;
 
 	//console.log("update El");
+	visualizer.style.zIndex = -100;
 	el = document.elementFromPoint(faderX, rect.top + rect.height/2);
 	
 	if (el && (el != ele) && (el.tagName.toUpperCase() == "LI"))
@@ -364,7 +365,7 @@ function updateEl()
 	}
 
 	var pos = "" + ((fader.value-left)/(right-left))*(centerRegion.getBoundingClientRect().width - visualizer.getBoundingClientRect().width) + "px";
-
+	visualizer.style.zIndex = 100;
 	visualizer.style.left = pos;
 }
 
