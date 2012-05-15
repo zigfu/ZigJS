@@ -117,10 +117,12 @@ background: blue;
 }
 #scrolling-content
 {
-	display:inline-block;
 	overflow:hidden;
-	width:80%;
-	height: 100%;
+}
+#center-region {
+	display:inline-block;
+	width: 80%;
+	height: 100%;	
 }
 
 #usersDisplay {
@@ -155,7 +157,17 @@ margin: 0 auto;
 #handCueImg	
 {
 height: 100%;			
-}			
+}
+#slider-visualizer {
+	top: 0px;
+	display: none;
+	position: absolute;
+	background: -webkit-radial-gradient(center center, ellipse cover, rgba(255,255,255,0.6) 0%,rgba(255,255,255,0) 100%);		
+	width: 150px;
+	height:100%;
+	-moz-border-radius: 15px;
+	border-radius: 15px;	
+}		
 </style>
 
 
@@ -176,18 +188,26 @@ height: 100%;
 <div id="hmenu">
 	<div id="container">
 		<img id="arrow-left" src='arrow/arrowL.png' >
-		<div id="scrolling-content">
-			<ul id="thumbnail-list">
-				<li data-overlay="false" data-link="http://www.versaworks.net/go.ashx?l=n166z6h5aahw3mj3wphec6y5dh">Injury Diagram (SilverLight)</li>
-				<li data-overlay="true" data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=bf8cd70b-a124-4927-bd27-43d22dce54c9&Dd_ContentType=Dashboard">Injury Diagram (HTML5 dashboard)</li>
-				<li data-overlay="false" data-link="http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh">SF Area Diagram (SilverLight)</li>
-				<li data-overlay="true" data-link="http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh&t=h">SF Area Digram (HTML5, share)</li>
-				<li data-overlay="false" data-link="http://www.versaworks.net/go.ashx?l=nd84eir8myewtgjckptg4c5dwc">Census Trend (SilverLight)</li>
-				<li data-overlay="true" data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=f850e708-d86f-4c6b-97b5-f85e617bc0ec&Dd_ContentType=Dashboard">Censure Trend (HTML5 dashboard)</li>
-				<li data-overlay="false" data-link="http://www.versaworks.net/go.ashx?l=bnopojrq881rfq5ewk56h4rojw">Executive Dashboard (SilverLight)</li>
-				<li data-overlay="true" data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=7df3005e-96f1-4115-9c52-5afd35e43602&Dd_ContentType=Dashboard">Executive Dashboard (HTML5)</li>
-			</ul>
-		</div> 
+		<div id="center-region">
+			<!-- dunno why I need this wrapper, but setting "left:0px" will cause the div to be at #container's beginning, instead of #center-region's beginning, ruining everything -->
+			<div style="height:100%;position:absolute;top:0px;">
+				<div id="slider-visualizer">
+				</div>
+			</div>
+			<div id="scrolling-content">
+				<ul id="thumbnail-list">
+					<li data-overlay="false" data-link="http://www.versaworks.net/go.ashx?l=n166z6h5aahw3mj3wphec6y5dh">Injury Diagram (SilverLight)</li>
+					<li data-overlay="true" data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=bf8cd70b-a124-4927-bd27-43d22dce54c9&Dd_ContentType=Dashboard">Injury Diagram (HTML5 dashboard)</li>
+					<li data-overlay="false" data-link="http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh">SF Area Diagram (SilverLight)</li>
+					<li data-overlay="true" data-link="http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh&t=h">SF Area Digram (HTML5, share)</li>
+					<li data-overlay="false" data-link="http://www.versaworks.net/go.ashx?l=nd84eir8myewtgjckptg4c5dwc">Census Trend (SilverLight)</li>
+					<li data-overlay="true" data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=f850e708-d86f-4c6b-97b5-f85e617bc0ec&Dd_ContentType=Dashboard">Censure Trend (HTML5 dashboard)</li>
+					<li data-overlay="false" data-link="http://www.versaworks.net/go.ashx?l=bnopojrq881rfq5ewk56h4rojw">Executive Dashboard (SilverLight)</li>
+					<li data-overlay="true" data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=7df3005e-96f1-4115-9c52-5afd35e43602&Dd_ContentType=Dashboard">Executive Dashboard (HTML5)</li>
+				</ul>
+			</div>
+
+		</div>
 		<img id="arrow-right" src='arrow/arrowR.png' >
 	</div>
 </div>
@@ -254,9 +274,11 @@ var left = .1;
 var right = .9;
 var hyst = .05;
 
+var visualizer = document.getElementById("slider-visualizer");
 var list = document.getElementById("scrolling-content");
 var arrowLeft = document.getElementById("arrow-left");
 var arrowRight = document.getElementById("arrow-right");
+var centerRegion = document.getElementById("center-region");
 var scrollAmt = 10;
 var scrollTime = 10;
 var intval = null;
@@ -265,25 +287,26 @@ var scrolling = false;
 function startScroll(dir)
 {
 //console.log("direction: " + dir);
-if (!scrolling){
-	scrolling = true;
-	if (ele)
-	{
-		ele.style.background = '';
-		ele = '';
+	if (!scrolling){
+		scrolling = true;
+		if (ele)
+		{
+			ele.style.background = '';
+			ele = '';
+		}
+		
+		if (dir == 0)
+		{
+			intval = window.setInterval("list.scrollLeft-=scrollAmt;",scrollTime)
+			arrowLeft.src = "arrow/arrowLG.png";
+		}
+		else
+		{
+			intval = window.setInterval("list.scrollLeft+=scrollAmt;",scrollTime)
+			arrowRight.src = "arrow/arrowRG.png";
+		}	
 	}
-	
-	if (dir == 0)
-	{
-		intval = window.setInterval("list.scrollLeft-=scrollAmt;",scrollTime)
-		arrowLeft.src = "arrow/arrowLG.png";
-	}
-	else
-	{
-		intval = window.setInterval("list.scrollLeft+=scrollAmt;",scrollTime)
-		arrowRight.src = "arrow/arrowRG.png";
-	}	
-	}
+	visualizer.style.display = "none";
 }
 function stopScroll()
 {
@@ -291,6 +314,7 @@ function stopScroll()
 	arrowRight.src = "arrow/arrowR.png";
 	arrowLeft.src = "arrow/arrowL.png";
 	scrolling = false;
+	visualizer.style.display = "inline-block";
 }
 var ele;
 var pageView = document.getElementById("pageView");
@@ -323,11 +347,13 @@ fader.addEventListener('valuechange', function (f) {
 		startScroll(1);
 	}
 
-})
+});
 function updateEl()
 {
+	var faderX = rect.left + fader.value*rect.width;
+
 	//console.log("update El");
-	el = document.elementFromPoint(rect.left + fader.value*rect.width, rect.top + rect.height/2);
+	el = document.elementFromPoint(faderX, rect.top + rect.height/2);
 	
 	if (el && (el != ele) && (el.tagName.toUpperCase() == "LI"))
 	{
@@ -336,7 +362,10 @@ function updateEl()
 		ele = el;
 		console.log(el.innerHTML);
 	}
-	
+
+	var pos = "" + ((fader.value-left)/(right-left))*(centerRegion.getBoundingClientRect().width - visualizer.getBoundingClientRect().width) + "px";
+
+	visualizer.style.left = pos;
 }
 
 // PushDetector
@@ -357,6 +386,9 @@ pushDetector.addEventListener('click', function(pd) {
 	window.setTimeout(killSession,500);
 	
 });
+
+//zig.singleUserSession.bboxBounds = [2000,500,1000];
+
 zig.singleUserSession.addListener(pushDetector);
 
 
@@ -374,13 +406,14 @@ zig.singleUserSession.addEventListener('sessionstart', function(initialPosition)
 	{
 	//	pageView.style.display='none';
 	}
-	
-	
+	visualizer.style.display = "block";
+
 });
 zig.singleUserSession.addEventListener('sessionend', function() {
 	console.log('Session ended')
 	//document.getElementById("overlay").style.display='none';
 	document.getElementById("handCue").style.display = 'block';	
+	visualizer.style.display = "none";
 	defaultImages();
 
 	//if (pageView.getAttribute('data-overlay') == "false")
