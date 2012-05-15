@@ -452,6 +452,9 @@ var Base64 =
     }
 }
 
+var colors = [[255,255,0], [255,0,0], [0,255,0], [0,0,255]];
+var colorsLength = colors.length;
+
 function drawLM(plugin) {
     var lm = plugin.labelMap;
     if (lm.length == 0) return;
@@ -464,11 +467,10 @@ function drawLM(plugin) {
     for(var i = 0; i < 160*120; i++) {
         pixel = srcData[i*2] | (srcData[i*2 + 1] << 8);
         if (pixel != 0) {
-            data[i*4] = 255;
-            col = pixel % 16;
-            data[i*4 + 1] = col*16;
-            data[i*4 + 2] = ((col+8) % 16)*16;
-            
+            col = colors[pixel % colorsLength];
+            data[i*4] = col[0];
+            data[i*4 + 1] = col[1];
+            data[i*4 + 2] = col[2];
         }
         data[i*4 + 3] = 255;
         
