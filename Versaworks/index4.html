@@ -368,14 +368,14 @@ fader.addEventListener('valuechange', function (f) {
 function startHovering(elem)
 {
 	hoverValue = 0;
-	hoverTimeout = setInterval(function(){doHover(elem);}, 1.0/30);
+	hoverTimeout = setInterval(function(){doHover(elem);}, 33);
 	if (hoverDiv.parentNode) {
 		hoverDiv.parentNode.removeChild(hoverDiv);
 	}
 	elem.appendChild(hoverDiv);
 }
 function doHover(elem) {
-	hoverValue += 1.0 / 30;
+	hoverValue += 33 / 1000;
 	if (hoverValue >= hoverTime) {
 		hoverDiv.style.height = "100%";
 		pageView.src = elem.getAttribute("data-link");
@@ -384,7 +384,7 @@ function doHover(elem) {
 		clearInterval(hoverTimeout);
 		//window.setTimeout(killSession,500);
 	} else {
-		hoverDiv.style.height = "" + (hoverValue*100) + "%";
+		hoverDiv.style.height = "" + ((hoverValue/hoverTime)*100) + "%";
 	}
 }
 function stopHover() {
