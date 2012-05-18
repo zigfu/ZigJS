@@ -1,0 +1,640 @@
+<html><head><title>Dashboard Test</title>
+
+<script type="text/javascript" src="zig.js"></script>
+
+<style>
+body
+{
+	margin: 0 auto;
+}
+#top
+{
+position: relative;
+top: 0px;
+left: 0px;
+width: 100%;
+height: 100%;
+margin: 0 auto;
+padding: 0px;
+}
+#footer
+{
+height: 200px;
+}
+#bottom
+{
+display: block;
+position: relative;
+bottom: 0px;
+height: 100%;
+left: 0px;
+width: 100%;
+
+background: -webkit-radial-gradient(center center, ellipse cover, rgba(255,255,255,0.7) 0%,rgba(0,0,0,0.9) 90%);
+z-index: 65534;
+margin: 0 auto;
+}
+
+#aligntable
+{
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	height: 100%;
+	width: 100%;
+	border-width: 0px;
+	border-spacing: 0px;
+	margin: 0px;	
+	padding: 0px;	
+	
+}
+td
+{
+border: 0px;
+padding: 0px;
+border-width: 0px;
+margin: 0px;
+}
+
+
+#pageView
+{
+position: relative;
+frameborder: 0;
+scrolling: no;
+height: 100%;
+top: 0px;
+left: 0px;
+width: 100%;
+margin:0 auto;
+padding: 0;
+border: none;
+}
+#hmenu
+{
+position: absolute;
+width: 100%;
+height: 100%;
+text-align: center;
+margin:0 auto;
+}
+#container
+{
+position: relative;
+width: 70%; /* or whatever */
+height: 100%;
+/*height: 300px; /* or whatever */	
+overflow: hidden;
+white-space: nowrap;
+text-align:center;
+margin:0 auto;
+}
+#thumbnail-list
+{
+	position:relative;
+	display: inline-block;
+	height: 100%;
+}
+#thumbnail-list li
+{
+	position: relative;
+	display: inline-block;
+	width: 240px;
+	height: 80%; 
+	vertical-align: top;
+	top: 0px;
+	/*margin: 40px;*/
+	padding: 0px;
+	background: #88F;
+}
+
+#arrow-left
+{
+	position:absolute;
+	height: 100%;
+	left:0px;
+}
+#arrow-right
+{
+	position:absolute;
+	height: 100%;
+	right:0px;
+}
+#scrolling-content
+{
+	overflow:hidden;
+}
+#center-region {
+	display:inline-block;
+	width: 80%;
+	height: 100%;	
+}
+
+#usersDisplay {
+	position: absolute;
+	margin: 0px;
+	right: 10px;
+	bottom: 10px;
+	height: 180px;
+	opacity: 0.8;
+	-moz-opacity: 0.8;
+	filter:alpha(opacity=8);
+}
+#handCue			
+{	
+display: block;			
+position: absolute;
+bottom: 25px;			
+text-align:center;			
+z-index: 65534;
+margin: 0 auto;
+height: 150px;
+width: 100%;	
+}
+#handCueOverlay
+{						
+background: -webkit-radial-gradient(center center, ellipse cover, rgba(0,0,0,1) 0%,rgba(0,0,0,0) 100%);		
+width: 150px;	
+-moz-border-radius: 15px;
+border-radius: 15px;
+margin: 0 auto;		
+}			
+#handCueImg	
+{
+height: 100%;			
+}
+#slider-visualizer {
+	top: 0px;
+	display: none;
+	position: absolute;
+	background: -webkit-radial-gradient(center center, ellipse cover, rgba(255,255,255,0.6) 0%,rgba(255,255,255,0) 100%);		
+	width: 150px;
+	height:100%;
+	-moz-border-radius: 15px;
+	border-radius: 15px;	
+}
+#hoverDiv {
+	position: absolute;
+	bottom: 0px;
+	width: 100%;
+	background-color: rgba(255,255,0,0.5);
+	height: 0px;
+}		
+</style>
+
+
+</head>
+<body>
+<table id="aligntable" >
+<tr><td>
+<div id="top">
+<iframe data-overlay="true" id="pageView" src = "http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh&t=h"></iframe>
+
+</div>
+</td>
+</tr>
+<tr id="footer">
+<td>
+<div id="bottom">
+
+<div id="hmenu">
+	<div id="container">
+		<img id="arrow-left" src='arrow/arrowL.png' >
+		<div id="center-region">
+			<!-- dunno why I need this wrapper, but setting "left:0px" will cause the div to be at #container's beginning, instead of #center-region's beginning, ruining everything.
+			After more mucking around, this is related to being inside a table -->
+			<div style="height:100%;position:absolute;top:0px;">
+				<div id="slider-visualizer">
+				</div>
+			</div>
+			<div id="scrolling-content">
+				<ul id="thumbnail-list">
+					<li data-overlay="false" data-link="http://www.versaworks.net/go.ashx?l=n166z6h5aahw3mj3wphec6y5dh">Injury Diagram (Silverlight)<br><img src="thumbs/Injury.png"></li>
+					<li data-overlay="true" data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=bf8cd70b-a124-4927-bd27-43d22dce54c9&Dd_ContentType=Dashboard">Injury Diagram (HTML5 dashboard)<br><img src="thumbs/Injury.png"></li>
+					<li data-overlay="false" data-link="http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh">SF Area Diagram (Silverlight)<br><img src="thumbs/Area.png"></li>
+					<li data-overlay="true" data-link="http://www.versaworks.net/go.ashx?l=95jwx6dwintrzczkwowcgms6bh&t=h">SF Area Digram (HTML5, share)<br><img src="thumbs/Area.png"></li>
+					<li data-overlay="false" data-link="http://www.versaworks.net/go.ashx?l=nd84eir8myewtgjckptg4c5dwc">Census Trend (Silverlight)<br><img src="thumbs/Census.png"></li>
+					<li data-overlay="true" data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=f850e708-d86f-4c6b-97b5-f85e617bc0ec&Dd_ContentType=Dashboard">Census Trend (HTML5 dashboard)<br><img src="thumbs/Census.png"></li>
+					<li data-overlay="false" data-link="http://www.versaworks.net/go.ashx?l=bnopojrq881rfq5ewk56h4rojw">Executive Dashboard (Silverlight)<br><img src="thumbs/Executive.png"></li>
+					<li data-overlay="true" data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=7df3005e-96f1-4115-9c52-5afd35e43602&Dd_ContentType=Dashboard">Executive Dashboard (HTML5)<br><img src="thumbs/Executive.png"></li>
+					<li data-overlay="false" data-link="http://www.versaworks.net/go.ashx?l=sxx1ukg6duowpcsopmrk7k6tjr">CPA Dashboard (Silverlight)<br><img src="thumbs/CPA.png"></li>
+					<li data-overlay="true" data-link="http://www.versaworks.net/HtmlViewer.ashx?Dd_ContentId=cf0059dc-ea55-4fd4-a5fc-e492ed7d1933&Dd_ContentType=Dashboard">CPA Dashboard (HTML5)<br><img src="thumbs/CPA.png"></li>
+					<li data-overlay="false" data-link="http://www.versaworks.net/go.ashx?l=6om6i8r494irbky817xutwagcy">Productivity (Silverlight)<br><img src="thumbs/Productivity.png"></li>
+					<li data-overlay="true" data-link="http://www.versaworks.net/go.ashx?l=6om6i8r494irbky817xutwagcy">Productivity (HTML5)<br><img src="thumbs/Productivity.png"></li>
+					
+				</ul>
+			</div>
+
+		</div>
+		<img id="arrow-right" src='arrow/arrowR.png' >
+	</div>
+</div>
+	<!-- see css - the dimensions aren't really what we specify here -->
+	<canvas id="usersDisplay" width="320" height="240"></canvas>
+</div>
+
+</div>
+</td>
+</tr>
+</table>
+
+
+
+<div id="handCue"><div id="handCueOverlay"><img id="handCueImg" src="handimages/wave_gesture_1.png"></img></div></div>
+<script>
+
+
+	var images = new Array()
+			function preload() {
+				for (i = 0; i < preload.arguments.length; i++) {
+					images[i] = new Image()
+					images[i].src = preload.arguments[i]
+				}
+			}
+			preload(
+				"arrow/arrowR.png",
+				"arrow/arrowL.png",
+				"arrow/arrowLG.png",
+				"arrow/arrowRG.png",
+				"handimages/wave_gesture_1.png",
+				"handimages/wave_gesture_2.png",
+				"handimages/wave_gesture_3.png"
+			);
+
+	var waveImages = [
+				"handimages/wave_gesture_1.png",
+				"handimages/wave_gesture_2.png",
+				"handimages/wave_gesture_3.png"
+			];
+	var imageDir = true; //right
+	var imageId = 0;
+	var handCueImage = document.getElementById("handCueImg");
+	var handCue = document.getElementById("handCue");
+	function pingpong()
+		{
+			handCueImage.src = waveImages[imageId];
+			
+			imageId = imageDir ? imageId+1 : imageId-1;
+			if ((imageId == 0) || (imageId == waveImages.length - 1))
+			{
+				imageDir = !imageDir;
+			}
+			
+		}
+	window.setInterval(pingpong,200);
+
+
+
+//var hmenu = document.getElementById("hmenu");
+//hmenu.style.top = (window.innerHeight / 2) - 100 +'px';
+
+var left = .1;
+var right = .9;
+var hyst = .05;
+
+var visualizer = document.getElementById("slider-visualizer");
+var list = document.getElementById("scrolling-content");
+var arrowLeft = document.getElementById("arrow-left");
+var arrowRight = document.getElementById("arrow-right");
+var centerRegion = document.getElementById("center-region");
+var scrollAmt = 10;
+var scrollTime = 10;
+var intval = null;
+var scrolling = false;
+var hoverTimeout;
+var hoverValue = 0;
+
+function startScroll(dir)
+{
+	stopHover();
+//console.log("direction: " + dir);
+	if (!scrolling){
+		scrolling = true;
+		if (ele && (ele != selectedElem))
+		{
+			
+			ele.style.background = '';
+			ele = '';
+		}
+		
+		if (dir == 0)
+		{
+			intval = window.setInterval("list.scrollLeft-=scrollAmt;",scrollTime)
+			arrowLeft.src = "arrow/arrowLG.png";
+		}
+		else
+		{
+			intval = window.setInterval("list.scrollLeft+=scrollAmt;",scrollTime)
+			arrowRight.src = "arrow/arrowRG.png";
+		}	
+	}
+	visualizer.style.display = "none";
+}
+function stopScroll()
+{
+	window.clearInterval(intval);
+	arrowRight.src = "arrow/arrowR.png";
+	arrowLeft.src = "arrow/arrowL.png";
+	scrolling = false;
+	visualizer.style.display = "inline-block";
+}
+var hoverTime = 1.5;
+var hoverDiv = document.createElement("div");
+hoverDiv.id = "hoverDiv"; // for styling
+
+var ele;
+var pageView = document.getElementById("pageView");
+var fader = zig.controls.Fader(zig.Orientation.X);
+fader.addEventListener('valuechange', function (f) {
+	//console.log('Fader value: ' + f.value);
+	rect = list.getBoundingClientRect();
+	if (!scrolling)
+	{
+		updateEl();
+	}
+	
+	
+	
+	if (f.value < right-hyst)
+	{
+		stopScroll();
+	}	
+	if (f.value > left+hyst)
+	{
+		stopScroll();
+	}
+	if (f.value < left)
+	{
+		startScroll(0);
+	}
+	
+	if (f.value > right)
+	{
+		startScroll(1);
+	}
+
+});
+function startHovering(elem)
+{
+	hoverValue = 0;
+	hoverTimeout = setInterval(function(){doHover(elem);}, 33);
+	if (hoverDiv.parentNode) {
+		hoverDiv.parentNode.removeChild(hoverDiv);
+	}
+	elem.appendChild(hoverDiv);
+}
+var selectedElem = '';
+function doHover(elem) {
+	hoverValue += 33 / 1000;
+	if (hoverValue >= hoverTime) {
+		hoverDiv.style.height = "100%";
+		if (selectedElem)
+		{
+			selectedElem.style.background = '';
+		}
+		selectedElem = elem;	
+		selectedElem.style.background = "yellow";
+			
+		clearInterval(hoverTimeout);
+		//window.setTimeout(killSession,500);
+	} else {
+		hoverDiv.style.height = "" + ((hoverValue/hoverTime)*100) + "%";
+	}
+}
+function stopHover() {
+	clearInterval(hoverTimeout);
+	hoverDiv.style.height = "";
+}
+function updateEl()
+{
+	var faderX = rect.left + fader.value*rect.width;
+
+	//console.log("update El");
+	visualizer.style.zIndex = -100;
+	el = document.elementFromPoint(faderX, rect.top + rect.height/2);
+	if (el && (el.tagName.toUpperCase() == "IMG"))
+	{
+		//console.log("ON IMG, USING PARENT");
+		el = el.parentNode;
+	}
+	if (el && (el != ele) && (el.tagName.toUpperCase() == "LI"))
+	{
+		if (ele && (ele != selectedElem)){ele.style.background = "";}
+		if (el != selectedElem)
+		{
+		el.style.background = "red";
+		ele = el;
+		stopHover();
+		startHovering(el);
+		}
+		console.log(el.innerHTML);
+	}
+
+	var pos = "" + ((fader.value-left)/(right-left))*(centerRegion.getBoundingClientRect().width - visualizer.getBoundingClientRect().width) + "px";
+	visualizer.style.zIndex = 100;
+	visualizer.style.left = pos;
+}
+
+// PushDetector
+var pushDetector = zig.controls.PushDetector();
+//TODO: delete?
+
+pushDetector.addEventListener('push', function(pd) {
+	console.log('PushDetector: Push');	
+	if (selectedElem)
+	{
+		pageView.src = selectedElem.getAttribute("data-link");
+		pageView.setAttribute('data-overlay',selectedElem.getAttribute("data-overlay"));
+	}	
+});
+/*
+pushDetector.addEventListener('release', function(pd) {
+	console.log('PushDetector: Release');
+	ele.style.background = "blue";
+});
+pushDetector.addEventListener('click', function(pd) {
+	console.log('PushDetector: Click');
+	pageView.src = ele.getAttribute("data-link");
+	pageView.setAttribute('data-overlay',ele.getAttribute("data-overlay"));
+	ele.style.background = "yellow";
+	window.setTimeout(killSession,500);
+	
+});*/
+
+//zig.singleUserSession.bboxBounds = [2000,500,1000];
+
+zig.singleUserSession.addListener(pushDetector);
+
+
+zig.singleUserSession.addEventListener('userengaged', function(user) {
+	console.log('User started UI session: ' + user.id);
+});
+zig.singleUserSession.addEventListener('userdisengaged', function(user) {
+	console.log('User ended UI session: ' + user.id);
+});
+zig.singleUserSession.addEventListener('sessionstart', function(initialPosition) {
+	console.log('Session started at ' + initialPosition);
+	//document.getElementById("overlay").style.display='block';
+	document.getElementById("handCue").style.display = 'none';
+	if (pageView.getAttribute('data-overlay') == "false")
+	{
+	//	pageView.style.display='none';
+	}
+	visualizer.style.display = "block";
+
+});
+zig.singleUserSession.addEventListener('sessionend', function() {
+	console.log('Session ended')
+	//document.getElementById("overlay").style.display='none';
+	document.getElementById("handCue").style.display = 'block';	
+	visualizer.style.display = "none";
+	stopScroll();
+	defaultImages();
+	stopHover();
+
+	//if (pageView.getAttribute('data-overlay') == "false")
+	//{
+	//	pageView.style.display = 'block';
+	//}
+});
+
+zig.singleUserSession.addListener(fader);
+
+function defaultImages()			
+{			
+	if ((ele) && (ele != selectedElem))
+	{
+		ele.style.background = '';
+	}
+	arrowRight.src = "arrow/arrowR.png";
+	arrowLeft.src = "arrow/arrowL.png";
+			
+}			
+
+function killSession()
+{
+	var sus = zig.singleUserSession.engagedHSD;
+	if (sus)
+	{
+		console.log("SuS ended by killSession ASDHKSAJHFKSUHFDSKFNKSJDHFBNDKSJHFBDSKJFBDSKJFBDS");
+		sus.stopSession();
+	}
+	else
+	{
+		console.log("non sus");
+	}
+}
+
+//label map drawing script
+var codexStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+var codexInt = [];
+for(var i = 0; i < 256; i++) {
+	var idx = codexStr.indexOf(String.fromCharCode(i));
+	codexInt[i] = idx;
+}
+var Base64 =
+{
+    // assuming that the input string encodes a number of bytes divisible by 3
+    decode : function (input)
+    {
+        var output = new Array(input.length*3/4);
+        var inLength = input.length;
+        var outIndex = 0;
+        for (var i = 0; i < inLength; i += 4) {
+            var enc1 = codexInt[input.charCodeAt(i)];
+            var enc2 = codexInt[input.charCodeAt(i+1)];
+            var enc3 = codexInt[input.charCodeAt(i+2)];
+            var enc4 = codexInt[input.charCodeAt(i+3)];
+
+            var chr1 = (enc1 << 2) | (enc2 >> 4);
+            var chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+            var chr3 = ((enc3 & 3) << 6) | enc4;
+            
+
+            output[outIndex] = chr1;
+            output[outIndex+1] = chr2;
+            output[outIndex+2] = chr3;
+            outIndex += 3;
+        }
+
+        return output;
+    }
+}
+
+var colors = [[255,0,0],[255,95,0],[255,191,0],[223,255,0],[127,255,0],[31,255,0],[0,255,63],[0,255,159],[0,255,255],[0,159,255],[0,63,255],[31,0,255],[127,0,255],[223,0,255],[255,0,191],[255,0,95]];
+var colorsLength = colors.length;
+
+function drawLM(plugin) {
+    var lm = plugin.labelMap;
+    if (lm.length == 0) return;
+    var ctx = labelmapContext;
+    var pix = ctx.createImageData(160,120);
+    var data = pix.data;
+    var srcData = Base64.decode(lm);
+    var pixel = 0;
+    var col = 0;
+    for(var i = 0; i < 160*120; i++) {
+        pixel = srcData[i*2] | (srcData[i*2 + 1] << 8);
+        if (pixel != 0) {
+            col = colors[pixel % colorsLength];
+            data[i*4] = col[0];
+            data[i*4 + 1] = col[1];
+            data[i*4 + 2] = col[2];
+        }
+        data[i*4 + 3] = 255;
+        
+    }
+    ctx.putImageData(pix, 0, 0);
+}
+
+function ZigPluginLoaded() {
+
+	pluginObj = document.getElementById("ZigPlugin");
+
+    pluginObj.requestStreams({updateDepth: false, updateImage: false, updateLabelMap : true});
+    zig.addEventListener('dataupdate', newData);
+}
+
+var glow = new Image();
+glow.src = 'im/cf.png';
+
+var labelmap = document.createElement('canvas');
+labelmap.width = 160;
+labelmap.height = 120;
+var labelmapContext = labelmap.getContext('2d');
+var jointsToDraw = [zig.Joint.LeftHand, zig.Joint.RightHand];
+function newData(obj) {
+    var users = obj.users;
+    if (users.length == 0) return;
+    var canv = document.getElementById('usersDisplay');
+    var ctx = canv.getContext('2d');
+    ctx.globalCompositeOperation = 'copy';
+    drawLM(pluginObj);
+    ctx.drawImage(labelmap, 0,0,320,240);
+    ctx.globalCompositeOperation = 'lighter';
+
+    for (var userid in users) if (users.hasOwnProperty(userid)) {
+        var user = users[userid];
+        if (!user.skeleton.hasOwnProperty(zig.Joint.Torso)) continue;
+        var torsoY = user.skeleton[zig.Joint.Torso].position[1];
+        for(var i = 0; i <jointsToDraw.length; i++) {
+            var jnt = jointsToDraw[i];
+            if (user.skeleton.hasOwnProperty(jnt)) {
+                if ((user.skeleton[jnt].confidence < 1) || (torsoY > user.skeleton[jnt].position[1])) continue;
+                var pixelpos = pluginObj.convertWorldToImageSpace(user.skeleton[jnt].position);
+                if ((pixelpos[0] >= 0) && (pixelpos[0] < 160) && (pixelpos[1] >= 0) && (pixelpos[1] < 120)) {
+                    ctx.drawImage(glow, pixelpos[0]*2 - glow.width/2, pixelpos[1]*2 - glow.height/2);
+                }
+            }
+        }
+    }
+}
+
+</script>
+<div id="pluginContainer">
+	<object id="ZigPlugin" type="application/x-zig" width="0" height="0">
+		<param name="onload" value="ZigPluginLoaded" />
+	</object>
+</div> 
+</body>
+</html>
