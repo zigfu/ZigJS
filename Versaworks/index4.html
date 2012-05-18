@@ -406,7 +406,11 @@ function updateEl()
 	//console.log("update El");
 	visualizer.style.zIndex = -100;
 	el = document.elementFromPoint(faderX, rect.top + rect.height/2);
-	
+	if (el && (el.tagName.toUpperCase() == "IMG"))
+	{
+		//console.log("ON IMG, USING PARENT");
+		el = el.parentNode;
+	}
 	if (el && (el != ele) && (el.tagName.toUpperCase() == "LI"))
 	{
 		if (ele){ele.style.background = "";}
@@ -470,6 +474,7 @@ zig.singleUserSession.addEventListener('sessionend', function() {
 	//document.getElementById("overlay").style.display='none';
 	document.getElementById("handCue").style.display = 'block';	
 	visualizer.style.display = "none";
+	stopScroll();
 	defaultImages();
 	stopHover();
 
