@@ -29,7 +29,7 @@
 function hysteresis(classname, pixelsize, container) {
   var cls = classname;
   var size = pixelsize; //TODO: separate X, Y sizes?
-  var items;
+  var items = [];
   var currentItem = null;
 
   if (undefined === container) {
@@ -102,19 +102,25 @@ var pushed = false;
 function setCursor(element, xpx, ypx) {
   element.style.left = xpx + "px";
   element.style.top = ypx + "px";
-  videolisthysteresis.update(xpx, ypx);
+  //videolisthysteresis.update(xpx, ypx);
   if (pushed) {
     iscrollMouseMove(videolistscroller, xpx, ypx);
   }
 }
 
-
+/*
 function positionCursor(element, posX, posY) {
   lastCursor.x = (posX * element.parentNode.offsetWidth - (element.offsetWidth / 2));
   lastCursor.y = (posY * element.parentNode.offsetHeight - (element.offsetHeight / 2));
   setCursor(element, lastCursor.x, lastCursor.y);
-}
+}*/
 
+function positionCursor(element, posX, posY) {
+  target[0] = (posX * element.parentNode.offsetWidth - (element.offsetWidth / 2));
+  target[1] = (posY * element.parentNode.offsetHeight - (element.offsetHeight / 2));
+  //setCursor(element, lastCursor.x, lastCursor.y);
+}
+			
 function doClick()
 {
   console.log("Doing the click");
@@ -131,14 +137,43 @@ function clamp(val, min, max) {
   if (val > max) return max;
   return val;
 }
-
-function moveCursorBy(element, deltaX, deltaY) {
+    
+    
+    var target = [0,0];
+    
+    function vlerp(p1,p2,r)
+    {
+        out = [];
+        for (i=0;i<p1.length;i++)
+        {	
+            out.push(p2[i]*r+p1[i]*(1-r));
+        }
+        return out;
+    }   
+    
+/*function moveCursorBy(element, deltaX, deltaY) {
   lastCursor.x = clamp(lastCursor.x + deltaX, 0, element.parentNode.offsetWidth);
   lastCursor.y = clamp(lastCursor.y + deltaY, 0, element.parentNode.offsetHeight);
 
   setCursor(element, lastCursor.x, lastCursor.y);
-}
+}*/
+    
+    function moveCursorBy(element, deltaX, deltaY) {
+        target[0] = clamp(target[0] + deltaX, 0, element.parentNode.offsetWidth);
+        target[1] = clamp(target[1] + deltaY, 0, element.parentNode.offsetHeight);
+    }
+    
+    function moveCursor()
+    {
+        last = [lastCursor.x,lastCursor.y];
+        out = vlerp(last,target,.3);
+        lastCursor.x = out[0];
+        lastCursor.y = out[1];
+        setCursor(document.getElementById('cursor'), lastCursor.x, lastCursor.y);
+    }
+    window.setInterval(moveCursor,20);
 
+    
 function iscrollMouseMove(iscroll, x,y) {
   iscroll.handleEvent({
       type:"mousemove", 
