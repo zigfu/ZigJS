@@ -23,6 +23,11 @@
       position:absolute;
       background-image : url("img/hand-pointer.png");
     }
+	.playbutton	
+	{
+		z-index: 10000;
+		background-color: #FF0000
+	}
 </style>
 <script>
 
@@ -102,7 +107,7 @@ var pushed = false;
 function setCursor(element, xpx, ypx) {
   element.style.left = xpx + "px";
   element.style.top = ypx + "px";
-  //videolisthysteresis.update(xpx, ypx);
+  videolisthysteresis.update(xpx, ypx);
   if (pushed) {
     iscrollMouseMove(videolistscroller, xpx, ypx);
   }
@@ -301,7 +306,7 @@ function roomStarted(roomData) {
   videolist.clear();
   videolist.bind(document.getElementById('videolist'), function(id, data) {
     var l = document.createElement('li');
-    l.innerHTML = data.title;
+    l.innerHTML = "<span class='playbutton' data-title='"+data.title +"' data-videoid='"+data.videoid+"'>PLAY</span> "+data.title;
     l.classList.add('hoverable');
     l.addEventListener('click', function() {
       setTitle(data.title);
@@ -327,7 +332,46 @@ function roomStarted(roomData) {
   }
   host.cursor.onpushstart = function(userid) {
     pushed = true;
-    iscrollMouseDown(videolistscroller, lastCursor.x, lastCursor.y);
+	elem = document.elementFromPoint(lastCursor.x,lastCursor.y);
+   console.log("x: " + lastCursor.x + " y: " + lastCursor.y);
+	
+	if (elem)
+	{
+		var r = elem;
+		var n=elem, el=n, elems=[];		
+		k=0;
+		do {
+			console.log(el);
+			console.log("class: "+el.className);
+			elems.push(el);	
+			if (el.className == "playbutton")
+			{
+				var videoid = el.getAttribute("data-videoid");
+				var title = el.getAttribute("data-title")
+			console.log('title: ' + title +  ' videoid ' + videoid);
+			 	 setTitle(title);
+      			setMainArea(mainAreaTypes.videoplayer);
+      			loadVideo(videoid);
+			}
+			else
+			{
+				el.style.zIndex = parseInt(el.style.zIndex||0)-(1000+k);
+			}
+			r = el;
+			el = document.elementFromPoint(lastCursor.x,lastCursor.y);
+		
+			k++;
+		} while(el!=n && el!=r && k<5);
+			
+		for(var ii=0; ii<elems.length; ii++)
+		{
+		
+			elems[ii].style.zIndex = parseInt(elems[ii].style.zIndex) + (1000+ii);	
+		
+		}	
+	}	
+			
+	iscrollMouseDown(videolistscroller, lastCursor.x, lastCursor.y);
   }
   host.cursor.onpushstop = function(userid) {
     pushed = false;
@@ -483,7 +527,8 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
   </head>
 
   <body>
-
+<div id='cursor' style='display: none;'></div>
+      
   <div id="wrapper">
 
     <div id='header'>
@@ -513,7 +558,6 @@ document.addEventListener('DOMContentLoaded', function () { setTimeout(loaded, 2
         <ul id='videolist'></ul>
       </div>
 
-      <div id='cursor' style='display: none;'></div>
       
       <div id="playerContainer" style="display: none;">
         <div id="videoDiv">Loading...</div>
