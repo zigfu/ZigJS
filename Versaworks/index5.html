@@ -174,7 +174,6 @@ height: 100%;
 	border-radius: 15px;	
 }
 #hoverDiv {
-	display: none; //as requested
 	position: absolute;
 	bottom: 0px;
 	width: 100%;
@@ -345,7 +344,7 @@ hoverDiv.id = "hoverDiv"; // for styling
 
 var ele;
 var pageView = document.getElementById("pageView");
-var fader = zig.controls.Fader(zig.Orientation.X);
+var fader = zig.controls.Fader(zig.Orientation.X, 300); //300 mm fader
 fader.addEventListener('valuechange', function (f) {
 	//console.log('Fader value: ' + f.value);
 	rect = list.getBoundingClientRect();
@@ -388,14 +387,14 @@ var selectedElem = '';
 function doHover(elem) {
 	hoverValue += 33 / 1000;
 	if (hoverValue >= hoverTime) {
-		hoverDiv.style.height = "100%";
+		
 		if (selectedElem)
 		{
 			selectedElem.style.background = '';
 		}
 		selectedElem = elem;	
 		selectedElem.style.background = "yellow";
-			
+		hoverDiv.style.height = "";	
 		clearInterval(hoverTimeout);
 		//window.setTimeout(killSession,500);
 	} else {
@@ -413,11 +412,13 @@ function updateEl()
 	//console.log("update El");
 	visualizer.style.zIndex = -100;
 	el = document.elementFromPoint(faderX, rect.top + rect.height/2);
+
 	if (el && (el.tagName.toUpperCase() == "IMG"))
 	{
 		//console.log("ON IMG, USING PARENT");
 		el = el.parentNode;
-	}
+	}	
+	
 	if (el && (el != ele) && (el.tagName.toUpperCase() == "LI"))
 	{
 		if (ele && (ele != selectedElem)){ele.style.background = "";}
@@ -428,9 +429,14 @@ function updateEl()
 		stopHover();
 		startHovering(el);
 		}
+		else
+		{
+			ele = el;
+			stopHover();
+		}
 		console.log(el.innerHTML);
 	}
-
+	
 	var pos = "" + ((fader.value-left)/(right-left))*(centerRegion.getBoundingClientRect().width - visualizer.getBoundingClientRect().width) + "px";
 	visualizer.style.zIndex = 100;
 	visualizer.style.left = pos;
@@ -464,6 +470,8 @@ pushDetector.addEventListener('click', function(pd) {
 
 //zig.singleUserSession.bboxBounds = [2000,500,1000];
 
+zig.singleUserSession.startOnSteady = false;
+zig.singleUserSession.startOnExternalHandpoint = false; 			
 zig.singleUserSession.addListener(pushDetector);
 
 

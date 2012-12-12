@@ -1,0 +1,671 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>three.js - kinect</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body
+        {
+            font-family: Monospace;
+            background-color: #000000;
+            margin: 0px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.5/jquery-ui.min.js"></script>
+    <script src="js/Detector.js"></script>
+    <script src="js/RequestAnimationFrame.js"></script>
+    <script src="js/Stats.js"></script>
+    <script src="js/Three.js"></script>
+    <script src="js/base64_utils.js"></script>
+    <script src='http://cdn.zigfu.com/zigjs/zig.min.js'></script>
+    <div id="pluginContainer">
+        <object id="ZigPlugin" type="application/x-zig" width="0" height="0">
+            <param name="onload" value="pluginLoaded" />
+        </object>
+    </div>
+    <!--<audio id="audio-element" src="DorsetPerception2.ogg" controls="true" style="width: 512px;">
+		</audio>-->
+		<audio id="audio-element" src="DorsetPerception.ogg"></audio>
+    <div style='background-color: white; position:fixed; left:200px; bottom:0; width:100%;'>
+        <canvas id="fft" width="512" height="200" style="display:none;"></canvas>
+    </div>
+    <script id="vs" type="x-shader/x-vertex">
+
+//
+// Description : Array and textureless GLSL 2D simplex noise function.
+//      Author : Ian McEwan, Ashima Arts.
+//  Maintainer : ijm
+//     Lastmod : 20110822 (ijm)
+//     License : Copyright (C) 2011 Ashima Arts. All rights reserved.
+//               Distributed under the MIT License. See LICENSE file.
+//               https://github.com/ashima/webgl-noise
+// 
+
+vec3 mod289(vec3 x) {
+  return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
+
+vec2 mod289(vec2 x) {
+  return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
+
+vec3 permute(vec3 x) {
+  return mod289(((x*34.0)+1.0)*x);
+}
+
+float snoise(vec2 v)
+  {
+  const vec4 C = vec4(0.211324865405187,  // (3.0-sqrt(3.0))/6.0
+                      0.366025403784439,  // 0.5*(sqrt(3.0)-1.0)
+                     -0.577350269189626,  // -1.0 + 2.0 * C.x
+                      0.024390243902439); // 1.0 / 41.0
+//+ First corner
+  vec2 i  = floor(v + dot(v, C.yy) );
+  vec2 x0 = v -   i + dot(i, C.xx);
+
+// Other corners
+  vec2 i1;
+  //i1.x = step( x0.y, x0.x ); // x0.x > x0.y ? 1.0 : 0.0
+  //i1.y = 1.0 - i1.x;
+  i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+  // x0 = x0 - 0.0 + 0.0 * C.xx ;
+  // x1 = x0 - i1 + 1.0 * C.xx ;
+  // x2 = x0 - 1.0 + 2.0 * C.xx ;
+  vec4 x12 = x0.xyxy + C.xxzz;
+  x12.xy -= i1;
+
+// Permutations
+  i = mod289(i); // Avoid truncation effects in permutation
+  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+		+ i.x + vec3(0.0, i1.x, 1.0 ));
+
+  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+  m = m*m ;
+  m = m*m ;
+
+// Gradients: 41 points uniformly over a line, mapped onto a diamond.
+// The ring size 17*17 = 289 is close to a multiple of 41 (41*7 = 287)
+
+  vec3 x = 2.0 * fract(p * C.www) - 1.0;
+  vec3 h = abs(x) - 0.5;
+  vec3 ox = floor(x + 0.5);
+  vec3 a0 = x - ox;
+
+// Normalise gradients implicitly by scaling m
+// Approximation of: m *= inversesqrt( a0*a0 + h*h );
+  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+
+// Compute final noise value at P
+  vec3 g;
+  g.x  = a0.x  * x0.x  + h.x  * x0.y;
+  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+  return 130.0 * dot(m, g);
+}	// end of simplex noise code	
+
+			uniform sampler2D map;
+
+			uniform float size;
+			uniform float bass;
+
+			uniform float width;
+			uniform float height;
+
+			varying vec2 vUv;
+
+			//const float XtoZ = 1.11146; // tan( 1.0144686 / 2.0 ) * 2.0;
+			//const float YtoZ = 0.83359; // tan( 0.7898090 / 2.0 ) * 2.0;
+            uniform float XtoZ;
+            uniform float YtoZ;
+			void main() {
+
+				vUv = vec2( position.x / width, 1.0 - ( position.y / height ) );
+				float noiseFactor = snoise(vec2(vUv.y,bass));
+
+				vec4 color = texture2D( map, vUv );
+				// maxdepth is 10000, encoding LSB in R and MSB in G
+				float z = ( color.r + (color.g * 256.0) ) * 256.0;
+
+				
+				vec4 pos = vec4(
+					( position.x / width - 0.5 ) * z * XtoZ,
+					( position.y / height - 0.5 ) * z * YtoZ,
+					- z + 1000.0 + noiseFactor*64.0,
+					1.0);
+
+				gl_PointSize = 2.0 + size*(noiseFactor + 0.5); // 2.0;
+				gl_Position = projectionMatrix * modelViewMatrix * pos;
+
+			}
+
+		</script>
+    <script id="fs" type="x-shader/x-fragment">
+
+			uniform sampler2D map;
+
+			varying vec2 vUv;
+
+			void main() {
+
+				vec4 color = texture2D( map, vUv );
+				//gl_FragColor = vec4( 1.0 - (abs(color.r - 0.5) * 2), color.g * 6, color.b, smoothstep( 8000.0, -8000.0, gl_FragCoord.z / gl_FragCoord.w ) );
+				float val = color.r;
+				//gl_FragColor = vec4( abs(color.r - 0.5) * 2.0, (color.g * 6.0), 1.0 - (abs(color.r - 0.5) * 2.0) , smoothstep( 8000.0, -8000.0, gl_FragCoord.z / gl_FragCoord.w ) );
+				gl_FragColor = vec4( abs(color.r - 0.5) * 2.0, ceil(color.b), 1.0 - (abs(color.r - 0.5) * 2.0) , smoothstep( 8000.0, -8000.0, gl_FragCoord.z / gl_FragCoord.w ) );
+
+			}
+
+		</script>
+    <script>
+    	var bias = [-330, 30];
+
+    	var cubeCount = 40;
+    	var cubes = [];
+        var container;
+
+        var scene, camera, light, renderer;
+        var geometry, cube, mesh, material;
+        var mouse, center;
+        var stats;
+        var mouseLock = true;
+
+        var video, texture;
+
+        if (Detector.webgl) {
+
+            //init();
+            //animate();2
+
+        } else {
+
+            document.body.appendChild(Detector.getWebGLErrorMessage());
+
+        }
+
+        function init() {
+
+            //RW/image conversion
+            var plugin = document.getElementById("ZigPlugin");
+            var rw = plugin.convertImageToWorldSpace([81, 61, 1000]);
+            var XtoZ = 160*rw[0] / 1000;
+            var YtoZ = -120*rw[1] / 1000;
+            console.log(XtoZ);console.log(YtoZ);
+            stats = new Stats();
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.top = '0px';
+            stats.domElement.style.right = '0px';
+            container = document.createElement("div");
+            document.body.appendChild(container);
+            container.appendChild(stats.domElement);
+
+            scene = new THREE.Scene();
+            center = new THREE.Vector3();
+            center.z = -1000;
+	center.x = -window.innerWidth / 2;
+
+
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+            camera.position.set(window.innerWidth / 2, window.innerHeight / 2, 500);
+            scene.add(camera);
+
+            canvas = document.createElement('canvas');
+            texture = new THREE.Texture(canvas);
+            texture.minFilter = THREE.NearestFilter;
+            texture.magFilter = THREE.NearestFilter;
+
+            var width = 160, height = 120;
+
+            geometry = new THREE.Geometry();
+
+            for (var i = 0, l = width * height; i < l; i++) {
+
+                var position = new THREE.Vector3();
+                position.x = (i % width);
+                position.y = Math.floor(i / width);
+
+                geometry.vertices.push(new THREE.Vertex(position));
+
+            }
+            // whee, js global variables. modify "value" to change particle size
+            particleSize = { type: 'f', value: 8.0 }
+            bass = { type: 'f', value: 0 };
+
+            material = new THREE.ShaderMaterial({
+
+                //attributes : particleAttributes,
+                uniforms: {
+                    "bass": bass,
+                    "size": particleSize,
+                    "XtoZ": { type: 'f', value: XtoZ },
+                    "YtoZ": { type: 'f', value: YtoZ },
+                    "map": { type: "t", value: 0, texture: texture },
+                    "width": { type: "f", value: width },
+                    "height": { type: "f", value: height },
+
+                },
+                vertexShader: document.getElementById('vs').textContent,
+                fragmentShader: document.getElementById('fs').textContent,
+                depthWrite: false
+
+            });
+
+            mesh = new THREE.ParticleSystem(geometry, material);
+            mesh.position.x = 0;
+            mesh.position.y = 0;
+            scene.add(mesh);
+
+           
+            var light = new THREE.PointLight(0xFFFF00);
+            light.position.set(window.innerWidth / 2, window.innerHeight / 2, 500);
+            scene.add(light);
+
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            mouse = new THREE.Vector3(0, 0, 1);
+            projector = new THREE.Projector();
+            ray = new THREE.Ray(camera.position);
+
+            document.addEventListener('mousemove', onDocumentMouseMove, false);
+
+            document.onkeypress = onDocumentKeyPress;
+
+        }
+
+        function onDocumentMouseMove(event) {
+
+            if (!mouseLock) {
+                mouse.x = (event.clientX - window.innerWidth / 2) * 1 ;
+                mouse.y = (event.clientY - window.innerHeight / 2) * 1;
+//console.log("mouse.x: " + mouse.x + ",  mouse.y: " + mouse.y);
+            }
+        }
+
+        function onDocumentKeyPress(event) {
+
+            var char = String.fromCharCode(event.keyCode || event.charCode);
+            if (char == 'l') {
+                mouseLock = !mouseLock;
+            }
+        }
+
+
+        function animate() {
+
+            requestAnimationFrame(animate);
+            //time.value += 0.01;
+            render();
+            stats.update();
+
+        }
+
+        function render() {
+			//camera.position.x = 0;
+			//camera.position.y = 0;
+            camera.position.x += (mouse.x - camera.position.x) * 0.05;
+            camera.position.y += (-mouse.y - camera.position.y) * 0.05;
+            camera.lookAt(center);
+
+            renderer.render(scene, camera);
+
+        }
+
+        // My code
+
+        function pluginLoaded() {
+            if (!Detector.webgl) return;
+            init();
+            animate();
+            var plugin = document.getElementById("ZigPlugin");
+            try {
+                plugin.requestStreams(true, false, false);
+            } catch (e) {
+                console.log('new style plugin');
+                plugin.requestStreams({ updateDepth: true, updateImage: false, updateLabelMap: true });
+            }
+            plugin.addEventListener("NewFrame", function () {
+                drawDM(plugin, canvas);
+                texture.needsUpdate = true;
+            }, false);
+        }
+
+        function drawDM(plugin, canvas) {
+            var dm = plugin.depthMap;
+            var lm = plugin.labelMap;
+            if (dm.length == 0) return;
+            var ctx = canvas.getContext('2d');
+            var pix = ctx.createImageData(160, 120);
+            var data = pix.data;
+            var srcData = Base64.decode(dm);
+            var labelData = Base64.decode(lm);
+            for (var i = 0; i < 160 * 120; i++) {
+                var isUser = (labelData[i * 2] != 0 || labelData[i * 2 + 1] != 0);
+                data[i * 4] = (isUser) ? srcData[i * 2] : 0;
+                data[i * 4 + 1] = (isUser) ? srcData[i * 2 + 1] : 0;
+                data[i * 4 + 2] = 255;
+                data[i * 4 + 3] = 255;
+            }
+            ctx.putImageData(pix, 0, 0);
+        }
+
+        $(document).ready(function () {
+            var canvas = document.getElementById('fft'),
+			  ctx = canvas.getContext('2d'),
+			  channels,
+			  rate,
+			  frameBufferLength,
+			  fft;
+
+            function loadedMetadata() {
+                channels = audio.mozChannels;
+                rate = audio.mozSampleRate;
+                frameBufferLength = audio.mozFrameBufferLength;
+
+                fft = new FFT(frameBufferLength / channels, rate);
+            }
+
+            function audioAvailable(event) {
+                var fb = event.frameBuffer,
+				t = event.time, /* unused, but it's there */
+				signal = new Float32Array(fb.length / channels),
+				magnitude;
+
+                for (var i = 0, fbl = frameBufferLength / 2; i < fbl; i++) {
+                    // Assuming interlaced stereo channels,
+                    // need to split and merge into a stero-mix mono signal
+                    signal[i] = (fb[2 * i] + fb[2 * i + 1]) / 2;
+                }
+
+                fft.forward(signal);
+
+                // Clear the canvas before drawing spectrum
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                var n = 32;
+                var levels = [];
+                for (var i = 0; i < n; i++)
+                    levels[i] = 0;
+                for (var i = 0; i < fft.spectrum.length; i++) {
+                    // multiply spectrum by a zoom value
+                    //magnitude = fft.spectrum[i] * 4000;
+
+                    levels[((i / fft.spectrum.length) * n) >> 0] += fft.spectrum[i];
+                }
+                for (var i = 0; i < n; i++) {
+                    // Draw rectangle bars for each frequency bin
+                    ctx.fillRect(i * 4, canvas.height, 3, -levels[i] * 4000);
+                }
+
+                bass.value = levels[0];
+            }
+
+            var audio = document.getElementById('audio-element');
+            audio.addEventListener('MozAudioAvailable', audioAvailable, false);
+            audio.addEventListener('loadedmetadata', loadedMetadata, false);
+            audio.play();
+
+            // FFT from dsp.js, see below
+            var FFT = function (bufferSize, sampleRate) {
+                this.bufferSize = bufferSize;
+                this.sampleRate = sampleRate;
+                this.spectrum = new Float32Array(bufferSize / 2);
+                this.real = new Float32Array(bufferSize);
+                this.imag = new Float32Array(bufferSize);
+                this.reverseTable = new Uint32Array(bufferSize);
+                this.sinTable = new Float32Array(bufferSize);
+                this.cosTable = new Float32Array(bufferSize);
+
+                var limit = 1,
+				bit = bufferSize >> 1;
+
+                while (limit < bufferSize) {
+                    for (var i = 0; i < limit; i++) {
+                        this.reverseTable[i + limit] = this.reverseTable[i] + bit;
+                    }
+
+                    limit = limit << 1;
+                    bit = bit >> 1;
+                }
+
+                for (var i = 0; i < bufferSize; i++) {
+                    this.sinTable[i] = Math.sin(-Math.PI / i);
+                    this.cosTable[i] = Math.cos(-Math.PI / i);
+                }
+            };
+
+            FFT.prototype.forward = function (buffer) {
+                var bufferSize = this.bufferSize,
+				cosTable = this.cosTable,
+				sinTable = this.sinTable,
+				reverseTable = this.reverseTable,
+				real = this.real,
+				imag = this.imag,
+				spectrum = this.spectrum;
+
+                if (bufferSize !== buffer.length) {
+                    throw "Supplied buffer is not the same size as defined FFT. FFT Size: " + bufferSize + " Buffer Size: " + buffer.length;
+                }
+
+                for (var i = 0; i < bufferSize; i++) {
+                    real[i] = buffer[reverseTable[i]];
+                    imag[i] = 0;
+                }
+
+                var halfSize = 1,
+				phaseShiftStepReal,
+				phaseShiftStepImag,
+				currentPhaseShiftReal,
+				currentPhaseShiftImag,
+				off,
+				tr,
+				ti,
+				tmpReal,
+				i;
+
+                while (halfSize < bufferSize) {
+                    phaseShiftStepReal = cosTable[halfSize];
+                    phaseShiftStepImag = sinTable[halfSize];
+                    currentPhaseShiftReal = 1.0;
+                    currentPhaseShiftImag = 0.0;
+
+                    for (var fftStep = 0; fftStep < halfSize; fftStep++) {
+                        i = fftStep;
+
+                        while (i < bufferSize) {
+                            off = i + halfSize;
+                            tr = (currentPhaseShiftReal * real[off]) - (currentPhaseShiftImag * imag[off]);
+                            ti = (currentPhaseShiftReal * imag[off]) + (currentPhaseShiftImag * real[off]);
+
+                            real[off] = real[i] - tr;
+                            imag[off] = imag[i] - ti;
+                            real[i] += tr;
+                            imag[i] += ti;
+
+                            i += halfSize << 1;
+                        }
+
+                        tmpReal = currentPhaseShiftReal;
+                        currentPhaseShiftReal = (tmpReal * phaseShiftStepReal) - (currentPhaseShiftImag * phaseShiftStepImag);
+                        currentPhaseShiftImag = (tmpReal * phaseShiftStepImag) + (currentPhaseShiftImag * phaseShiftStepReal);
+                    }
+
+                    halfSize = halfSize << 1;
+                }
+
+                i = bufferSize / 2;
+                while (i--) {
+                    spectrum[i] = 2 * Math.sqrt(real[i] * real[i] + imag[i] * imag[i]) / bufferSize;
+                }
+            };
+            loaded();
+        });
+
+
+        function loaded() {
+        
+            //load canvas
+            //var canvas = document.getElementById('test');
+            //var ctx = canvas.getContext('2d');
+            //var draw = false;
+
+            //ctx.strokeStyle = "#ff0000";
+            //ctx.lineWidth = 3;
+            //ctx.lineCap = "round";
+
+            var faderValue = 0.0;
+
+            //    var elt = document.getElementById("btn");
+
+            // Create cursor and cursor dom element
+            var c = zig.controls.Cursor();
+            var ce = document.createElement('div');
+            ce.id = 'mycursor';
+            //document.body.appendChild(ce);
+
+
+            console.log("Browser plugin installed: " + zig.pluginInstalled);
+            console.log("Browser plugin version: " + zig.pluginVersion);
+            console.log("Zig.js version: " + zig.version);
+            zig.addEventListener('statuschange', function () {
+                console.log("Sensor connected: " + zig.sensorConnected);
+            });
+
+
+
+
+
+
+            console.log("Adding sessionstart and sessionend listeners");
+
+            // 1. show/hide cursor on session start/end
+            zig.singleUserSession.addEventListener('sessionstart', function (focusPosition) {
+                //ce.style.display = 'block';
+                console.log("sessionstart");
+            });
+            zig.singleUserSession.addEventListener('sessionend', function () {
+                //ce.style.display = 'none';
+                console.log("sessionend");
+            });
+
+           
+            var engager = zig.EngageUsersWithSkeleton(1);
+            engager.addEventListener('userengaged', function (user) {
+                console.log('User engaged: ' + user.id);
+
+                user.addEventListener('userupdate', function (user) {
+                    //console.log('Right Hand position: ' + user.skeleton[zig.Joint.RightHand].position);
+
+                    var handPosition = user.skeleton[zig.Joint.RightHand].position;
+
+                    var cube = new THREE.Mesh(
+                     new THREE.CubeGeometry(10, 10, 10),
+                    new THREE.MeshLambertMaterial({ color: 0xFFFF00 })
+                );
+
+
+                /*
+			const float XtoZ = 1.11146; // tan( 1.0144686 / 2.0 ) * 2.0;
+			const float YtoZ = 0.83359; // tan( 0.7898090 / 2.0 ) * 2.0;
+
+
+				vUv = vec2( position.x / width, 1.0 - ( position.y / height ) );
+				float noiseFactor = snoise(vec2(vUv.y,bass));
+
+				vec4 color = texture2D( map, vUv );
+				// maxdepth is 10000, encoding LSB in R and MSB in G
+				float z = ( color.r + (color.g * 256.0) ) * 256.0;
+
+				
+				vec4 pos = vec4(
+					( position.x / width - 0.5 ) * z * XtoZ,
+					( position.y / height - 0.5 ) * z * YtoZ,
+					- z + 1000.0 + noiseFactor*64.0,
+					1.0);
+
+				gl_PointSize = 2.0 + size*(noiseFactor + 0.5); // 2.0;
+				gl_Position = projectionMatrix * modelViewMatrix * pos;
+                */
+                	hp = handPosition;
+                    cubes.push(cube);
+
+                    cube.position.set(handPosition[0]+bias[0], handPosition[1]+bias[1], 1000.0-handPosition[2]);
+                    while (cubes.length > cubeCount) {
+                    	scene.remove(cubes.shift());
+                    }
+
+                    scene.add(cube);
+
+                });
+            });
+            engager.addEventListener('userdisengaged', function (user) {
+                console.log('User disengaged: ' + user.id);
+            });
+            zig.addListener(engager);
+
+            
+            // 2. move the cursor element on cursor move
+            c.addEventListener('move', function (cursor) {
+                return;
+                //ce.style.left = (c.x * window.innerWidth - (ce.offsetWidth / 2)) + "px";
+                //ce.style.top = (c.y * window.innerHeight - (ce.offsetHeight / 2)) + "px";
+
+                //console.log("%o %o", c.x, c.y);
+                if (true/*draw*/) {
+
+                    var cube = new THREE.Mesh(
+                     new THREE.CubeGeometry(10, 10, 10),
+                    new THREE.MeshLambertMaterial({ color: 0xFFFF00 })
+                );
+
+                    //const float XtoZ = 1.11146; // tan( 1.0144686 / 2.0 ) * 2.0;
+                    //const float YtoZ = 0.83359; // tan( 0.7898090 / 2.0 ) * 2.0;
+
+                    cube.position.set(c.x * 160, (1 - c.y) * 120, 10);
+                    cubes.push[cube];
+
+                    scene.add(cube);
+                    while (cubes.length > cubeCount) {
+                    	scene.remove(cubes.shift());
+                    }
+                }
+            });
+
+            // 3. Add/remove 'pushed' class on cursor push/release
+            c.addEventListener('push', function (c) {
+
+      
+                console.log("push")
+            });
+            
+            c.addEventListener('release', function (c) {
+            
+            draw = !draw;  // toggle draw state
+            console.log("release");
+            });
+            
+
+            /*
+            // 4. Simulate mouse click on our virtual cursor
+            c.addEventListener('click', function(c) {
+            var xpos = c.x * window.innerWidth;
+            var ypos = c.y * window.innerHeight;
+            var evt = document.createEvent("MouseEvents");
+            evt.initMouseEvent("click", true, true, window, 1, xpos, ypos, xpos, ypos, false, false, false, false, 0, null);
+            //elt.dispatchEvent(evt);
+            });
+            */
+
+            // Add cursor to our single user UI session
+            zig.singleUserSession.addListener(c);
+        }
+
+		</script>
+
+</body>
+</html>

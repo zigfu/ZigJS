@@ -108,7 +108,7 @@ function setCursor(x,y)
 	
 	
 	elem = document.elementFromPoint(xpos,ypos);
-	output = document.getElementById("output");
+	//output = document.getElementById("output");
 	if (elem)
 	{
 		
@@ -188,7 +188,7 @@ function setCursor(x,y)
 			elems[ii].style.zIndex = parseInt(elems[ii].style.zIndex) + (1000+ii);	
 			}
 		}
-		output.innerHTML = "xpos: " + xpos + " y: " + ypos + "<br>elems " + elems;
+		//output.innerHTML = "xpos: " + xpos + " y: " + ypos + "<br>elems " + elems;
 	}
 }
 	
@@ -227,7 +227,13 @@ window.onload = function(){
 //	target[0] = e.clientX / window.innerWidth;
 //	target[1] = e.clientY / window.innerHeight;
 //};
-	
+
+function moveCursor()
+{
+	//console.log(target);
+	last = vlerp(last,target,.3);
+	setCursor(last[0],last[1]);
+}
 	window.setInterval(moveCursor,15);
 
 // Create cursor and cursor dom element
@@ -250,12 +256,7 @@ c.addEventListener('move', function(cursor) {
 });
 
 
-function moveCursor()
-{
-	//console.log(target);
-	last = vlerp(last,target,.3);
-	setCursor(last[0],last[1]);
-}
+
 
 
 // 3. Add/remove 'pushed' class on cursor push/release
