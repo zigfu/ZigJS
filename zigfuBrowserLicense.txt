@@ -1,0 +1,86 @@
+Version 1.0
+End User License Agreement for Zigfu Browser Plugin
+Single Machine License
+
+IMPORTANT -- READ CAREFULLY: 
+
+THIS DOCUMENT IS A LEGAL AGREEMENT (the “License Agreement”, “EULA”) BETWEEN MOTION ARCADE INC. (“We,” “Us”) AND YOU OR THE ORGANZIATION FOR WHICH YOU ARE UNDERTAKING THE LICENSE DESCRIBED BELOW (“You”). THIS LICENSE AGREEMENT RELATES TO THE ZIGFU BROWSER PLUGIN (THE “Software”) AND RELATED MATERIALS. BY DOWNLOADING, INSTALLING, COPYING, OR OTHERWISE USING THE SOFTWARE, YOU ACCEPT THE FOLLOWING TERMS AND CONDITIONS. IF YOU DO NOT AGREE WITH ANY OF THE TERMS OR CONDITIONS OF THIS LICENSE AGREEMENT, DO NOT PROCEED WITH THE DOWNLOADING, COPYING, INSTALLATION OR ANY OTHER USE OF THE SOFTWARE. THIS SOFTWARE IS PROTECTED BY UNITED STATES COPYRIGHT LAWS AND INTERNATIONAL COPYRIGHT LAWS, AS WELL AS OTHER INTELLECTUAL PROPERTY LAWS AND TREATIES. THE SOFTWARE IS LICENSED, NOT SOLD.
+
+THIS LICENSE AGREEMENT CONTAINS THE TERMS AND CONDITIONS THAT GOVERN YOUR USE OF THE SOFTWARE AND IMPOSES MATERIAL LIMITATIONS TO YOUR RIGHTS. YOU SHOULD READ THIS EULA CAREFULLY.
+
+THIS SOFTWARE IS DEPENDENT ON YOUR USE OF SOFTWARE FROM OTHER VENDORS INCLUDING MICROSOFT INC AND PRIMESENSE LTD. CONTACT THEM FOR LICENSING INFORMATION FOR USE OF THEIR SOFTWARE.
+
+
+1. OWNERSHIP
+
+This License Agreement is not an agreement for sale. We reserve ownership of all intellectual property rights related to the Software. These rights include, but are not limited to, all patent rights, copyrights, trademarks registered or unregistered, confidential information, and all other rights other than those expressly granted by this Agreement.
+
+Subject to the terms and conditions set forth in this EULA, We grant to You a revocable, non-transferable, non-exclusive license for a single Designated User (as defined below) within Your organization to install and use the Software on any computer used exclusively by Designated User subject to the restrictions set forth in accordance with sections 3 and 4 below. “Designated User” shall mean Your employee acting within the scope of their employment or Your consultant or contractor acting within the scope of the services they provide for You or on Your behalf.
+
+2. PERMITTED USES, SOURCE CODE, MODIFICATIONS, BINARY FILES
+
+We provide You with source code so that You can create Modifications of the original Software. Modifications are defined as a) additions or deletions to the original Software or previous Modifications created by You, or b) any new file containing parts of the original Software or previous Modifications. While you retain all rights to original works authored by You as part of the Modifications, We continue to own all rights associated with the Software.
+
+3. DISTRIBUTION
+
+This license permits you to install the Zigfu Browser Plugin on one machine and use it for any number of projects, games and applications (collectively referred to as “Applications”) that you develop using the Software in accordance with this License Agreement, provided that such distribution does not violate the restrictions set forth in section 4 of this agreement.
+
+4. PROHIBITED USE
+
+You must ensure that Our original Software and source code, as well as any Modifications, are not distributed to unlicensed parties for the development of Applications. If you must share our Software and your Modifications within your organization or with your customers, please contact info@zigfu.com for further information about site-licensing Our Software.
+
+If you are using Our Software commercially under this license, You may not use the Software in conjunction with our watermarked, non-commercially licensed version. If You hire consultants or employees to use our software, they must use commercially licensed versions of Our Software.
+
+You are explicitly not allowed to redistribute the Software or any Modifications thereof as part of any product that can be described as a “development tool-kit” or “Software Library” intended for use by application developers and not end-users. If you are interested in producing extensions of the Zigfu Browser Plugin please contact info@zigfu.com for information on becoming a value-added-reseller. 
+
+This license only permits the Designated User to install Our Software on one machine. You may not grant the right to an unlicensed third party, such as a publisher, application store, or software marketplace to redistribute our Software. For publisher and marketplace licensing please contact info@zigfu.com.  
+
+You may not use our Software or Modifications thereof to create a product with substantially the same functionality as Our Software.  You also may not use this product to create an Application for the discovery, sale and/or distribution of products created using the Zigfu Development Kit.
+
+5. TERMINATION
+
+Any distribution of our Software to an unlicensed third party or use in violation of these restrictions shall terminate this License Agreement and result in revocation of the rights granted under this License. Upon termination, You agree to cease using and destroy the Software and all Modifications thereof, including all related documents and materials. The provisions 4 through 11 of this license agreement shall survive termination of this EULA.
+
+6. DISCLAIMER OF WARRANTIES
+
+The Software is provided "AS IS" and "WITH ALL FAULTS," without warranty of any kind, including without limitation the warranties of merchantability, fitness for a particular purpose, and non-infringement. The Licensor makes no warranty that the Software is free of defects or is suitable for any particular purpose. In no event shall the Licensor be responsible for loss or damages arising from the installation or use of the Software, including but not limited to any indirect, punitive, special, incidental, or consequential damages of any character including, without limitation, damages for loss of goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages or losses. The entire risk as to the quality and performance of the Software is borne by you. Should the Software prove defective, you and not the Licensor assume the entire cost of any service and repair.
+
+7. LIMITATION OF LIABILITIES
+
+In no event will Licensor be liable to any user for any damages, whether direct, indirect, incidental or consequential, arising out of the use or inability to use the licensed program, even if Licensor has been advised of the possibility of such damages. Some states do not allow the limitation or exclusion of liability for incidental or consequential damages so the above limitation or exclusion may not apply.
+In any event, Our total aggregate liability to you for all damages of every kind and type (regardless of whether based in contract or tort) shall not exceed the purchase price of the product.
+
+8. VERIFICATION, RIGHT TO AUDIT
+
+You agree that We may audit Your use of the Software to verify that Your use of Our Software is within these terms, at any time, upon reasonable notice. In the event that such audit reveals any use of Our Software that is not in full compliance with the terms of this EULA, You shall reimburse our reasonable costs of conducting the audit and pay Us any amounts that are attributable to the unauthorized use. 
+
+9. THIRD PARTY SOFTWARE
+
+Use of Our Software is dependent on third party libraries or code (“Third Party Software”). Third Party Software does not comprise part of the Software. In some cases, access to Third Party Software may be included along with the Software delivery as a convenience or for demonstration purposes. Such source code and libraries do not comprise the Software. You acknowledge that some part of Third Party Software may require additional licensing of copyright and patents from the owners of such, and that distribution of the Software referencing or including any portion of a Third Party Software may require appropriate licensing from such third parties.
+
+10. SUPPORT AND UPDATES
+
+You are only entitled to limited support for this software under this Agreement. We will provide updates to minor releases 1.1, 1.2, 1.X through 1.9. New major product versions 2.X, 3.X, and so on, will require additional licensing. 
+
+We provide premium support to customers that require advanced releases of features on Our roadmap. If You have additional support, or wish to purchase advanced release of certain features, please contact info@zigfu.com.
+
+11. MISCELLANEOUS
+
+The license granted herein applies only to the version of the Software available for download in connection with the terms of this Agreement. Any previous or subsequent license granted to You for use of the Software shall be governed by the terms and conditions of the agreement offered for that version of the Software. You agree that you will comply with all applicable laws and regulations with respect to the Software, including without limitation all export and re-export control laws and regulations.
+
+While redistributing the Software or Modifications thereof, You may choose to offer acceptance of support, warranty, indemnity, or other liability obligations and/or rights consistent with this Agreement. However, in accepting such obligations, You may act only on Your own behalf and on Your sole responsibility, not on Our behalf. You agree to indemnify, defend, and hold Us harmless from and against any liability incurred by, or claims asserted against, Us (i) by reason of Your accepting any such support, warranty, indemnity or additional liability; or (ii) arising out of the use, reproduction or distribution of Your Application, except to the extent such claim is solely based on the inclusion of the Software therein.
+
+You agree to be identified as a customer of Ours and You agree that We may refer to You by name, trade name and trademark, if applicable, and may describe Your business in Our marketing materials and web site.
+
+You may not assign this License Agreement without Our prior written consent, which will not be unreasonably withheld. This License Agreement will inure to the benefit of Our successors and assigns.
+You acknowledge that this License Agreement is complete and is the exclusive representation of our agreement. No oral or written information given by Us or on Our behalf shall create a warranty or collateral contract, or in any way increase the scope of this License Agreement in any way, and You may not rely on any such oral or written information. No term or condition contained in any purchase order shall apply unless such term or condition is expressly accepted by Us in writing,
+
+There are no implied licenses or other implied rights granted under this Agreement, and all rights, save for those expressly granted hereunder, shall remain with Us and Our licensors. In addition, no licenses or immunities are granted to the combination of the Software and/or Modifications, as applicable, with any other software or hardware not delivered by Us to You under this Agreement.
+
+If any provision in this License Agreement shall be determined to be invalid, such provision shall be deemed omitted; the remainder of this License Agreement shall continue in full force and effect. If any remedy provided is determined to have failed for its essential purpose, all limitations of liability and exclusions of damages set forth in this Agreement shall remain in effect.
+
+This License Agreement may be modified only by a written instrument signed by an authorized representative of each party.
+
+This Agreement is governed by the law of the State of California, United States (notwithstanding conflicts of laws provisions), and all parties irrevocably submit to the jurisdiction of the courts of the State of California and further agree to commence any litigation which may arise hereunder in the state or federal courts located in the judicial district of San Francisco County, California, US.
+
+If the Software or any related documentation is licensed to the U.S. government or any agency thereof, it will be deemed to be “commercial computer software” or “commercial computer software documentation,” pursuant to DFAR Section 227.7202 and FAR Section 12.212. Any use of the Software or related documentation by the U.S. government will be governed solely by the terms of this License Agreement.

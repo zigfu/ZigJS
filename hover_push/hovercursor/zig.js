@@ -1150,7 +1150,7 @@ function EngageFirstUserInSession() {
 		onlistenerdetach : onlistenerdetach,
 		engagedUser : null,
 		engagedHSD : null,
-		bboxBounds : [1000, 500, 500],
+		bboxBounds : [1000, 700, 700],
 		bboxOffset : [0, 250, -300],
 		startOnWave : true,
 		startOnSteady : true,
