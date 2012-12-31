@@ -111,8 +111,7 @@ h1, h2, h3, h4, h5, h6, p {
 	padding: 0px 0px;
 }
 body {
-	background-color: #2f1c3a; /* Old browsers */
-	background-image:url(http://brycetucker.com/zigfurebrand/i/background-gradient.jpg);
+	background-color: #2f1c3a; /* Old browsers */	
 	background-repeat: no-repeat;
 	background-position: top;
 } 

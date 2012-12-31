@@ -44,8 +44,7 @@ body {
 #wrapper {
 	width: 640px;
 	height: 960px;
-	background-color: #2f1c3a; /* Old browsers */
-	background-image:url(http://brycetucker.com/zigfurebrand/i/background-gradient.jpg);
+	background-color: #2f1c3a; /* Old browsers */	
 	background-repeat: no-repeat;
 	background-position: top;;
 }
